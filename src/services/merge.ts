@@ -239,3 +239,34 @@ ${theirs}
     hasConflict
   };
 }
+
+/**
+ * Build a full-file conflict block in the same format merge3Way uses for
+ * inline conflict hunks. Use this when local and cloud disagree on the
+ * whole file and we want to surface the conflict to the user.
+ */
+export function buildConflictBlock(
+  localContent: string,
+  remoteContent: string,
+  localLabel: string,
+  remoteLabel: string
+): string {
+  return `<<<<<<< Local (${localLabel})
+${localContent}
+=======
+Remote (${remoteLabel})
+${remoteContent}
+>>>>>>>`;
+}
+
+/**
+ * Detect whether a file's content is a conflict block. A file is considered
+ * in conflict if it contains the standard merge markers (`<<<<<<<`, `=======`,
+ * `>>>>>>>`) in the right structural order. The user is expected to remove
+ * these markers after resolving the conflict.
+ */
+export function hasConflictMarkers(content: string): boolean {
+  if (!content) return false;
+  // Use regex with multiline so ^ and $ work per line.
+  return /<<<<<<<.*?\n[\s\S]*?=======\n[\s\S]*?>>>>>>>/m.test(content);
+}

@@ -8,7 +8,7 @@ import {
   deleteFile,
   type DriveFileInfo 
 } from './googleDrive';
-import { merge3Way } from './merge';
+import { buildConflictBlock, hasConflictMarkers } from './merge';
 
 export interface SyncProgress {
   status: 'idle' | 'authenticating' | 'connecting' | 'syncing' | 'completed' | 'error';
@@ -29,12 +29,16 @@ function parseDriveTime(timeStr: string): number {
   return new Date(timeStr).getTime();
 }
 
-export async function runSync(journalDir: string, onProgress: SyncCallback): Promise<string[]> {
+export async function runSync(
+  journalDir: string,
+  onProgress: SyncCallback
+): Promise<{ modifiedDates: string[]; conflictedDates: string[] }> {
   if (!journalDir) {
     throw new Error('Journal storage directory is not configured.');
   }
 
   const modifiedDates: string[] = [];
+  const conflictedDates: string[] = [];
   console.log(`[Sync] Starting desktop sync for folder: ${journalDir}`);
 
   try {
@@ -114,12 +118,23 @@ export async function runSync(journalDir: string, onProgress: SyncCallback): Pro
       const fileName = `${date}.md`;
 
       filesProcessed++;
-      onProgress({ 
-        status: 'syncing', 
-        message: `Processing ${date}...`, 
-        filesProcessed, 
-        totalFiles 
+      onProgress({
+        status: 'syncing',
+        message: `Processing ${date}...`,
+        filesProcessed,
+        totalFiles
       });
+
+      // Skip dates that are still in conflict. The local file contains
+      // conflict markers that the user must resolve in the editor. Touching
+      // either the local or the cloud while in this state would risk
+      // destroying the user's data. We still re-add the date to
+      // conflictedDates so the user is reminded to resolve it.
+      if (local && hasConflictMarkers(local.content)) {
+        console.log(`[Sync] Entry ${date}: Local is in conflict. Skipping sync; user must resolve.`);
+        conflictedDates.push(date);
+        continue;
+      }
 
       if (local && !remote) {
         if (local.content.trim() === '') {
@@ -134,7 +149,7 @@ export async function runSync(journalDir: string, onProgress: SyncCallback): Pro
         await invoke('set_file_timestamp', { dirPath: journalDir, date, timestampMs: remoteTime });
         await invoke('write_sync_base', { dirPath: journalDir, date, content: local.content });
         console.log(`[Sync] Entry ${date}: Uploaded successfully.`);
-      } 
+      }
       else if (!local && remote) {
         const baseWhenNoLocal = await invoke<string>('read_sync_base', { dirPath: journalDir, date });
 
@@ -157,16 +172,16 @@ export async function runSync(journalDir: string, onProgress: SyncCallback): Pro
         }
         const remoteTime = parseDriveTime(remote.modifiedTime);
         console.log(`[Sync] Entry ${date}: Downloaded content length = ${content.length} characters.`);
-        await invoke('write_entry_with_timestamp', { 
-          dirPath: journalDir, 
-          date, 
-          content, 
-          timestampMs: remoteTime 
+        await invoke('write_entry_with_timestamp', {
+          dirPath: journalDir,
+          date,
+          content,
+          timestampMs: remoteTime
         });
         await invoke('write_sync_base', { dirPath: journalDir, date, content });
         modifiedDates.push(date);
         console.log(`[Sync] Entry ${date}: Local file written successfully.`);
-      } 
+      }
       else if (local && remote) {
         const localTime = local.last_modified;
         const remoteTime = parseDriveTime(remote.modifiedTime);
@@ -175,74 +190,92 @@ export async function runSync(journalDir: string, onProgress: SyncCallback): Pro
 
         console.log(`[Sync] Entry ${date}: Local = ${new Date(localTime).toISOString()}, Remote = ${new Date(remoteTime).toISOString()}, diff = ${diff}ms`);
 
-        if (diff <= TIME_TOLERANCE) {
-          console.log(`[Sync] Entry ${date}: In sync (within 5s tolerance).`);
-          if (local.content.trim() === '') {
-            console.log(`[Sync] Entry ${date}: Contents are empty. Cleaning up...`);
-            await deleteFile(remote.id);
-            await invoke('delete_entry', { dirPath: journalDir, date });
-            await invoke('delete_sync_base', { dirPath: journalDir, date });
-            continue;
-          }
-          // Ensure base content is populated
-          const baseContent = await invoke<string>('read_sync_base', { dirPath: journalDir, date });
+        // Pre-read the base. We need it in both branches.
+        const baseContent = await invoke<string>('read_sync_base', { dirPath: journalDir, date });
+
+        // The TIME_TOLERANCE check below is only an optimization to avoid
+        // the network call to download remote content. It is NOT a substitute
+        // for content comparison. Two writes that happen within a few seconds
+        // of each other can still produce different content; trusting mtime
+        // over content is unsafe.
+        const localAgreesWithBase = local.content === baseContent;
+        // If mtime matches and local content matches the recorded base, we
+        // can skip downloading remote content. Otherwise we must download to
+        // make a proper decision.
+        const canSkipRemoteDownload = diff <= TIME_TOLERANCE && localAgreesWithBase;
+
+        if (local.content.trim() === '') {
+          console.log(`[Sync] Entry ${date}: Local content is empty. Cleaning up...`);
+          await deleteFile(remote.id);
+          await invoke('delete_sync_base', { dirPath: journalDir, date });
+          continue;
+        }
+
+        if (canSkipRemoteDownload) {
+          console.log(`[Sync] Entry ${date}: In sync (mtime matches, local matches base).`);
+          // Make sure the base is populated
           if (!baseContent) {
             await invoke('write_sync_base', { dirPath: journalDir, date, content: local.content });
           }
         } else {
-          // Only download and check content if timestamps actually differ
-          const baseContent = await invoke<string>('read_sync_base', { dirPath: journalDir, date });
+          // We need the actual remote content to make a decision.
+          // (Either mtimes differ, or local content disagrees with base.)
           const remoteContent = await downloadFileContent(remote.id);
 
-          if (local.content !== remoteContent) {
-            const localLabel = `Desktop - ${new Date(localTime).toLocaleString()}`;
-            const remoteLabel = `Cloud - ${new Date(remoteTime).toLocaleString()}`;
-
-            const localChanged = local.content !== baseContent;
-            const remoteChanged = remoteContent !== baseContent;
-
-            if (localChanged && remoteChanged) {
-              console.log(`[Sync] Entry ${date}: Both local and remote have changed. Merging...`);
-              const { merged, hasConflict } = merge3Way(baseContent, local.content, remoteContent, localLabel, remoteLabel);
-              
-              // Overwrite locally and remotely with merged content
-              const updateResult = await updateFileContent(remote.id, merged);
-              const newRemoteTime = parseDriveTime(updateResult.modifiedTime);
-              await invoke('write_entry_with_timestamp', { 
-                dirPath: journalDir, 
-                date, 
-                content: merged, 
-                timestampMs: newRemoteTime 
-              });
-              await invoke('write_sync_base', { dirPath: journalDir, date, content: merged });
-              modifiedDates.push(date);
-              console.log(`[Sync] Entry ${date}: 3-way merge completed. Conflict: ${hasConflict}`);
-            } 
-            else if (localChanged && !remoteChanged) {
-              console.log(`[Sync] Entry ${date}: Only local changed (external edit or unsynced). Uploading local content...`);
-              const updateResult = await updateFileContent(remote.id, local.content);
-              const newRemoteTime = parseDriveTime(updateResult.modifiedTime);
-              await invoke('set_file_timestamp', { dirPath: journalDir, date, timestampMs: newRemoteTime });
-              await invoke('write_sync_base', { dirPath: journalDir, date, content: local.content });
-            } 
-            else {
-              console.log(`[Sync] Entry ${date}: Only remote changed. Downloading remote content...`);
-              await invoke('write_entry_with_timestamp', { 
-                dirPath: journalDir, 
-                date, 
-                content: remoteContent, 
-                timestampMs: remoteTime 
-              });
-              await invoke('write_sync_base', { dirPath: journalDir, date, content: remoteContent });
-              modifiedDates.push(date);
-            }
-          } else {
-            // Contents match, align timestamps
-            console.log(`[Sync] Entry ${date}: Contents match, aligning timestamps.`);
-            await invoke('set_file_timestamp', { dirPath: journalDir, date, timestampMs: remoteTime });
+          if (local.content === remoteContent) {
+            // Local and cloud agree. Update base to match (in case base was
+            // stale) and align local mtime to cloud mtime.
+            console.log(`[Sync] Entry ${date}: Local and cloud agree. Aligning...`);
             if (baseContent !== local.content) {
               await invoke('write_sync_base', { dirPath: journalDir, date, content: local.content });
             }
+            await invoke('set_file_timestamp', { dirPath: journalDir, date, timestampMs: remoteTime });
+          } else if (localAgreesWithBase) {
+            // Local matches the recorded base, but cloud differs.
+            // Cloud is the only thing that changed -> safely download it.
+            console.log(`[Sync] Entry ${date}: Only cloud changed. Downloading cloud...`);
+            await invoke('write_entry_with_timestamp', {
+              dirPath: journalDir,
+              date,
+              content: remoteContent,
+              timestampMs: remoteTime
+            });
+            await invoke('write_sync_base', { dirPath: journalDir, date, content: remoteContent });
+            modifiedDates.push(date);
+          } else if (remoteContent === baseContent) {
+            // Cloud matches the recorded base, but local differs.
+            // Only the local was edited (the base reflects an older sync
+            // from when local = cloud = base, and the user has since edited
+            // the local). Safely upload the local to the cloud.
+            console.log(`[Sync] Entry ${date}: Only local changed. Uploading local...`);
+            const updateResult = await updateFileContent(remote.id, local.content);
+            const newRemoteTime = parseDriveTime(updateResult.modifiedTime);
+            await invoke('set_file_timestamp', { dirPath: journalDir, date, timestampMs: newRemoteTime });
+            await invoke('write_sync_base', { dirPath: journalDir, date, content: local.content });
+            modifiedDates.push(date);
+          } else {
+            // Both local and cloud differ from the base AND from each other.
+            // We cannot tell which side is "right", so we surface the
+            // conflict to the user instead of silently picking a side.
+            // Write a conflict block to the local file (so the user sees
+            // both versions in the editor) and leave the cloud untouched.
+            console.log(`[Sync] Entry ${date}: CONFLICT - local and cloud disagree. Writing conflict block to local.`);
+            const localLabel = `Desktop - ${new Date(localTime).toLocaleString()}`;
+            const remoteLabel = `Cloud - ${new Date(remoteTime).toLocaleString()}`;
+            const conflictBlock = buildConflictBlock(local.content, remoteContent, localLabel, remoteLabel);
+            await invoke('write_entry_with_timestamp', {
+              dirPath: journalDir,
+              date,
+              content: conflictBlock,
+              timestampMs: remoteTime,
+            });
+            // Note: we do NOT call updateFileContent here. The cloud's
+            // existing content is left intact so the user can choose
+            // either side. We do NOT call write_sync_base either, so the
+            // base still reflects the last agreed state and a future sync
+            // can do a real 3-way merge after the user resolves.
+            conflictedDates.push(date);
+            console.log(`[Sync] Entry ${date}: Conflict written. Cloud preserved.`);
           }
         }
       }
@@ -250,22 +283,22 @@ export async function runSync(journalDir: string, onProgress: SyncCallback): Pro
 
     localStorage.setItem('past_you_last_sync_time', Date.now().toString());
 
-    onProgress({ 
-      status: 'completed', 
-      message: 'Sync completed successfully!', 
-      filesProcessed: totalFiles, 
-      totalFiles 
+    onProgress({
+      status: 'completed',
+      message: 'Sync completed successfully!',
+      filesProcessed: totalFiles,
+      totalFiles
     });
 
-    console.log(`[Sync] Sync completed. Modified dates: [${modifiedDates.join(', ')}]`);
-    return modifiedDates;
+    console.log(`[Sync] Sync completed. Modified dates: [${modifiedDates.join(', ')}], Conflicted dates: [${conflictedDates.join(', ')}]`);
+    return { modifiedDates, conflictedDates };
   } catch (error: any) {
     console.error('[Sync] Sync failed:', error);
-    onProgress({ 
-      status: 'error', 
-      message: error.message || 'An error occurred during synchronization.', 
-      filesProcessed: 0, 
-      totalFiles: 0 
+    onProgress({
+      status: 'error',
+      message: error.message || 'An error occurred during synchronization.',
+      filesProcessed: 0,
+      totalFiles: 0
     });
     throw error;
   }

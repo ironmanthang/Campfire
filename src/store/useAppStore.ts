@@ -162,16 +162,20 @@ export const useAppStore = create<AppState>((set, get) => ({
 
       // 2. Run Google Drive Sync
       const { runSync } = await import("../services/sync");
-      const modifiedDates = await runSync(config.journal_dir, (progress) => {
+      const { modifiedDates, conflictedDates } = await runSync(config.journal_dir, (progress) => {
         set({ syncProgress: progress });
       });
 
       if (modifiedDates && modifiedDates.length > 0) {
         set({ syncResultDates: modifiedDates });
-      } else {
-        if (isManual && get().syncPending === 'none') {
-          get().showNotification("Sync completed! Everything is up to date.", "success");
-        }
+      }
+      if (conflictedDates && conflictedDates.length > 0) {
+        get().showNotification(
+          `Sync done. ${conflictedDates.length} entr${conflictedDates.length === 1 ? 'y' : 'ies'} need conflict resolution: ${conflictedDates.join(', ')}`,
+          "error"
+        );
+      } else if (isManual && get().syncPending === 'none' && (!modifiedDates || modifiedDates.length === 0)) {
+        get().showNotification("Sync completed! Everything is up to date.", "success");
       }
       get().triggerJournalRefresh();
     } catch (err: any) {

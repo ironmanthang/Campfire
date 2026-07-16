@@ -88,11 +88,11 @@ function App() {
     }
 
     try {
-      const modifiedDates = await runSync((progress) => {
+      const { modifiedDates, conflictedDates } = await runSync((progress) => {
         setSyncProgress(progress);
       });
       await loadEntries();
-      
+
       // Reload current active editor content if it was updated during sync
       if (activeDate) {
         const entry = await getLocalEntry(activeDate);
@@ -102,7 +102,9 @@ function App() {
         }
       }
 
-      if (modifiedDates && modifiedDates.length > 0) {
+      if (conflictedDates && conflictedDates.length > 0) {
+        setSyncResultDates(conflictedDates);
+      } else if (modifiedDates && modifiedDates.length > 0) {
         setSyncResultDates(modifiedDates);
       } else {
         setToastMessage("Sync completed! Up to date.");
