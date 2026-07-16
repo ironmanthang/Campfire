@@ -1,0 +1,202 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  /* Warm Cream (Light Theme) */
+  --bg-app: #FAF8F5;
+  --bg-surface: #F0ECE3;
+  --text-primary: #201D1A;
+  --text-secondary: #6E685F;
+  --color-accent: #C68B59;
+  --color-accent-hover: #B57A48;
+  --border-color: #E6DFD3;
+  --bg-input: #FCFAF7;
+}
+
+:root.dark {
+  color-scheme: dark;
+  /* Warm Charcoal/Obsidian (Dark Theme) */
+  --bg-app: #141210;
+  --bg-surface: #1C1917;
+  --text-primary: #E6E1DC;
+  --text-secondary: #968F85;
+  --color-accent: #D4A373;
+  --color-accent-hover: #C59261;
+  --border-color: #282420;
+  --bg-input: #0B0A09;
+}
+
+@theme {
+  --color-bg-app: var(--bg-app);
+  --color-bg-surface: var(--bg-surface);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-accent-brand: var(--color-accent);
+  --color-accent-brand-hover: var(--color-accent-hover);
+  --color-border-brand: var(--border-color);
+  --color-bg-input: var(--bg-input);
+}
+
+body {
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Custom Scrollbar for warm themes */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-app);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
+
+/* Markdown Preview Styling */
+.markdown-preview p {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.markdown-preview h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.25rem;
+}
+
+.markdown-preview h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.markdown-preview h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.markdown-preview ul, .markdown-preview ol {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.markdown-preview ul {
+  list-style-type: disc;
+}
+
+.markdown-preview ol {
+  list-style-type: decimal;
+}
+
+.markdown-preview li {
+  margin-bottom: 0.25rem;
+}
+
+.markdown-preview strong {
+  font-weight: 700;
+}
+
+.markdown-preview em {
+  font-style: italic;
+}
+
+.markdown-preview code {
+  font-family: monospace;
+  background-color: var(--bg-surface);
+  padding: 0.125rem 0.25rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+.markdown-preview pre {
+  background-color: var(--bg-surface);
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border-color);
+}
+
+.markdown-preview pre code {
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-size: 0.85rem;
+}
+
+.markdown-preview blockquote {
+  border-left: 4px solid var(--color-accent);
+  padding-left: 1rem;
+  margin-left: 0;
+  margin-right: 0;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-bottom: 1rem;
+}
+
+.markdown-preview a {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+
+.markdown-preview a:hover {
+  color: var(--color-accent-hover);
+}
+
+/* Hide default calendar picker indicator to fix native WebView2 white square rendering bug */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  display: none !important;
+  -webkit-appearance: none;
+}
+
+/* Donation Heart Animations & Styles */
+@keyframes heartbeat {
+  0% { transform: scale(1); }
+  5% { transform: scale(1.15); }
+  10% { transform: scale(1); }
+  15% { transform: scale(1.15); }
+  25% { transform: scale(1); }
+  100% { transform: scale(1); }
+}
+
+.animate-heartbeat {
+  animation: heartbeat 10s infinite ease-in-out;
+}
+
+.donate-heart {
+  color: #ef4444;
+  fill: #ef4444;
+  filter: drop-shadow(0 0 2px rgba(239, 68, 68, 0.5));
+  transition: all 0.2s ease-in-out;
+}
+
+.donate-heart-btn:hover .donate-heart {
+  color: #f43f5e;
+  fill: #f43f5e;
+  filter: drop-shadow(0 0 6px rgba(244, 63, 94, 0.85));
+  transform: scale(1.25);
+}

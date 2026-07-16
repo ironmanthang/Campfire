@@ -1,0 +1,16 @@
+FROM gemma4:e2b-it-qat
+
+# Max GPU layers for MX350 2GB VRAM
+PARAMETER num_gpu 25
+
+
+# Low batch size = less VRAM spike per forward pass
+PARAMETER num_batch 128
+
+# Physical cores only — i7-1165G7 has 4P cores, avoid hyperthreads for bandwidth reasons
+PARAMETER num_thread 4
+
+# Sampling — conservative for quality
+PARAMETER top_k 40
+PARAMETER top_p 0.9
+PARAMETER temperature 0.7
