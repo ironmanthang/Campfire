@@ -229,7 +229,7 @@ export function IdentitySection() {
             <div className="space-y-2 border-t border-border-brand/30 pt-3 flex flex-col">
               <div className="flex items-center justify-between">
                 <button
-                  onClick={handleSync}
+                  onClick={() => handleSync(true)}
                   disabled={syncProgress.status === 'syncing' || syncProgress.status === 'connecting'}
                   className="px-4 py-2 bg-accent-brand text-bg-app hover:bg-accent-brand-hover rounded-lg text-xs font-semibold transition-colors disabled:opacity-50"
                 >

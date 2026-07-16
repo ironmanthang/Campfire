@@ -136,6 +136,16 @@ export async function runSync(journalDir: string, onProgress: SyncCallback): Pro
         console.log(`[Sync] Entry ${date}: Uploaded successfully.`);
       } 
       else if (!local && remote) {
+        const baseWhenNoLocal = await invoke<string>('read_sync_base', { dirPath: journalDir, date });
+
+        // Local file was deleted but sync_base remains — user intentionally cleared this entry
+        if (baseWhenNoLocal.trim() !== '') {
+          console.log(`[Sync] Entry ${date}: Local deleted (base exists). Deleting remote...`);
+          await deleteFile(remote.id);
+          await invoke('delete_sync_base', { dirPath: journalDir, date });
+          continue;
+        }
+
         console.log(`[Sync] Entry ${date}: Remote exists, local doesn't. Downloading...`);
         const content = await downloadFileContent(remote.id);
         if (content.trim() === '') {

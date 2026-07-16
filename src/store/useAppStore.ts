@@ -28,8 +28,9 @@ interface AppState {
     filesProcessed: number;
     totalFiles: number;
   };
+  syncPending: 'none' | 'auto' | 'manual';
   checkDriveStatus: () => Promise<void>;
-  handleSync: () => Promise<void>;
+  handleSync: (isManual?: boolean) => Promise<void>;
   startDriveAuth: (clientId: string, clientSecret: string) => Promise<void>;
   disconnectDrive: () => Promise<void>;
   listJournalBackups: (dirPath: string) => Promise<number[]>;
@@ -111,6 +112,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     filesProcessed: 0,
     totalFiles: 0
   },
+  syncPending: 'none',
   syncResultDates: null,
   setSyncResultDates: (dates) => set({ syncResultDates: dates }),
 
@@ -123,9 +125,11 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
 
-  handleSync: async () => {
+  handleSync: async (isManual = false) => {
     const { config, isDriveConnected, syncProgress } = get();
     if (syncProgress.status === 'syncing' || syncProgress.status === 'connecting') {
+      const currentPending = get().syncPending;
+      set({ syncPending: isManual || currentPending === 'manual' ? 'manual' : 'auto' });
       return;
     }
     if (!config.journal_dir) {
@@ -134,6 +138,16 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
     if (!isDriveConnected) {
       get().showNotification("Connect your Google Drive account in settings first.", "error");
+      return;
+    }
+
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      set({
+        syncProgress: { status: 'error', message: 'No internet connection.', filesProcessed: 0, totalFiles: 0 }
+      });
+      if (isManual) {
+        get().showNotification("Sync failed: No internet connection.", "error");
+      }
       return;
     }
 
@@ -155,7 +169,9 @@ export const useAppStore = create<AppState>((set, get) => ({
       if (modifiedDates && modifiedDates.length > 0) {
         set({ syncResultDates: modifiedDates });
       } else {
-        get().showNotification("Sync completed! Everything is up to date.", "success");
+        if (isManual && get().syncPending === 'none') {
+          get().showNotification("Sync completed! Everything is up to date.", "success");
+        }
       }
       get().triggerJournalRefresh();
     } catch (err: any) {
@@ -164,7 +180,17 @@ export const useAppStore = create<AppState>((set, get) => ({
       set({
         syncProgress: { status: 'error', message: errMsg, filesProcessed: 0, totalFiles: 0 }
       });
-      get().showNotification(errMsg, "error");
+      if (isManual) {
+        get().showNotification(errMsg, "error");
+      }
+    } finally {
+      const pendingType = get().syncPending;
+      if (pendingType !== 'none') {
+        set({ syncPending: 'none' });
+        setTimeout(() => {
+          get().handleSync(pendingType === 'manual').catch(console.error);
+        }, 500);
+      }
     }
   },
 

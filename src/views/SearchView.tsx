@@ -66,7 +66,7 @@ export function SearchView() {
   const { t } = useTranslation();
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const { config, showNotification, handleExport, setCurrentDate, navigateToView } = useAppStore();
+  const { config, showNotification, handleExport, handleSync, setCurrentDate, navigateToView } = useAppStore();
   const { ollamaConnected, modelsList } = useOllamaStore();
   const { searchQuery, searchMode, tagMode, handleTagClick } = useSearchStore();
 
@@ -128,6 +128,7 @@ export function SearchView() {
     },
     showNotification,
     handleExport,
+    handleSync,
   });
 
   const [searching, setSearching] = useState(false);

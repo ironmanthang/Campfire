@@ -15,7 +15,6 @@
 
 
 
-Call the tool myself
 
 
 ## Future Plans & Monetization Setup
@@ -26,6 +25,6 @@ Call the tool myself
   - *Challenge:* Store fees ($25 one-time for Android, $99/year for iOS) make native app publishing expensive.
   - *Alternative:* Explore WebDAV, git sync, or a simple self-hosted PWA (Progressive Web App) to save logs directly into the user's flat-file journal directory.
 
-
+allow user to byok api
 
 right now the donate message is "donate past you" and user can not edit it, what if i want to add to the support me somethign like "and hey, i you want to notify me, the quickest way is to donate to me along with your messages, i guanrantee to read it immediately : ) " suggest me. is the "messeage the dev the fastes by send them money along with the message" a good way to monitize the app? of couse they dont have to send money to feedback, i have the [FeedbackModal.tsx](file;file:///d%3A/program/past%20you/src/components/FeedbackModal.tsx) report bug here. so: user can feedback freely here, and if they want to notify me something, they can just put it the the message when send my mone, how is that?

@@ -33,6 +33,7 @@ export function TimelineView() {
     navigateToView,
     showNotification,
     handleExport,
+    handleSync,
     sidebarCollapsed,
     toggleSidebar
   } = useAppStore();
@@ -68,6 +69,7 @@ export function TimelineView() {
     },
     showNotification,
     handleExport,
+    handleSync,
   });
 
   // Load Timeline

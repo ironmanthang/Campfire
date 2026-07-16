@@ -7,13 +7,15 @@ interface UseEntrySelectionProps {
   onDeleteSuccess: (deletedDates: string[]) => void;
   showNotification: (text: string, type: "success" | "error") => void;
   handleExport: (format: "json" | "text", dates?: string[]) => void;
+  handleSync?: () => Promise<void>;
 }
 
 export function useEntrySelection({
   journalDir,
   onDeleteSuccess,
   showNotification,
-  handleExport
+  handleExport,
+  handleSync
 }: UseEntrySelectionProps) {
   const { t } = useTranslation();
   const [isSelecting, setIsSelecting] = useState(false);
@@ -28,8 +30,12 @@ export function useEntrySelection({
   const deleteEntry = async (date: string) => {
     try {
       await invoke("delete_entry", { dirPath: journalDir, date });
+      // Clean up sync_base so the next sync knows this was intentional
+      await invoke("delete_sync_base", { dirPath: journalDir, date }).catch(() => {});
       onDeleteSuccess([date]);
       showNotification(t("timeline.notifications.entryDeleted"), "success");
+      // Propagate deletion to Drive immediately if auto-sync is on
+      handleSync?.().catch(console.error);
     } catch (err) {
       console.error(err);
       showNotification(t("timeline.notifications.failedToDeleteEntry"), "error");
@@ -41,10 +47,18 @@ export function useEntrySelection({
     try {
       const dates = Array.from(selectedDates);
       await invoke("delete_entries", { dirPath: journalDir, dates });
+      // Clean up sync_base files so deletions propagate correctly on next sync
+      await Promise.all(
+        dates.map((date) =>
+          invoke("delete_sync_base", { dirPath: journalDir, date }).catch(() => {})
+        )
+      );
       onDeleteSuccess(dates);
       setSelectedDates(new Set());
       setIsSelecting(false);
       showNotification(t("timeline.notifications.entriesDeleted", { count: dates.length }), "success");
+      // Propagate deletions to Drive immediately if auto-sync is on
+      handleSync?.().catch(console.error);
     } catch (err) {
       console.error(err);
       showNotification(t("timeline.notifications.failedToDeleteEntries"), "error");

@@ -9,7 +9,11 @@ import {
   Clock,
   Check,
   Save,
-  Tag
+  Tag,
+  Cloud,
+  CloudOff,
+  RefreshCw,
+  AlertTriangle
 } from "lucide-react";
 import { formatToDDMMYY, getLocalYYYYMMDD } from "../lib/dateUtils";
 import { useResizer } from "../hooks/useResizer";
@@ -32,7 +36,8 @@ export function JournalEditorView() {
     toggleSidebar,
     navigateToView,
     isDriveConnected,
-    handleSync
+    handleSync,
+    syncProgress
   } = useAppStore();
 
   const { handleTagClick } = useSearchStore();
@@ -282,6 +287,47 @@ export function JournalEditorView() {
               </>
             )}
           </div>
+
+          {/* Cloud Sync Status */}
+          {config.google_drive_client_id && (
+            <button
+              onClick={() => {
+                if (syncProgress.status !== 'syncing' && syncProgress.status !== 'connecting') {
+                  handleSync(true).catch(console.error);
+                }
+              }}
+              disabled={syncProgress.status === 'syncing' || syncProgress.status === 'connecting'}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border-brand hover:border-accent-brand bg-bg-surface/30 text-text-secondary hover:text-text-primary transition-colors disabled:opacity-85 text-xs font-semibold cursor-pointer active:scale-95"
+              title={
+                !isDriveConnected
+                  ? "Drive not connected"
+                  : syncProgress.status === 'idle'
+                  ? "Drive Connected (Click to sync now)"
+                  : syncProgress.message
+              }
+            >
+              {!isDriveConnected ? (
+                <CloudOff className="h-3.5 w-3.5 text-text-secondary" />
+              ) : syncProgress.status === 'syncing' || syncProgress.status === 'connecting' ? (
+                <RefreshCw className="h-3.5 w-3.5 text-accent-brand animate-spin" />
+              ) : syncProgress.status === 'error' ? (
+                <AlertTriangle className="h-3.5 w-3.5 text-red-500 animate-pulse" />
+              ) : (
+                <Cloud className="h-3.5 w-3.5 text-emerald-500" />
+              )}
+              <span className="hidden sm:inline">
+                {!isDriveConnected
+                  ? "Offline"
+                  : syncProgress.status === 'syncing'
+                  ? "Syncing"
+                  : syncProgress.status === 'connecting'
+                  ? "Connecting"
+                  : syncProgress.status === 'error'
+                  ? "Error"
+                  : "Synced"}
+              </span>
+            </button>
+          )}
 
           {/* Manual Save Trigger */}
           {config.autosave_interval === 0 && isDirty && (
