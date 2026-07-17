@@ -153,6 +153,13 @@ export async function runSync(
       }
 
       if (local && !remote) {
+        const baseContent = local.baseContent || '';
+        if (baseContent.trim() !== '' && local.content === baseContent) {
+          addSyncLog(`Entry ${date}: Deleted on remote and unmodified locally. Deleting local entry...`);
+          await db.entries.delete(date);
+          continue;
+        }
+
         if (local.content.trim() === '') {
           addSyncLog(`Entry ${date}: Local is empty, remote doesn't exist. Deleting local entry...`);
           await db.entries.delete(date);

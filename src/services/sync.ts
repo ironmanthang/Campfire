@@ -137,6 +137,14 @@ export async function runSync(
       }
 
       if (local && !remote) {
+        const baseContent = await invoke<string>('read_sync_base', { dirPath: journalDir, date });
+        if (baseContent.trim() !== '' && local.content === baseContent) {
+          console.log(`[Sync] Entry ${date}: Deleted on remote and unmodified locally. Deleting local entry...`);
+          await invoke('delete_entry', { dirPath: journalDir, date });
+          await invoke('delete_sync_base', { dirPath: journalDir, date });
+          continue;
+        }
+
         if (local.content.trim() === '') {
           console.log(`[Sync] Entry ${date}: Local is empty, remote doesn't exist. Deleting local entry...`);
           await invoke('delete_entry', { dirPath: journalDir, date });
