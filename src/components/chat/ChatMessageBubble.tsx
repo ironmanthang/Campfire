@@ -173,19 +173,35 @@ export function ChatMessageBubble({
               <div className="flex items-center gap-2 text-text-secondary py-1 italic font-mono text-xs">
                 <Loader2 className="h-3.5 w-3.5 animate-spin text-accent-brand" />
                 <span>
-                  {activeToolName === "get_system_resources"
-                    ? "Checking system hardware..."
-                    : activeToolName === "get_laptop_brightness"
-                    ? "Reading screen brightness..."
-                    : activeToolName === "set_laptop_brightness"
-                    ? "Adjusting screen brightness..."
-                    : activeToolName === "read_journal_entries"
-                    ? "Reading historical journals..."
-                    : activeToolName === "navigate_to_journal_date"
-                    ? "Navigating to date in Editor..."
-                    : activeToolName === "web_search"
-                    ? t("chatView.searchingWebStatus")
-                    : t("chatView.waitingResponse")}
+                  {(() => {
+                    const statusText = activeToolName === "get_system_resources"
+                      ? "Checking system hardware..."
+                      : activeToolName === "get_laptop_brightness"
+                      ? "Reading screen brightness..."
+                      : activeToolName === "set_laptop_brightness"
+                      ? "Adjusting screen brightness..."
+                      : activeToolName === "read_journal_entries"
+                      ? "Reading historical journals..."
+                      : activeToolName === "navigate_to_journal_date"
+                      ? "Navigating to date in Editor..."
+                      : activeToolName === "web_search"
+                      ? t("chatView.searchingWebStatus")
+                      : t("chatView.waitingResponse");
+
+                    if (statusText.endsWith("...")) {
+                      return (
+                        <>
+                          {statusText.slice(0, -3)}
+                          <span className="inline-flex gap-0.5 ml-0.5">
+                            <span className="animate-dot1">.</span>
+                            <span className="animate-dot2">.</span>
+                            <span className="animate-dot3">.</span>
+                          </span>
+                        </>
+                      );
+                    }
+                    return statusText;
+                  })()}
                 </span>
               </div>
             ) : null}

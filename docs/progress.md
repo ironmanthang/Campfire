@@ -12,7 +12,7 @@
 ## product backlog
 
 ### logic
-right now if all the cloud, mobile desktop are all sunced, the moment i input a letter on desktop journal view, the auto sync will do what? toast?pop up? nothing?la
+
 when i tried to edit md files in drive and open it in gg docs, it can create multiple files with the same data, then i open app and click sync now, i got error: `Failed to download file (status ${response.status}). If this file was created by another client, ensure both Client IDs are configured under the SAME Google Cloud Project.`
 
 right now if all the cloud, mobile desktop are all sunced, the moment i input a letter on desktop journal view, the auto sync will do what? toast?pop up? nothing?

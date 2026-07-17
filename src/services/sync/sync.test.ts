@@ -76,7 +76,7 @@ vi.mock('../googleDrive', () => {
       }
       return file ? file.content : '';
     }),
-    uploadFile: vi.fn(async (folderId: string, name: string, content: string) => {
+    uploadFile: vi.fn(async (_folderId: string, name: string, content: string) => {
       const file = {
         id: `drive-${name}`,
         name,

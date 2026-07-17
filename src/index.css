@@ -200,3 +200,35 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   filter: drop-shadow(0 0 6px rgba(244, 63, 94, 0.85));
   transform: scale(1.25);
 }
+
+/* Chat Waiting Dots Animation */
+@keyframes dot-flash {
+  0% { opacity: 0.2; }
+  20% { opacity: 1; }
+  100% { opacity: 0.2; }
+}
+
+.animate-dot1 {
+  animation: dot-flash 1.4s infinite linear;
+}
+
+.animate-dot2 {
+  animation: dot-flash 1.4s infinite linear 0.2s;
+}
+
+.animate-dot3 {
+  animation: dot-flash 1.4s infinite linear 0.4s;
+}
+
+/* Custom Highlight Overlay Scroll Sync */
+.overlay-scroll-container {
+  overflow-y: scroll;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+.overlay-scroll-container::-webkit-scrollbar {
+  width: 0px;
+  background: transparent; /* Chrome/Safari/Webkit */
+}
+

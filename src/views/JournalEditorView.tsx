@@ -13,7 +13,8 @@ import {
   Cloud,
   CloudOff,
   RefreshCw,
-  AlertTriangle
+  AlertTriangle,
+  X
 } from "lucide-react";
 import { formatToDDMMYY, getLocalYYYYMMDD } from "../lib/dateUtils";
 import { useResizer } from "../hooks/useResizer";
@@ -45,8 +46,115 @@ export function JournalEditorView() {
 
   const prevDateRef = useRef(currentDate);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const overlayRef = useRef<HTMLDivElement | null>(null);
 
   const [entryContent, setEntryContent] = useState("");
+
+  // Custom Find in Editor (Ctrl+F)
+  const [showFindBar, setShowFindBar] = useState(false);
+  const [findQuery, setFindQuery] = useState("");
+  const [findMatches, setFindMatches] = useState<{ start: number; end: number }[]>([]);
+  const [activeMatchIndex, setActiveMatchIndex] = useState(0);
+
+  const handleFindNext = useCallback(() => {
+    if (findMatches.length === 0) return;
+    setActiveMatchIndex((prev) => (prev + 1) % findMatches.length);
+  }, [findMatches]);
+
+  const handleFindPrev = useCallback(() => {
+    if (findMatches.length === 0) return;
+    setActiveMatchIndex((prev) => (prev - 1 + findMatches.length) % findMatches.length);
+  }, [findMatches]);
+
+  const handleCloseFind = useCallback(() => {
+    setShowFindBar(false);
+    setFindQuery("");
+    setFindMatches([]);
+    setActiveMatchIndex(0);
+    textareaRef.current?.focus();
+  }, []);
+
+  // Update matches list reactively when query or content changes (without focusing)
+  useEffect(() => {
+    if (!showFindBar || !findQuery) {
+      setFindMatches([]);
+      setActiveMatchIndex(0);
+      return;
+    }
+
+    const text = entryContent.toLowerCase();
+    const query = findQuery.toLowerCase();
+    const matches: { start: number; end: number }[] = [];
+    let idx = text.indexOf(query);
+    while (idx !== -1) {
+      matches.push({ start: idx, end: idx + query.length });
+      idx = text.indexOf(query, idx + query.length);
+    }
+    setFindMatches(matches);
+    setActiveMatchIndex((prev) => {
+      if (matches.length === 0) return 0;
+      if (prev >= matches.length) return matches.length - 1;
+      return prev;
+    });
+  }, [findQuery, entryContent, showFindBar]);
+
+  // Scroll active match in the overlay into view and sync textarea scroll
+  useEffect(() => {
+    if (showFindBar && findMatches.length > 0) {
+      // Small timeout to allow DOM to render active-find-match first
+      const t = setTimeout(() => {
+        const activeElement = document.getElementById("active-find-match");
+        if (activeElement && overlayRef.current && textareaRef.current) {
+          const container = overlayRef.current;
+          const textarea = textareaRef.current;
+          
+          // Calculate the target scroll position (center the match vertically in the container)
+          const elementTop = activeElement.offsetTop;
+          const elementHeight = activeElement.offsetHeight;
+          const containerHeight = container.clientHeight;
+          
+          const targetScrollTop = elementTop - (containerHeight / 2) + (elementHeight / 2);
+          
+          // Apply scrollTop to both overlay and textarea
+          container.scrollTop = targetScrollTop;
+          textarea.scrollTop = targetScrollTop;
+        }
+      }, 30);
+      return () => clearTimeout(t);
+    }
+  }, [activeMatchIndex, findMatches, showFindBar]);
+
+  // Intercept Ctrl+F / Cmd+F to toggle search bar
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (view !== "journal") return;
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f") {
+        e.preventDefault();
+        setShowFindBar((prev) => {
+          if (prev) {
+            // Close search bar and clear states
+            setFindQuery("");
+            setFindMatches([]);
+            setActiveMatchIndex(0);
+            textareaRef.current?.focus();
+            return false;
+          } else {
+            // Open search bar and focus input
+            setTimeout(() => {
+              const input = document.getElementById("editor-find-input") as HTMLInputElement;
+              if (input) {
+                input.focus();
+                input.select();
+              }
+            }, 50);
+            return true;
+          }
+        });
+      }
+    };
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
+  }, [view]);
 
   const [editorWidthPercent, startDrag, resetWidth] = useResizer({
     key: "editor_width_percent",
@@ -260,6 +368,27 @@ export function JournalEditorView() {
     };
   }, []);
 
+  const getHighlightedText = () => {
+    const escaped = escapeHtml(entryContent);
+    if (!showFindBar || !findQuery) return escaped;
+    
+    const queryEscaped = escapeHtml(findQuery).toLowerCase();
+    if (!queryEscaped) return escaped;
+
+    const escapedForRegex = queryEscaped.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    const regex = new RegExp(escapedForRegex, 'gi');
+    
+    let matchIndex = 0;
+    return escaped.replace(regex, (match) => {
+      const isCurrent = matchIndex === activeMatchIndex;
+      const id = isCurrent ? ' id="active-find-match"' : '';
+      matchIndex++;
+      return `<mark${id} class="${isCurrent ? 'bg-orange-500/50 dark:bg-orange-500/70 shadow-[0_0_0_1px_rgba(249,115,22,0.4)]' : 'bg-yellow-500/25 dark:bg-yellow-500/40'} text-transparent rounded-sm px-[1.5px] -mx-[1.5px]">${match}</mark>`;
+    });
+  };
+
+  const highlightedText = getHighlightedText();
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Editor Header / Controls */}
@@ -393,19 +522,116 @@ export function JournalEditorView() {
             display: editorWidthPercent === 0 ? "none" : "flex"
           }}
         >
+          {showFindBar && (
+            <div className="w-full bg-bg-surface/60 border-b border-border-brand/80 flex items-center justify-between p-2 shrink-0 gap-2 animate-fade-in select-none">
+              <div className="flex items-center gap-2 flex-1">
+                <input
+                  id="editor-find-input"
+                  type="text"
+                  placeholder={t("journalEditor.findPlaceholder", "Find in entry...")}
+                  value={findQuery}
+                  onChange={(e) => setFindQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      if (e.shiftKey) {
+                        handleFindPrev();
+                      } else {
+                        handleFindNext();
+                      }
+                    } else if (e.key === "Escape") {
+                      e.preventDefault();
+                      handleCloseFind();
+                    }
+                  }}
+                  className="px-2.5 py-1 text-xs bg-bg-input border border-border-brand/80 rounded-lg focus:outline-none focus:border-accent-brand text-text-primary w-48 font-sans"
+                />
+                <span className="text-[10px] text-text-secondary font-mono px-1 select-none min-w-[32px]">
+                  {findMatches.length > 0 ? `${activeMatchIndex + 1}/${findMatches.length}` : "0/0"}
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={handleFindPrev}
+                  disabled={findMatches.length === 0}
+                  className="p-1 hover:bg-bg-app/80 rounded-lg transition-colors text-text-secondary hover:text-text-primary disabled:opacity-30 cursor-pointer"
+                  title="Previous Match (Shift+F3 / Shift+Ctrl+G)"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleFindNext}
+                  disabled={findMatches.length === 0}
+                  className="p-1 hover:bg-bg-app/80 rounded-lg transition-colors text-text-secondary hover:text-text-primary disabled:opacity-30 cursor-pointer"
+                  title="Next Match (F3 / Ctrl+G)"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+                <div className="w-[1px] h-4 bg-border-brand/60 mx-1" />
+                <button
+                  type="button"
+                  onClick={handleCloseFind}
+                  className="p-1 hover:bg-bg-app/80 rounded-lg transition-colors text-text-secondary hover:text-text-primary cursor-pointer"
+                  title="Close (Esc)"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          )}
           {loadingEntry ? (
             <div className="flex-1 flex flex-col items-center justify-center gap-2">
               <Loader2 className="h-6 w-6 animate-spin text-accent-brand" />
               <span className="text-xs text-text-secondary">{t("journalEditor.loadingFlatFile")}</span>
             </div>
           ) : (
-            <textarea
-              ref={textareaRef}
-              value={entryContent}
-              onChange={(e) => handleTextChange(e.target.value)}
-              placeholder={t("journalEditor.editorPlaceholder")}
-              className="flex-1 w-full p-6 bg-transparent text-text-primary text-sm leading-relaxed border-none focus:outline-none resize-none font-mono"
-            />
+            <div className="flex-1 w-full relative overflow-hidden">
+              {/* Highlight Overlay */}
+              <div 
+                ref={overlayRef}
+                className="absolute inset-0 w-full h-full p-6 pointer-events-none font-mono text-sm leading-relaxed whitespace-pre-wrap break-words text-transparent border-none select-none overlay-scroll-container"
+                style={{ 
+                  color: "transparent",
+                  backgroundColor: "transparent",
+                }}
+                dangerouslySetInnerHTML={{ __html: highlightedText }}
+              />
+              <textarea
+                ref={textareaRef}
+                value={entryContent}
+                onChange={(e) => handleTextChange(e.target.value)}
+                onScroll={(e) => {
+                  if (overlayRef.current) {
+                    overlayRef.current.scrollTop = e.currentTarget.scrollTop;
+                    overlayRef.current.scrollLeft = e.currentTarget.scrollLeft;
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (showFindBar) {
+                    if (e.key === "F3") {
+                      e.preventDefault();
+                      if (e.shiftKey) {
+                        handleFindPrev();
+                      } else {
+                        handleFindNext();
+                      }
+                    }
+                    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "g") {
+                      e.preventDefault();
+                      if (e.shiftKey) {
+                        handleFindPrev();
+                      } else {
+                        handleFindNext();
+                      }
+                    }
+                  }
+                }}
+                placeholder={t("journalEditor.editorPlaceholder")}
+                className="absolute inset-0 w-full h-full p-6 bg-transparent text-text-primary text-sm leading-relaxed border-none focus:outline-none resize-none font-mono overflow-y-auto scrollbar-thin"
+              />
+            </div>
           )}
         </div>
 
@@ -474,4 +700,11 @@ export function JournalEditorView() {
       </footer>
     </div>
   );
+}
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }

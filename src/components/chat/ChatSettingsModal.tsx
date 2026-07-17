@@ -136,6 +136,24 @@ export function ChatSettingsModal({ onClose }: ChatSettingsModalProps) {
 
             {!interfaceCollapsed && (
               <div className="space-y-4 pt-3 border-t border-border-brand/20 animate-fade-in">
+                {/* Tick/Untick All */}
+                <div className="flex items-center justify-between px-2 pb-1.5 border-b border-border-brand/10 text-xs">
+                  <span className="text-text-secondary font-medium">{t("chatView.quickActions", "Quick actions")}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const target = !(showThinking && collapseToolResponse);
+                      setShowThinking(target);
+                      setCollapseToolResponse(target);
+                    }}
+                    className="text-accent-brand hover:text-accent-brand-hover font-semibold transition-colors cursor-pointer"
+                  >
+                    {showThinking && collapseToolResponse
+                      ? t("chatView.untickAll", "Untick all")
+                      : t("chatView.tickAll", "Tick all")}
+                  </button>
+                </div>
+
                 {/* Show Thinking Process */}
                 <div className="flex items-start gap-3 p-2 rounded-lg hover:bg-bg-surface border border-transparent hover:border-border-brand/30 transition-all">
                   <input
@@ -239,6 +257,31 @@ export function ChatSettingsModal({ onClose }: ChatSettingsModalProps) {
 
             {!toolsCollapsed && (
               <div className="space-y-2 pt-3 border-t border-border-brand/20 animate-fade-in">
+                {/* Tick/Untick All */}
+                <div className="flex items-center justify-between px-2 pb-1.5 border-b border-border-brand/10 text-xs">
+                  <span className="text-text-secondary font-medium">{t("chatView.quickActions", "Quick actions")}</span>
+                  <button
+                    type="button"
+                    disabled={isStreamingChat}
+                    onClick={() => {
+                      const allToolsNames = ["get_system_resources", "laptop_brightness", "read_journal_entries", "navigate_to_journal_date", "scan_for_garbage"];
+                      const allToolsChecked = config.web_search_enabled && allToolsNames.every(name => enabledTools.includes(name));
+                      const target = !allToolsChecked;
+                      
+                      updateConfigField("web_search_enabled", target);
+                      if (target) {
+                        setEnabledTools(allToolsNames);
+                      } else {
+                        setEnabledTools([]);
+                      }
+                    }}
+                    className="text-accent-brand hover:text-accent-brand-hover font-semibold transition-colors cursor-pointer disabled:opacity-50 text-[11px]"
+                  >
+                    {config.web_search_enabled && ["get_system_resources", "laptop_brightness", "read_journal_entries", "navigate_to_journal_date", "scan_for_garbage"].every(name => enabledTools.includes(name))
+                      ? t("chatView.untickAll", "Untick all")
+                      : t("chatView.tickAll", "Tick all")}
+                  </button>
+                </div>
                 {[
                   {
                     id: "web-search",

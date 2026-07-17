@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, Eye, Edit2, Calendar } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
@@ -18,11 +18,22 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
   const [content, setContent] = useState(initialContent);
   const [isPreview, setIsPreview] = useState(false);
   const [words, setWords] = useState(0);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   // Reset content when switching to a different entry date
   useEffect(() => {
     setContent(initialContent);
   }, [date]);
+
+  // Focus and place cursor at the end of the text on load/edit toggle
+  useEffect(() => {
+    if (!isPreview && textareaRef.current) {
+      const textarea = textareaRef.current;
+      textarea.focus();
+      const length = textarea.value.length;
+      textarea.setSelectionRange(length, length);
+    }
+  }, [isPreview, date]);
 
   useEffect(() => {
     // Calculate word count
@@ -99,11 +110,11 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
           /* Textarea Input Panel */
           <div className="flex-1 flex flex-col min-h-0 p-4">
             <textarea
+              ref={textareaRef}
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder={`Write your diary for ${formatDate(date)}...\nUse #tags to categorize your thoughts.`}
               className="flex-1 w-full bg-transparent text-text-primary resize-none outline-none text-base leading-relaxed placeholder:text-text-secondary/50 font-sans"
-              autoFocus
             />
           </div>
         )}

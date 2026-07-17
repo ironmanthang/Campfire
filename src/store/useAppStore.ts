@@ -37,6 +37,7 @@ interface AppState {
   restoreJournalBackup: (dirPath: string, timestamp: number) => Promise<void>;
   syncResultDates: string[] | null;
   setSyncResultDates: (dates: string[] | null) => void;
+  lastConflictedDates: string[];
 
   // Navigation
   view: ViewType;
@@ -115,6 +116,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   syncPending: 'none',
   syncResultDates: null,
   setSyncResultDates: (dates) => set({ syncResultDates: dates }),
+  lastConflictedDates: [],
 
   checkDriveStatus: async () => {
     try {
@@ -178,12 +180,27 @@ export const useAppStore = create<AppState>((set, get) => ({
       const shouldShowModal = hasDownloads && (isStartupSync || isManual);
 
       if (conflictedDates && conflictedDates.length > 0) {
-        get().showNotification(
-          `Sync done. ${conflictedDates.length} entr${conflictedDates.length === 1 ? 'y' : 'ies'} need conflict resolution: ${conflictedDates.join(', ')}`,
-          "error"
-        );
-      } else if (isManual && get().syncPending === 'none' && !hasDownloads) {
-        get().showNotification("Sync completed! Everything is up to date.", "success");
+        // Only notify if the conflicted set has changed (new conflicts appeared or
+        // different dates). This prevents spamming the error on every auto-sync
+        // cycle while the user is actively editing the conflict markers.
+        const prev = get().lastConflictedDates;
+        const prevKey = [...prev].sort().join(',');
+        const nextKey = [...conflictedDates].sort().join(',');
+        if (prevKey !== nextKey) {
+          get().showNotification(
+            `Sync done. ${conflictedDates.length} entr${conflictedDates.length === 1 ? 'y' : 'ies'} need conflict resolution: ${conflictedDates.join(', ')}`,
+            "error"
+          );
+        }
+        set({ lastConflictedDates: conflictedDates });
+      } else {
+        // All conflicts resolved — clear the tracked set
+        if (get().lastConflictedDates.length > 0) {
+          set({ lastConflictedDates: [] });
+        }
+        if (isManual && get().syncPending === 'none' && !hasDownloads) {
+          get().showNotification("Sync completed! Everything is up to date.", "success");
+        }
       }
 
       if (shouldShowModal) {
@@ -403,12 +420,13 @@ export const useAppStore = create<AppState>((set, get) => ({
       clearTimeout(notificationTimeout);
     }
     set({ statusMessage: { text, type } });
-    if (type === "success") {
-      const timeout = setTimeout(() => {
-        set({ statusMessage: null, notificationTimeout: null });
-      }, 4000);
-      set({ notificationTimeout: timeout });
-    }
+    // Both success and error notifications auto-dismiss. Error gets a longer
+    // window (10s) so the user has time to read it, but it never sticks forever.
+    const duration = type === "success" ? 4000 : 10000;
+    const timeout = setTimeout(() => {
+      set({ statusMessage: null, notificationTimeout: null });
+    }, duration);
+    set({ notificationTimeout: timeout });
   },
 
   clearNotification: () => {
