@@ -7,8 +7,8 @@ import {
   updateFileContent,
   deleteFile,
   type DriveFileInfo 
-} from './googleDrive';
-import { buildConflictBlock, hasConflictMarkers } from './merge';
+} from '../googleDrive';
+import { buildConflictBlock, hasConflictMarkers } from '../merge';
 
 export interface SyncProgress {
   status: 'idle' | 'authenticating' | 'connecting' | 'syncing' | 'completed' | 'error';
@@ -311,4 +311,3 @@ export async function runSync(
     throw error;
   }
 }
-

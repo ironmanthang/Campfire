@@ -161,7 +161,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       await invoke("create_journal_backup", { dirPath: config.journal_dir });
 
       // 2. Run Google Drive Sync
-      const { runSync } = await import("../services/sync");
+      const { runSync } = await import("../services/sync/sync");
       const { modifiedDates, conflictedDates } = await runSync(config.journal_dir, (progress) => {
         set({ syncProgress: progress });
       });
