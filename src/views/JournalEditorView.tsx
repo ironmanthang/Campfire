@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import ReactMarkdown from "react-markdown";
 import {
@@ -37,7 +37,8 @@ export function JournalEditorView() {
     navigateToView,
     isDriveConnected,
     handleSync,
-    syncProgress
+    syncProgress,
+    journalRefreshKey
   } = useAppStore();
 
   const { handleTagClick } = useSearchStore();
@@ -57,8 +58,28 @@ export function JournalEditorView() {
   });
   const [loadingEntry, setLoadingEntry] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  // Use a ref for the in-progress flag so toggling it does NOT cause a
+  // re-render. A re-render here would restart the auto-save debounce timer
+  // (its useEffect cleanup runs → new timer set) which is what caused the
+  // double-sync cycle and the predictable "Auto-saving ↔ Saved" toggle.
+  const isSavingRef = useRef(false);
+  // Separate, UI-only state: only the save function itself writes this, so
+  // it never feeds back into the debounce loop.
+  type SaveStatus = 'idle' | 'saving';
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [editorTags, setEditorTags] = useState<string[]>([]);
+  // Always-current ref to saveEntryImmediate so timer/unmount callbacks
+  // never hold a stale closure without needing it in their dep arrays.
+  const saveEntryImmediateRef = useRef<(date: string, content: string) => void>(() => {});
+
+  const isDirtyRef = useRef(isDirty);
+  const currentDateRef = useRef(currentDate);
+  const entryContentRef = useRef(entryContent);
+
+  // Keep refs in sync with state/props on every render
+  isDirtyRef.current = isDirty;
+  currentDateRef.current = currentDate;
+  entryContentRef.current = entryContent;
 
   // Load entry content when currentDate or journal_dir changes
   useEffect(() => {
@@ -76,6 +97,7 @@ export function JournalEditorView() {
     async function loadEntry() {
       setLoadingEntry(true);
       setEntryContent(""); // Clear old content immediately to prevent visual leakage in preview
+      entryContentRef.current = "";
       setEditorTags([]); // Clear tags too
       try {
         const text = await invoke<string>("read_entry", {
@@ -86,6 +108,8 @@ export function JournalEditorView() {
           setEntryContent(text);
           setEditorTags(extractTags(text));
           setIsDirty(false);
+          isDirtyRef.current = false;
+          entryContentRef.current = text;
         }
       } catch (err) {
         console.error("Error loading entry:", err);
@@ -99,7 +123,7 @@ export function JournalEditorView() {
     return () => {
       active = false;
     };
-  }, [currentDate, config.journal_dir]);
+  }, [currentDate, config.journal_dir, journalRefreshKey]);
 
   // Focus textarea when done loading an entry and editor view is active
   useEffect(() => {
@@ -131,9 +155,13 @@ export function JournalEditorView() {
   }, [view]);
 
   // Manual & Auto Save
-  const saveEntryImmediate = async (dateToSave: string, contentToSave: string) => {
+  const saveEntryImmediate = useCallback(async (dateToSave: string, contentToSave: string) => {
     if (!config.journal_dir) return;
-    setIsSaving(true);
+    // Guard against re-entrant saves (e.g. if the debounce fires while a
+    // previous save is still in-flight).
+    if (isSavingRef.current) return;
+    isSavingRef.current = true;
+    setSaveStatus('saving');
     try {
       await invoke("write_entry", {
         dirPath: config.journal_dir,
@@ -141,6 +169,7 @@ export function JournalEditorView() {
         content: contentToSave
       });
       setIsDirty(false);
+      isDirtyRef.current = false;
 
       // Trigger Google Drive sync if auto-sync is enabled and drive is connected
       if (config.google_drive_auto_sync && config.google_drive_client_id && isDriveConnected) {
@@ -150,9 +179,16 @@ export function JournalEditorView() {
       console.error(err);
       showNotification(t("journalEditor.failedToSaveEntry"), "error");
     } finally {
-      setIsSaving(false);
+      isSavingRef.current = false;
+      setSaveStatus('idle');
     }
-  };
+  }, [config.journal_dir, config.google_drive_auto_sync, config.google_drive_client_id, isDriveConnected, handleSync, showNotification, t]);
+
+  // Keep the ref in sync with the latest version of the function.
+  // This allows the debounce timer and unmount cleanup to always call the
+  // up-to-date function without listing it in their own dep arrays
+  // (which would restart their timers on every render).
+  saveEntryImmediateRef.current = saveEntryImmediate;
 
   // Auto-save debouncer
   useEffect(() => {
@@ -161,7 +197,7 @@ export function JournalEditorView() {
 
     const delay = config.autosave_interval * 1000;
     const timer = setTimeout(() => {
-      saveEntryImmediate(currentDate, entryContent);
+      saveEntryImmediateRef.current(currentDate, entryContent);
     }, delay);
 
     return () => clearTimeout(timer);
@@ -171,6 +207,8 @@ export function JournalEditorView() {
     setEntryContent(text);
     setEditorTags(extractTags(text));
     setIsDirty(true);
+    isDirtyRef.current = true;
+    entryContentRef.current = text;
   };
 
 
@@ -213,12 +251,14 @@ export function JournalEditorView() {
   // Save on unmount if dirty
   useEffect(() => {
     return () => {
-      if (isDirty) {
-        // Save immediately before component is destroyed
-        saveEntryImmediate(currentDate, entryContent);
+      if (isDirtyRef.current) {
+        // Save immediately before component is destroyed.
+        // Use the ref so we always call the latest version of the function
+        // without adding it to this effect's dep array.
+        saveEntryImmediateRef.current(currentDateRef.current, entryContentRef.current);
       }
     };
-  }, [isDirty, currentDate, entryContent]);
+  }, []);
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
@@ -270,7 +310,7 @@ export function JournalEditorView() {
         <div className="flex items-center gap-4">
           {/* Saving / Save Indicator */}
           <div className="flex items-center gap-2 text-xs text-text-secondary">
-            {isSaving ? (
+            {saveStatus === 'saving' ? (
               <>
                 <Loader2 className="h-3.5 w-3.5 animate-spin text-accent-brand" />
                 <span>{t("journalEditor.statusWriting")}</span>

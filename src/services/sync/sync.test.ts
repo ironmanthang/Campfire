@@ -11,7 +11,7 @@ globalThis.localStorage = {
 } as any;
 
 // 2. Mock state maps
-let driveStore = new Map<string, { id: string; name: string; content: string; modifiedTime: string }>();
+let driveStore = new Map<string, { id: string; name: string; content: string; modifiedTime: string; mimeType?: string }>();
 let localStore = new Map<string, { date: string; content: string; last_modified: number }>();
 let syncBaseStore = new Map<string, string>();
 
@@ -69,8 +69,11 @@ vi.mock('../googleDrive', () => {
   return {
     getOrCreateFolderId: vi.fn(async () => 'mock-folder-id'),
     listDriveFiles: vi.fn(async () => Array.from(driveStore.values())),
-    downloadFileContent: vi.fn(async (id: string) => {
+    downloadFileContent: vi.fn(async (id: string, mimeType?: string) => {
       const file = Array.from(driveStore.values()).find(f => f.id === id);
+      if (file && mimeType?.startsWith('application/vnd.google-apps.')) {
+        return `[Exported Doc] ${file.content}`;
+      }
       return file ? file.content : '';
     }),
     uploadFile: vi.fn(async (folderId: string, name: string, content: string) => {
@@ -188,4 +191,50 @@ test('Conflict: both local and remote modified differently -> conflict markers w
 
   // Cloud remains unchanged
   expect(driveStore.get('2026-07-17.md')?.content).toBe('cloud version');
+});
+
+test('Google Doc Deduplication: prefers native file over Google Doc', async () => {
+  // Mock two files on Drive with the same name (Google Docs duplicate)
+  driveStore.set('2026-07-17.md-native', {
+    id: 'drive-native',
+    name: '2026-07-17.md',
+    content: 'native content',
+    modifiedTime: new Date(Date.now() - 5000).toISOString(), // older
+    mimeType: 'text/markdown'
+  });
+  driveStore.set('2026-07-17.md-doc', {
+    id: 'drive-doc',
+    name: '2026-07-17.md',
+    content: 'google doc content',
+    modifiedTime: new Date().toISOString(), // newer
+    mimeType: 'application/vnd.google-apps.document'
+  });
+
+  const result = await runSync('mock-dir', mockProgressCallback);
+
+  // Should select the native file and download it
+  expect(result.modifiedDates).toEqual(['2026-07-17']);
+  expect(localStore.get('2026-07-17')?.content).toBe('native content');
+
+  // Should delete the Google Doc duplicate
+  const driveFiles = Array.from(driveStore.values());
+  expect(driveFiles.find(f => f.id === 'drive-doc')).toBeUndefined();
+  expect(driveFiles.find(f => f.id === 'drive-native')).toBeDefined();
+});
+
+test('Google Doc export fallback: syncs Google Doc if only Workspace native document exists', async () => {
+  // Only Google Doc file on Drive
+  driveStore.set('2026-07-17.md', {
+    id: 'drive-doc-only',
+    name: '2026-07-17.md',
+    content: 'google doc content',
+    modifiedTime: new Date().toISOString(),
+    mimeType: 'application/vnd.google-apps.document'
+  });
+
+  const result = await runSync('mock-dir', mockProgressCallback);
+
+  // Should fall back to exporting the Google Doc and download it
+  expect(result.modifiedDates).toEqual(['2026-07-17']);
+  expect(localStore.get('2026-07-17')?.content).toBe('[Exported Doc] google doc content');
 });

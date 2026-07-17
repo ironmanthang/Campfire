@@ -12,6 +12,7 @@
 ## product backlog
 
 ### logic
+right now if all the cloud, mobile desktop are all sunced, the moment i input a letter on desktop journal view, the auto sync will do what? toast?pop up? nothing?la
 when i tried to edit md files in drive and open it in gg docs, it can create multiple files with the same data, then i open app and click sync now, i got error: `Failed to download file (status ${response.status}). If this file was created by another client, ensure both Client IDs are configured under the SAME Google Cloud Project.`
 
 right now if all the cloud, mobile desktop are all sunced, the moment i input a letter on desktop journal view, the auto sync will do what? toast?pop up? nothing?
@@ -22,7 +23,7 @@ the delete in the timeline browse doesnt sync, you should reference how the jour
 
 on desktop journal editor, if i type rapidly, for example "11111111111" fast, so when i press "1" i see the auto save icon one letter it said "auto-saving" and then i imadiately i press another new letter "11" i see it said "saved to disk", then press another letter right after that "111" it said "auto-saving" i press the fourth "1111" it said "saved to disk"?? is this behaviour expected?
 
-on desktop journal editor, if i type rapidly, for example "11111111111" fast, so when i press "1" i see the auto save icon one letter it said "auto-saving" and then i imadiately i press another new letter "11" i see it said "saved to disk", then press another letter right after that "111" it said "auto-saving" i press the fourth "1111" it said "saved to disk"?? is this behaviour expected?
+on desktop journal editor, if i type rapidly, for example "11111111111" fast, so when i press "1" i see the auto save icon one letter it said "auto-saving" and then i imadiately i press another new letter "11" i see it said "saved to disk", then press another letter right after that "111" it said "auto-saving" i press the fourth "1111" it said "saved to disk"?? is this behaviour expected? why toggle, isnt this suppose to be something unpredictable?who know when will the text get saved
 
 why after i just input a single letter, the icon goes from "synced" to "connecting" to "syncing" "to "synced" twice? so "synced" to "connecting" to "syncing" "to "synced" and then another "synced" to "connecting" to "syncing" "to "synced" ? isnt it suppose to go just once?
 
@@ -37,11 +38,21 @@ add toggle "tick/untick all" in the Tools & Diagnostics and the Chat Interface o
 
 in the configuration page, add a toggle something like toggle the appering of the heart donate icon, when people toggle, app will somehow check if they have ever donate. user can only toggle this icon only if they had donate at least once. and when they try to toggle before donate, show a pop up window with sinsere message something like "please thong cam, you can toggle the icon if you donate at least once"
 
+
+Error
+
+Sync done. 1 entry need conflict resolution: 2026-07-18
+
+Close
+
 ### UI/UX
 
 on mobile if i delete all letter of an entry, when click the back button, i see it "empty entry" even thought it synced  the moment i click back, only if i click manually the sync icon do the file disappear.
 
-on desktop when the chat show
+on desktop when the chat show "wait a second please..." make animation to the three dots
+
+when ctrl f in journal editot, only search in the edit md pannel
+
 ## Future Plans & Monetization Setup
 - [ ] **International Payments (Ko-fi + PayPal)** — Set up a Ko-fi profile connected to a PayPal Vietnam personal account to accept credit cards, Apple Pay, Google Pay, and PayPal from international users.
   - *Fee strategy:* Set a minimum donation threshold of $3.00 or $5.00 ("Buy me a Boba") to avoid high PayPal microtransaction fees ($0.30 fixed fee per transaction makes $1.00 tips highly inefficient).

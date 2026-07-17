@@ -37,7 +37,7 @@ export async function runSync(
     throw new Error('Journal storage directory is not configured.');
   }
 
-  const modifiedDates: string[] = [];
+  const downloadedDates: string[] = []; // cloud → local (user must be notified)
   const conflictedDates: string[] = [];
   console.log(`[Sync] Starting desktop sync for folder: ${journalDir}`);
 
@@ -68,17 +68,36 @@ export async function runSync(
     for (const [date, files] of filesByDate.entries()) {
       if (files.length > 1) {
         console.log(`[Sync] Duplicate files detected on Drive for date ${date}. Count: ${files.length}`);
-        // Sort descending by modifiedTime (newest first)
-        files.sort((a, b) => parseDriveTime(b.modifiedTime) - parseDriveTime(a.modifiedTime));
-        // Keep the newest one
-        driveFiles.push(files[0]);
-        // Delete older duplicates on Drive
-        for (let i = 1; i < files.length; i++) {
-          try {
-            console.log(`[Sync] Deleting older duplicate file: ID ${files[i].id}, modified ${files[i].modifiedTime}`);
-            await deleteFile(files[i].id);
-          } catch (err) {
-            console.error(`[Sync] Failed to delete duplicate file ${files[i].id} for date ${date}:`, err);
+        const isNativeBlob = (f: DriveFileInfo) =>
+          !f.mimeType?.startsWith('application/vnd.google-apps.');
+
+        const nativeFiles = files.filter(isNativeBlob);
+        const googleDocFiles = files.filter(f => !isNativeBlob(f));
+
+        if (nativeFiles.length > 0) {
+          // Use the newest native file, delete all others (native dupes + Google Docs)
+          nativeFiles.sort((a, b) => parseDriveTime(b.modifiedTime) - parseDriveTime(a.modifiedTime));
+          driveFiles.push(nativeFiles[0]);
+          const toDelete = [...nativeFiles.slice(1), ...googleDocFiles];
+          for (const f of toDelete) {
+            try {
+              console.log(`[Sync] Deleting duplicate/converted file: ID ${f.id}, modified ${f.modifiedTime}, mimeType ${f.mimeType}`);
+              await deleteFile(f.id);
+            } catch (err) {
+              console.error(`[Sync] Failed to delete duplicate file ${f.id} for date ${date}:`, err);
+            }
+          }
+        } else {
+          // All files for this date are Google Docs — use the newest (export fallback)
+          files.sort((a, b) => parseDriveTime(b.modifiedTime) - parseDriveTime(a.modifiedTime));
+          driveFiles.push(files[0]);
+          for (let i = 1; i < files.length; i++) {
+            try {
+              console.log(`[Sync] Deleting duplicate Google Doc: ID ${files[i].id}, modified ${files[i].modifiedTime}`);
+              await deleteFile(files[i].id);
+            } catch (err) {
+              console.error(`[Sync] Failed to delete duplicate file ${files[i].id} for date ${date}:`, err);
+            }
           }
         }
       } else {
@@ -170,7 +189,10 @@ export async function runSync(
         }
 
         console.log(`[Sync] Entry ${date}: Remote exists, local doesn't. Downloading...`);
-        const content = await downloadFileContent(remote.id);
+        if (remote.mimeType?.startsWith('application/vnd.google-apps.')) {
+          console.warn(`[Sync] Entry ${date}: Remote file is a Google Doc. Content will be exported as plain text.`);
+        }
+        const content = await downloadFileContent(remote.id, remote.mimeType);
         if (content.trim() === '') {
           console.log(`[Sync] Entry ${date}: Remote is empty. Deleting from Google Drive and local...`);
           await deleteFile(remote.id);
@@ -187,7 +209,7 @@ export async function runSync(
           timestampMs: remoteTime
         });
         await invoke('write_sync_base', { dirPath: journalDir, date, content });
-        modifiedDates.push(date);
+        downloadedDates.push(date);
         console.log(`[Sync] Entry ${date}: Local file written successfully.`);
       }
       else if (local && remote) {
@@ -228,7 +250,10 @@ export async function runSync(
         } else {
           // We need the actual remote content to make a decision.
           // (Either mtimes differ, or local content disagrees with base.)
-          const remoteContent = await downloadFileContent(remote.id);
+          if (remote.mimeType?.startsWith('application/vnd.google-apps.')) {
+            console.warn(`[Sync] Entry ${date}: Remote file is a Google Doc. Content will be exported as plain text.`);
+          }
+          const remoteContent = await downloadFileContent(remote.id, remote.mimeType);
 
           if (local.content === remoteContent) {
             // Local and cloud agree. Update base to match (in case base was
@@ -249,7 +274,7 @@ export async function runSync(
               timestampMs: remoteTime
             });
             await invoke('write_sync_base', { dirPath: journalDir, date, content: remoteContent });
-            modifiedDates.push(date);
+            downloadedDates.push(date);
           } else if (remoteContent === baseContent) {
             // Cloud matches the recorded base, but local differs.
             // Only the local was edited (the base reflects an older sync
@@ -260,7 +285,7 @@ export async function runSync(
             const newRemoteTime = parseDriveTime(updateResult.modifiedTime);
             await invoke('set_file_timestamp', { dirPath: journalDir, date, timestampMs: newRemoteTime });
             await invoke('write_sync_base', { dirPath: journalDir, date, content: local.content });
-            modifiedDates.push(date);
+            // local→cloud upload: do NOT push to downloadedDates (no modal needed)
           } else {
             // Both local and cloud differ from the base AND from each other.
             // We cannot tell which side is "right", so we surface the
@@ -298,8 +323,8 @@ export async function runSync(
       totalFiles
     });
 
-    console.log(`[Sync] Sync completed. Modified dates: [${modifiedDates.join(', ')}], Conflicted dates: [${conflictedDates.join(', ')}]`);
-    return { modifiedDates, conflictedDates };
+    console.log(`[Sync] Sync completed. Downloaded dates: [${downloadedDates.join(', ')}], Conflicted dates: [${conflictedDates.join(', ')}]`);
+    return { modifiedDates: downloadedDates, conflictedDates };
   } catch (error: any) {
     console.error('[Sync] Sync failed:', error);
     onProgress({

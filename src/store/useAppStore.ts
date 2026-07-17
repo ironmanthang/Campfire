@@ -30,7 +30,7 @@ interface AppState {
   };
   syncPending: 'none' | 'auto' | 'manual';
   checkDriveStatus: () => Promise<void>;
-  handleSync: (isManual?: boolean) => Promise<void>;
+  handleSync: (isManual?: boolean, isStartupSync?: boolean) => Promise<void>;
   startDriveAuth: (clientId: string, clientSecret: string) => Promise<void>;
   disconnectDrive: () => Promise<void>;
   listJournalBackups: (dirPath: string) => Promise<number[]>;
@@ -125,8 +125,11 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
 
-  handleSync: async (isManual = false) => {
+  handleSync: async (isManual = false, isStartupSync = false) => {
     const { config, isDriveConnected, syncProgress } = get();
+    if (import.meta.env.DEV) {
+      console.log('[handleSync] Invoked', { isManual, isStartupSync, status: syncProgress.status, pending: get().syncPending });
+    }
     if (syncProgress.status === 'syncing' || syncProgress.status === 'connecting') {
       const currentPending = get().syncPending;
       set({ syncPending: isManual || currentPending === 'manual' ? 'manual' : 'auto' });
@@ -166,18 +169,34 @@ export const useAppStore = create<AppState>((set, get) => ({
         set({ syncProgress: progress });
       });
 
-      if (modifiedDates && modifiedDates.length > 0) {
-        set({ syncResultDates: modifiedDates });
-      }
+      // modifiedDates = cloud→local downloads only.
+      // Show the SyncResultModal only when the user can act on it:
+      //   - startup sync: they need to know what changed before they start writing
+      //   - manual sync:  they explicitly asked for a report
+      // Auto-sync after save is silent — never show a popup.
+      const hasDownloads = modifiedDates && modifiedDates.length > 0;
+      const shouldShowModal = hasDownloads && (isStartupSync || isManual);
+
       if (conflictedDates && conflictedDates.length > 0) {
         get().showNotification(
           `Sync done. ${conflictedDates.length} entr${conflictedDates.length === 1 ? 'y' : 'ies'} need conflict resolution: ${conflictedDates.join(', ')}`,
           "error"
         );
-      } else if (isManual && get().syncPending === 'none' && (!modifiedDates || modifiedDates.length === 0)) {
+      } else if (isManual && get().syncPending === 'none' && !hasDownloads) {
         get().showNotification("Sync completed! Everything is up to date.", "success");
       }
-      get().triggerJournalRefresh();
+
+      if (shouldShowModal) {
+        // Defer journal refresh to after the user closes the modal (App.tsx onClose)
+        set({ syncResultDates: modifiedDates });
+      } else if (hasDownloads) {
+        // Downloads happened silently (auto-sync on active device that received
+        // remote changes). Refresh so the editor shows the new content.
+        get().triggerJournalRefresh();
+      }
+      // Pure upload (nothing downloaded): local content is unchanged — do NOT
+      // call triggerJournalRefresh(). Doing so would cause loadEntry to re-run,
+      // which clears entryContent to "" and shows "Reading flat file..." flicker.
     } catch (err: any) {
       console.error("Sync error:", err);
       const errMsg = typeof err === 'string' ? err : (err.message || 'Sync failed');
@@ -271,8 +290,10 @@ export const useAppStore = create<AppState>((set, get) => ({
       set({ config: loaded });
       await applyTheme(loaded.theme);
       await get().checkDriveStatus();
-      if (loaded.google_drive_auto_sync && loaded.google_drive_client_id) {
-        get().handleSync().catch(console.error);
+      // Await startup sync so the UI doesn't show stale (ghost) content.
+      // The loading spinner stays visible until sync completes.
+      if (loaded.google_drive_auto_sync && loaded.google_drive_client_id && get().isDriveConnected) {
+        await get().handleSync(false, true);
       }
     } catch (err) {
       console.error("Error loading config:", err);

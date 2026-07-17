@@ -51,7 +51,7 @@ function addSyncLog(message: string) {
 export async function runSync(
   onProgress: SyncCallback
 ): Promise<{ modifiedDates: string[]; conflictedDates: string[] }> {
-  const modifiedDates: string[] = [];
+  const downloadedDates: string[] = []; // cloud → local (user must be notified)
   const conflictedDates: string[] = [];
   addSyncLog('--- Starting sync cycle ---');
 
@@ -192,7 +192,7 @@ export async function runSync(
           synced: true,
           baseContent: content
         });
-        modifiedDates.push(date);
+        downloadedDates.push(date);
         addSyncLog(`Entry ${date}: Downloaded successfully. Local timestamp set to Drive modification time.`);
       } 
       else if (local && remote) {
@@ -252,7 +252,7 @@ export async function runSync(
               synced: true,
               baseContent: remoteContent
             });
-            modifiedDates.push(date);
+            downloadedDates.push(date);
           } else if (remoteContent === baseContent) {
             // Cloud matches the recorded base, but local differs.
             // Only the local was edited -> safely upload the local to the cloud.
@@ -264,7 +264,7 @@ export async function runSync(
               baseContent: local.content,
               lastModified: newRemoteTime
             });
-            modifiedDates.push(date);
+            // local→cloud upload: do NOT push to downloadedDates (no modal needed)
           } else {
             // Both local and cloud differ from the base AND from each other.
             // Cannot determine which side is "right" -> surface the conflict
@@ -300,8 +300,8 @@ export async function runSync(
       totalFiles 
     });
 
-    addSyncLog(`--- Sync completed. Updated dates: [${modifiedDates.join(', ')}], Conflicted dates: [${conflictedDates.join(', ')}] ---`);
-    return { modifiedDates, conflictedDates };
+    addSyncLog(`--- Sync completed. Downloaded dates: [${downloadedDates.join(', ')}], Conflicted dates: [${conflictedDates.join(', ')}] ---`);
+    return { modifiedDates: downloadedDates, conflictedDates };
   } catch (error: any) {
     console.error('Sync failed:', error);
     addSyncLog(`Sync failed with error: ${error.message || error}`);

@@ -49,7 +49,8 @@ function App() {
     goForward,
     showNotification,
     syncResultDates,
-    setSyncResultDates
+    setSyncResultDates,
+    triggerJournalRefresh
   } = useAppStore();
 
   const {
@@ -247,7 +248,12 @@ function App() {
       {syncResultDates !== null && (
         <SyncResultModal 
           updatedDates={syncResultDates} 
-          onClose={() => setSyncResultDates(null)} 
+          onClose={() => {
+            setSyncResultDates(null);
+            // Refresh journal AFTER modal closes so the editor shows the
+            // newly-downloaded content instead of ghost (pre-sync) content.
+            triggerJournalRefresh();
+          }} 
         />
       )}
 

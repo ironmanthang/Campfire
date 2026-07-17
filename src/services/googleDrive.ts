@@ -4,6 +4,7 @@ export interface DriveFileInfo {
   id: string;
   name: string;
   modifiedTime: string;
+  mimeType: string;
   size?: string;
 }
 
@@ -81,14 +82,28 @@ export async function getOrCreateFolderId(): Promise<string> {
 // List all .md journal files inside the folder
 export async function listDriveFiles(folderId: string): Promise<DriveFileInfo[]> {
   const query = encodeURIComponent(`'${folderId}' in parents and trashed=false`);
-  const response = await driveFetch(`https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name,modifiedTime,size)&pageSize=1000`);
+  const response = await driveFetch(`https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name,modifiedTime,mimeType,size)&pageSize=1000`);
   const data = await response.json();
   const files: DriveFileInfo[] = data.files || [];
   return files.filter(f => f.name.endsWith('.md'));
 }
 
+export async function exportGoogleDocAsText(fileId: string): Promise<string> {
+  const response = await driveFetch(
+    `https://www.googleapis.com/drive/v3/files/${fileId}/export?mimeType=text/plain`
+  );
+  if (!response.ok) {
+    throw new Error(`Failed to export Google Doc as text (status ${response.status}).`);
+  }
+  return await response.text();
+}
+
 // Download markdown file content
-export async function downloadFileContent(fileId: string): Promise<string> {
+export async function downloadFileContent(fileId: string, mimeType?: string): Promise<string> {
+  const isGoogleDoc = mimeType?.startsWith('application/vnd.google-apps.');
+  if (isGoogleDoc) {
+    return await exportGoogleDocAsText(fileId);
+  }
   const response = await driveFetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`);
   if (!response.ok) {
     throw new Error(`Failed to download file (status ${response.status}). If this file was created by another client, ensure both Client IDs are configured under the SAME Google Cloud Project.`);
