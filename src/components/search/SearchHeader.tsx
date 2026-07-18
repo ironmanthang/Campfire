@@ -8,7 +8,7 @@ import { TagCloudPanel } from "./TagCloudPanel";
 import { useAppStore } from "../../store/useAppStore";
 import { useOllamaStore } from "../../store/useOllamaStore";
 import { useSearchStore } from "../../store/useSearchStore";
-import { useSearchContext } from "../../views/SearchView";
+import { useSearchContext } from "../../views/search/SearchContext";
 
 export function SearchHeader() {
   const { t } = useTranslation();

@@ -1,6 +1,6 @@
 import { Paperclip, FileText, X, Settings, Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useChatContext } from "../../views/ChatView";
+import { useChatContext } from "../../views/chat/ChatContext";
 
 export function ChatInputFooter() {
   const { t } = useTranslation();

@@ -7,13 +7,10 @@ import { LOCAL_TOOLS, getWebSearchTool } from "./chatTools";
 import { useAppStore } from "../store/useAppStore";
 import { useOllamaStore } from "../store/useOllamaStore";
 import { getLocalYYYYMMDD } from "../lib/dateUtils";
-
-const tools = [...LOCAL_TOOLS, getWebSearchTool()];
-
+const tools = [...LOCAL_TOOLS, getWebSearchTool(
 const getToolDefaultArgs = (toolName: string): string => {
   const selectedTool = tools.find((t) => t.function.name === toolName);
   if (!selectedTool) return "{}";
-
   const props = selectedTool.function.parameters?.properties || {};
   const res: Record<string, any> = {};
   for (const [key, val] of Object.entries(props)) {
@@ -77,11 +74,9 @@ export function ToolExecutorTestPanel() {
     setChatEndDate(getPersistedValue("chat_filter_end", getLocalYYYYMMDD()));
     setActiveModel(appActiveModel);
   };
-
   useEffect(() => {
     syncWithAppState();
   }, [config, appActiveModel]);
-
   // Set default JSON structure when the tool changes
   useEffect(() => {
     if (toolName) {
@@ -91,7 +86,6 @@ export function ToolExecutorTestPanel() {
       setJsonError(null);
     }
   }, [toolName]);
-
   // Live syntax checking of the JSON arguments
   useEffect(() => {
     if (!argsJson.trim()) {
@@ -151,7 +145,6 @@ export function ToolExecutorTestPanel() {
     setRawError(null);
     setResult(null);
     setJsonError(null);
-
     try {
       let parsedArgs: Record<string, any> = {};
       try {
@@ -161,14 +154,12 @@ export function ToolExecutorTestPanel() {
         setRunning(false);
         return;
       }
-
       let parsedConfig: AppConfig;
       if (configJson.trim()) {
         parsedConfig = JSON.parse(configJson);
       } else {
         parsedConfig = config;
       }
-
       const ctx: ToolExecutionContext = {
         config: parsedConfig,
         chatStartDate,
@@ -180,11 +171,9 @@ export function ToolExecutorTestPanel() {
           navigateToView("journal");
         },
       };
-
       const toolCall: OllamaToolCall = {
         function: { name: toolName, arguments: parsedArgs },
       };
-
       const out = await executeToolCall(toolCall, ctx);
       setResult(out);
     } catch (err: any) {
@@ -195,11 +184,9 @@ export function ToolExecutorTestPanel() {
       setRunning(false);
     }
   };
-
   const panelStyle: React.CSSProperties = position 
     ? { left: `${position.x}px`, top: `${position.y}px`, bottom: 'auto', right: 'auto', position: 'fixed' } 
     : { bottom: '16px', right: '16px', position: 'fixed' };
-
   return (
     <div
       ref={panelRef}
@@ -396,5 +383,4 @@ export function ToolExecutorTestPanel() {
     </div>
   );
 }
-
 export default ToolExecutorTestPanel;

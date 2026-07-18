@@ -1,74 +1,34 @@
-import { useState, useEffect, useMemo, useRef, createContext, useContext } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { Search as SearchIcon, Loader2, AlertCircle } from "lucide-react";
-import { useResizer } from "../hooks/useResizer";
-import { useEntrySelection } from "../hooks/useEntrySelection";
-import { DeleteConfirmModal } from "../components/DeleteConfirmModal";
-import { SearchResult, EmbeddingCacheData, JournalEntryMetadata } from "../types";
-import { OllamaModelInfo } from "../services/ollama";
+import { useResizer } from "../../hooks/useResizer";
+import { useEntrySelection } from "../../hooks/useEntrySelection";
+import { DeleteConfirmModal } from "../../components/DeleteConfirmModal";
+import { SearchResult, EmbeddingCacheData, JournalEntryMetadata } from "../../types";
 import {
   createEmptyCache,
   loadEmbeddingsCache,
   buildEmbeddingIndex,
   performSemanticSearch,
   isEmbeddingModel
-} from "../services/embeddings";
-import { getLocalYYYYMMDD } from "../lib/dateUtils";
+} from "../../services/embeddings";
+import { getLocalYYYYMMDD } from "../../lib/dateUtils";
 import { useTranslation } from "react-i18next";
-import { usePersistedState } from "../hooks/usePersistedState";
-import { useAutoFocus } from "../hooks/useAutoFocus";
-import { DragHandles } from "../components/common";
-import { SearchHeader, SearchResultCard, SearchHelpModal } from "../components/search";
-import { useAppStore } from "../store/useAppStore";
-import { useOllamaStore } from "../store/useOllamaStore";
-import { useSearchStore } from "../store/useSearchStore";
-
-interface SearchContextType {
-  isSelecting: boolean;
-  setIsSelecting: (selecting: boolean) => void;
-  selectedDates: Set<string>;
-  setSelectedDates: (dates: Set<string> | ((prev: Set<string>) => Set<string>)) => void;
-  filteredResults: SearchResult[];
-  handleExportSelected: (format: "json" | "text") => void;
-  confirmDelete: (dates: string[]) => void;
-  setShowHelpModal: (show: boolean) => void;
-  embeddingModel: string;
-  setEmbeddingModel: (model: string) => void;
-  embeddingModels: OllamaModelInfo[];
-  searchInputRef: React.RefObject<HTMLInputElement | null>;
-  searchStartDate: string;
-  setSearchStartDate: (date: string) => void;
-  searchEndDate: string;
-  setSearchEndDate: (date: string) => void;
-  activePresetLabel: string;
-  setActivePresetLabel: (label: string) => void;
-  searchResultsLength: number;
-  allUniqueTags: string[];
-  tagsCollapsed: boolean;
-  setTagsCollapsed: (collapsed: boolean) => void;
-  isIndexing: boolean;
-  indexProgress: string;
-  clickMode: "open" | "select";
-  setClickMode: (mode: "open" | "select") => void;
-}
-
-const SearchContext = createContext<SearchContextType | null>(null);
-
-export const useSearchContext = () => {
-  const context = useContext(SearchContext);
-  if (!context) {
-    throw new Error("useSearchContext must be used within a SearchProvider");
-  }
-  return context;
-};
+import { usePersistedState } from "../../hooks/usePersistedState";
+import { useAutoFocus } from "../../hooks/useAutoFocus";
+import { SearchHeader, SearchHelpModal } from "../../components/search";
+import { useAppStore } from "../../store/useAppStore";
+import { useOllamaStore } from "../../store/useOllamaStore";
+import { useSearchStore } from "../../store/useSearchStore";
+import { SearchContext, SearchContextType } from "./SearchContext";
+import { SearchResultList } from "./SearchResultList";
 
 export function SearchView() {
   const { t } = useTranslation();
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const { config, showNotification, handleExport, handleSync, setCurrentDate, navigateToView } = useAppStore();
+  const { config, showNotification, handleExport, handleSync } = useAppStore();
   const { ollamaConnected, modelsList } = useOllamaStore();
-  const { searchQuery, searchMode, tagMode, handleTagClick } = useSearchStore();
+  const { searchQuery, searchMode, tagMode } = useSearchStore();
 
   const [searchWidth, startDrag] = useResizer({
     key: "search_width",
@@ -321,67 +281,14 @@ export function SearchView() {
       <div className="flex-1 flex flex-col overflow-hidden">
         <SearchHeader />
 
-        <div className="flex-1 overflow-y-auto">
-          <div
-            className="relative mx-auto w-full px-6 py-6 min-h-full flex flex-col"
-            style={{ maxWidth: `${searchWidth}px` }}
-          >
-            <DragHandles startDrag={startDrag} />
-
-            {searching ? (
-              <div className="flex-1 flex flex-col items-center justify-center gap-2">
-                <Loader2 className="h-6 w-6 animate-spin text-accent-brand" />
-                <span className="text-xs text-text-secondary">{t("searchView.searching")}</span>
-              </div>
-            ) : searchResults.length > 0 ? (
-              filteredResults.length > 0 ? (
-                <div className="space-y-3.5 w-full">
-                  <p className="text-xs text-text-secondary mb-2">
-                    {t("searchView.matchesCount", { count: filteredResults.length })}
-                    {searchResults.length !== filteredResults.length && ` ${t("searchView.filteredFrom", { total: searchResults.length })}`}
-                  </p>
-                  {filteredResults.map((result, idx) => {
-                    const isSelected = selectedDates.has(result.date);
-                    return (
-                      <SearchResultCard
-                        key={`${result.date}-${result.line_number}-${idx}`}
-                        result={result}
-                        isSelecting={isSelecting}
-                        isSelected={isSelected}
-                        toggleSelection={toggleSelection}
-                        setIsSelecting={setIsSelecting}
-                        setSelectedDates={setSelectedDates}
-                        setCurrentDate={setCurrentDate}
-                        setView={navigateToView}
-                        confirmDelete={confirmDelete}
-                        entryTagsMap={entryTagsMap}
-                        searchQuery={searchQuery}
-                        handleTagClick={(tag) => handleTagClick(tag, navigateToView)}
-                        clickMode={clickMode}
-                      />
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="flex-1 flex flex-col items-center justify-center text-text-secondary text-center py-20">
-                  <AlertCircle className="h-8 w-8 text-border-brand mb-2" />
-                  <p className="text-sm font-semibold">{t("searchView.noMatchesRangeTitle")}</p>
-                  <p className="text-xs mt-1">{t("searchView.noMatchesRangeDesc")}</p>
-                </div>
-              )
-            ) : searchQuery.trim() ? (
-              <div className="flex-1 flex flex-col items-center justify-center text-text-secondary">
-                <AlertCircle className="h-8 w-8 text-border-brand mb-2" />
-                <p className="text-sm">{t("searchView.noMatchesQuery", { query: searchQuery })}</p>
-              </div>
-            ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-text-secondary text-center">
-                <SearchIcon className="h-10 w-10 text-border-brand mb-2" />
-                <p className="text-sm">{t("searchView.enterQuery")}</p>
-              </div>
-            )}
-          </div>
-        </div>
+        <SearchResultList
+          searching={searching}
+          searchResults={searchResults}
+          toggleSelection={toggleSelection}
+          entryTagsMap={entryTagsMap}
+          startDrag={startDrag}
+          searchWidth={searchWidth}
+        />
 
         {showHelpModal && (
           <SearchHelpModal

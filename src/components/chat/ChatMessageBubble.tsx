@@ -3,7 +3,7 @@ import ReactMarkdown from "react-markdown";
 import { Sparkles, Terminal, Wrench, Loader2, Pencil } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { OllamaMessage, OllamaToolCall } from "../../services/ollama";
-import { useChatContext } from "../../views/ChatView";
+import { useChatContext } from "../../views/chat/ChatContext";
 
 interface ChatMessageBubbleProps {
   msg: OllamaMessage;

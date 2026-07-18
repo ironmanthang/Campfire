@@ -6,7 +6,7 @@ import { ModelSelector } from "../ModelSelector";
 import { TokenMeter } from "./TokenMeter";
 import { useAppStore } from "../../store/useAppStore";
 import { useOllamaStore } from "../../store/useOllamaStore";
-import { useChatContext } from "../../views/ChatView";
+import { useChatContext } from "../../views/chat/ChatContext";
 
 export function ChatHeader() {
   const { t } = useTranslation();

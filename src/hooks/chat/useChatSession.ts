@@ -1,21 +1,20 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useTranslation } from "react-i18next";
-import { ChatSession, DraftAttachment } from "../types";
-import { usePersistedState } from "./usePersistedState";
-import { getLocalYYYYMMDD } from "../lib/dateUtils";
-import { getSystemInstruction } from "../services/prompts";
+import { ChatSession, DraftAttachment } from "../../types";
+import { usePersistedState } from "../usePersistedState";
+import { getLocalYYYYMMDD } from "../../lib/dateUtils";
+import { getSystemInstruction } from "../../services/prompts";
 import {
   OllamaMessage,
   OllamaTool,
-  calculateHeuristicTokens,
-  fetchExactTokenCount,
   streamAIResponse,
-} from "../services/ollama";
-import { LOCAL_TOOLS, getWebSearchTool } from "../services/chatTools";
-import { executeToolCall } from "../services/toolExecutor";
-import { useAppStore } from "../store/useAppStore";
-import { useOllamaStore } from "../store/useOllamaStore";
+} from "../../services/ollama";
+import { LOCAL_TOOLS, getWebSearchTool } from "../../services/chatTools";
+import { executeToolCall } from "../../services/toolExecutor";
+import { useAppStore } from "../../store/useAppStore";
+import { useOllamaStore } from "../../store/useOllamaStore";
+import { useTokenCapacity } from "./useTokenCapacity";
 
 export function useChatSession({ visible }: { visible: boolean }) {
   const { t } = useTranslation();
@@ -27,11 +26,8 @@ export function useChatSession({ visible }: { visible: boolean }) {
   const [chatEndDate, setChatEndDate] = usePersistedState("chat_filter_end", getLocalYYYYMMDD);
   const [chatMessages, setChatMessages] = useState<OllamaMessage[]>([]);
   const [isStreamingChat, setIsStreamingChat] = useState(false);
-  const [tokenInfo, setTokenInfo] = useState<{ count: number; limit: number; status: "safe" | "warning" | "blocked" }>({
-    count: 0,
-    limit: 128000,
-    status: "safe"
-  });
+
+  const { tokenInfo, checkTokenCapacity } = useTokenCapacity(activeModel, modelsList);
 
   const chatAbortControllerRef = useRef<AbortController | null>(null);
   const [chatContextText, setChatContextText] = useState("");
@@ -48,8 +44,6 @@ export function useChatSession({ visible }: { visible: boolean }) {
   const [collapseToolResponse, setCollapseToolResponse] = usePersistedState("chat_collapse_tool_response", true);
   const [chatSubmissionMode, setChatSubmissionMode] = usePersistedState<"queue" | "interrupt">("chat_submission_mode", "queue");
   const [messageQueue, setMessageQueue] = useState<{ text: string; attachments: DraftAttachment[] }[]>([]);
-
-  const [ollamaConfiguredContextLength, setOllamaConfiguredContextLength] = useState<number | null>(null);
 
   // Load chat session from Tauri on mount
   useEffect(() => {
@@ -68,47 +62,6 @@ export function useChatSession({ visible }: { visible: boolean }) {
     }
     loadChatSession();
   }, []);
-
-  // Load configured context length from local Ollama db.sqlite
-  useEffect(() => {
-    async function loadOllamaContextLength() {
-      try {
-        const len = await invoke<number>("get_ollama_context_length");
-        if (len > 0) {
-          setOllamaConfiguredContextLength(len);
-        }
-      } catch (err) {
-        console.log("Could not read dynamic Ollama context length settings:", err);
-      }
-    }
-    loadOllamaContextLength();
-  }, []);
-
-  // Compute capacity limit for the token meter display
-  const capacityLimit = useMemo(() => {
-    const currentModelInfo = modelsList.find((m) => m.name === activeModel);
-    const isCloudModel = currentModelInfo ? currentModelInfo.size === 0 : activeModel.includes("cloud");
-    return ollamaConfiguredContextLength || currentModelInfo?.contextLength || (isCloudModel ? 128000 : 8192);
-  }, [modelsList, activeModel, ollamaConfiguredContextLength]);
-
-  // Calculate Token volumes in selected ranges
-  const checkTokenCapacity = async (context: string) => {
-    const heuristicCount = calculateHeuristicTokens(context);
-    let count = heuristicCount;
-    if (heuristicCount > capacityLimit * 0.8) {
-      count = await fetchExactTokenCount(activeModel, context);
-    }
-
-    let status: "safe" | "warning" | "blocked" = "safe";
-    if (count > capacityLimit) {
-      status = "blocked";
-    } else if (count > capacityLimit * 0.8) {
-      status = "warning";
-    }
-
-    setTokenInfo({ count, limit: capacityLimit, status });
-    return status !== "blocked";
-  };
 
   // Load context dates context
   useEffect(() => {
@@ -327,13 +280,8 @@ export function useChatSession({ visible }: { visible: boolean }) {
           config.journal_dir
         );
 
-        if (controller.signal.aborted) {
-          break;
-        }
-
-        if (!toolCalls || toolCalls.length === 0) {
-          break;
-        }
+        if (controller.signal.aborted) break;
+        if (!toolCalls || toolCalls.length === 0) break;
 
         const assistantToolMsg: OllamaMessage = {
           role: "assistant",
@@ -343,9 +291,7 @@ export function useChatSession({ visible }: { visible: boolean }) {
         };
         setChatMessages((prev) => {
           const next = [...prev];
-          if (next.length > 0) {
-            next[next.length - 1] = assistantToolMsg;
-          }
+          if (next.length > 0) next[next.length - 1] = assistantToolMsg;
           return next;
         });
         conversationMessages = [...conversationMessages, assistantToolMsg];
@@ -406,8 +352,6 @@ export function useChatSession({ visible }: { visible: boolean }) {
     handleStopChat();
     const targetMsg = chatMessages[index];
     if (!targetMsg || targetMsg.role !== "user") return null;
-
-    // Truncate history (delete everything from index onwards)
     setChatMessages(chatMessages.slice(0, index));
     return targetMsg;
   };
