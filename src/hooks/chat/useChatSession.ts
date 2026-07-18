@@ -10,8 +10,8 @@ import {
   OllamaTool,
   streamAIResponse,
 } from "../../services/ollama";
-import { LOCAL_TOOLS, getWebSearchTool } from "../../services/chatTools";
-import { executeToolCall } from "../../services/toolExecutor";
+import { LOCAL_TOOLS, getWebSearchTool } from "../../services/tools";
+import { executeToolCall } from "../../services/tools";
 import { useAppStore } from "../../store/useAppStore";
 import { useOllamaStore } from "../../store/useOllamaStore";
 import { useTokenCapacity } from "./useTokenCapacity";

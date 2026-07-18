@@ -115,7 +115,7 @@
     "noMatchingModels": "No matching models found.",
     "legacyManagement": "Legacy Data Management",
     "exportBadge": "Export",
-    "legacyManagementDesc": "Export your entire life log. There is no vendor lock-in. Your memories belong strictly to you.",
+    "legacyManagementDesc": "Export your entire life log. There is no vendor lock-in. Your memories belong strictly to you. You should export frequently to avoid accidental data loss.",
     "exportJsonButton": "Export as JSON Array",
     "exportTextButton": "Export as Text Compilation",
     "webSearchTitle": "Web Search Integration",

@@ -13,7 +13,13 @@
 
 ### logic
 
+analyze ui/ux, see where to add the suggested prompt in the chat view, so user can just click it and it will get send directly to the ai. ("what is your comment about me lately", "what should i do now", "what do you know about me",...), you should also brainstorm how to make the suggestion very, cause even if we make dozen of them, rotating the suggesting will get boring to the user.
+
+add in the user guide that they **should not** edit the md files in drive to avoid unexpected sync issues.
+
 when i tried to edit md files in drive and open it in gg docs, it can create multiple files with the same data, then i open app and click sync now, i got error: `Failed to download file (status ${response.status}). If this file was created by another client, ensure both Client IDs are configured under the SAME Google Cloud Project.`
+
+add an import button
 
 right now if all the cloud, mobile desktop are all sunced, the moment i input a letter on desktop journal view, the auto sync will do what? toast?pop up? nothing?
 

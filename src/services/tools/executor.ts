@@ -1,9 +1,8 @@
-
 import { invoke } from "@tauri-apps/api/core";
-import { OllamaMessage, OllamaToolCall } from "./ollama";
-import { formatSystemResources } from "../lib/systemResources";
-import { OLLAMA_BASE_URL } from "../lib/constants";
-import { AppConfig, SystemResources } from "../types";
+import { AppConfig, SystemResources } from "../../types";
+import { OllamaMessage, OllamaToolCall } from "../ollama";
+import { formatSystemResources } from "../../lib/systemResources";
+import { OLLAMA_BASE_URL } from "../../lib/constants";
 
 export interface ToolExecutionContext {
   config: AppConfig;
@@ -240,7 +239,7 @@ export async function executeToolCall(
           };
         }
 
-        let systemPrompt = `You are a careful editor reviewing {userName}'s private 
+        let systemPrompt = `You are a careful editor reviewing {userName}'s private
 journal. Your job is to find lines that are clearly *unintentional* noise — text that was almost certainly not meant to be there — so the user can decide whether to delete them.
 
 Garbage includes:

@@ -1,3 +1,6 @@
+// WARNING: This file is duplicated in mobile/src/services/merge.ts and src/services/merge.ts.
+// Please keep modifications in sync.
+
 export interface Hunk {
   baseStart: number; // inclusive
   baseEnd: number;   // exclusive

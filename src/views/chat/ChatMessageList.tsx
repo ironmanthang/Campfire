@@ -3,7 +3,7 @@ import { MessageSquare, Loader2, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { DragHandles } from "../../components/common";
 import { ChatMessageBubble } from "../../components/chat";
-import { findToolCallInput } from "../../services/toolExecutor";
+import { findToolCallInput } from "../../services/tools";
 import { useChatContext } from "./ChatContext";
 
 interface ChatMessageListProps {

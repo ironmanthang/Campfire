@@ -5,11 +5,11 @@ import { AboutModal } from "./components/AboutModal";
 import { FeedbackModal } from "./components/FeedbackModal";
 import { ErrorModal } from "./components/ErrorModal";
 import { HelpModal } from "./components/common";
-import { ToolExecutorTestPanel } from "./services/_toolExecutor.test";
+import { ToolExecutorTestPanel } from "./services/toolExecutorPanel";
 import { SyncResultModal } from "./components/SyncResultModal";
 import { SettingsView } from "./views/SettingsView";
 import { JournalEditorView } from "./views/journal/JournalEditorView";
-import { TimelineView } from "./views/TimelineView";
+import { TimelineView } from "./views/timeline";
 import { SearchView } from "./views/search/SearchView";
 import { ChatView } from "./views/chat/ChatView";
 import { ReflectionView } from "./views/ReflectionView";
@@ -19,15 +19,16 @@ import { useAppStore } from "./store/useAppStore";
 import { useOllamaStore } from "./store/useOllamaStore";
 
 function App() {
-  const { t } = useTranslation();
+  const t = useTranslation().t;
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [aboutInitialTab, setAboutInitialTab] = useState<"app" | "me">("app");
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [showDevPanel, setShowDevPanel] = useState(false);
 
-  // Toggle tool executor panel on Ctrl + Alt + T
+  // Toggle tool executor panel on Ctrl + Alt + T (development only)
   useEffect(() => {
+    if (!import.meta.env.DEV) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.altKey && e.key.toLowerCase() === "t") {
         setShowDevPanel((prev) => !prev);

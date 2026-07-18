@@ -55,3 +55,42 @@
   - Cleaned up the old `src/hooks/useChatSession.ts` from disk
   - Updated importing references in `src/views/chat/ChatView.tsx`
   - Verified compilation via TypeScript type-checks (0 errors).
+
+- **Phase 7: Refactor embeddings.ts into folder**
+  - Path: `src/services/embeddings/`
+  - Created `utils.ts` (prefix helpers, `dotProduct`, `runWithConcurrency`, model metadata)
+  - Created `cache.ts` (`createEmptyCache`, `loadEmbeddingsCache`, `saveEmbeddingsCache`)
+  - Created `search.ts` (`buildEmbeddingIndex`, `performSemanticSearch`)
+  - Created `index.ts` barrel re-exporting the public surface
+  - Removed monolithic `src/services/embeddings.ts`
+  - Folder index keeps `import ... from "../services/embeddings"` stable across consumers
+  - Verified compilation via TypeScript type-checks (0 errors).
+
+- **Phase 8: Refactor Rust journal.rs into journal/ module**
+  - Path: `src-tauri/src/commands/journal/`
+  - Created `helpers.rs` (types + pure parsing: `is_valid_date_file`, `extract_tags`, `extract_preview`, `JournalEntryMetadata`, `ExportedEntry`)
+  - Created `crud.rs` (CRUD + context + export)
+  - Created `sync.rs` (sync commands: `list_local_entries_for_sync`, `write_entry_with_timestamp`, `set_file_timestamp`, `read/write/delete_sync_base`)
+  - Created `sync_helpers.rs` (`set_file_timestamp_internal`, kept private)
+  - Created `mod.rs` with flat re-exports so `lib.rs` `tauri::generate_handler!` paths and `commands::embeddings` / `commands::search` imports keep working unchanged
+  - Removed monolithic `src-tauri/src/commands/journal.rs`
+  - Verified compilation via `cargo check` (0 errors, 0 warnings).
+
+- **Phase 9: Consolidate chatTools + toolExecutor into services/tools/**
+  - Path: `src/services/tools/`
+  - Created `definitions.ts` (tool schemas: `LOCAL_TOOLS`, `getWebSearchTool`)
+  - Created `executor.ts` (runtime: `executeToolCall`, `findToolCallInput`, `ToolExecutionContext`)
+  - Created `index.ts` barrel re-exporting the public surface
+  - Updated 4 importers: `useChatSession.ts`, `ChatMessageList.tsx`, `toolExecutorPanel.tsx`, plus the dev panel
+  - Removed `src/services/chatTools.ts` and `src/services/toolExecutor.ts`
+  - Verified compilation via TypeScript type-checks (0 errors).
+
+- **Phase 10: Split TimelineView into timeline/ subfolder**
+  - Path: `src/views/timeline/`
+  - Created `TimelineHeader.tsx` (header + selection toolbar + click-mode toggle, owns its own i18n label props)
+  - Created `TimelineEntryList.tsx` (month grouping, sticky-header markup, lazy load-more, `TimelineEntryCard` mapping)
+  - Created `TimelineView.tsx` orchestrator (state, data loading, scroll container, sticky-header fade)
+  - Created `index.tsx` barrel re-exporting `TimelineView`
+  - Removed monolithic `src/views/TimelineView.tsx`; `App.tsx` continues to use `./views/timeline` (resolves to the new `index.tsx`)
+  - Sticky-header fade logic moved from the entry list into the orchestrator, which owns the actual scroll container, preserving behavior
+  - Verified compilation via TypeScript type-checks (0 errors).

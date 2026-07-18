@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { Play, RefreshCw, AlertTriangle, CheckCircle, Maximize2, Minimize2 } from "lucide-react";
-import { executeToolCall, ToolExecutionContext } from "./toolExecutor";
+import { executeToolCall, ToolExecutionContext } from "./tools";
 import { OllamaToolCall, OllamaMessage } from "./ollama";
 import { AppConfig } from "../types";
-import { LOCAL_TOOLS, getWebSearchTool } from "./chatTools";
+import { LOCAL_TOOLS, getWebSearchTool } from "./tools";
 import { useAppStore } from "../store/useAppStore";
 import { useOllamaStore } from "../store/useOllamaStore";
 import { getLocalYYYYMMDD } from "../lib/dateUtils";
-const tools = [...LOCAL_TOOLS, getWebSearchTool(
+const tools = [...LOCAL_TOOLS, getWebSearchTool()];
 const getToolDefaultArgs = (toolName: string): string => {
   const selectedTool = tools.find((t) => t.function.name === toolName);
   if (!selectedTool) return "{}";

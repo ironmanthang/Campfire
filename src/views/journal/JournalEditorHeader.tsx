@@ -1,6 +1,5 @@
 import {
   ChevronLeft,
-  Calendar,
   ChevronRight,
   Loader2,
   Clock,
@@ -11,7 +10,7 @@ import {
   RefreshCw,
   AlertTriangle,
 } from "lucide-react";
-import { formatToDDMMYY } from "../../lib/dateUtils";
+import { DatePicker } from "../../components/common/DatePicker";
 import { SidebarToggleButton } from "../../components/SidebarToggleButton";
 import { useTranslation } from "react-i18next";
 
@@ -69,25 +68,7 @@ export function JournalEditorHeader({
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
-        <div className="relative flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-accent-brand" />
-          <span className="text-sm font-semibold pointer-events-none">
-            {formatToDDMMYY(currentDate)}
-          </span>
-          <input
-            type="date"
-            value={currentDate}
-            onChange={(e) => setCurrentDate(e.target.value)}
-            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-            onClick={(e) => {
-              try {
-                e.currentTarget.showPicker();
-              } catch (err) {
-                console.error(err);
-              }
-            }}
-          />
-        </div>
+        <DatePicker value={currentDate} onChange={setCurrentDate} />
         <button
           onClick={(e) => stepDate(1, e.shiftKey)}
           onMouseDown={(e) => e.preventDefault()}
