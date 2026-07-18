@@ -13,6 +13,7 @@ function App() {
   const [entries, setEntries] = useState<LocalJournalEntry[]>([]);
   const [activeDate, setActiveDate] = useState<string | null>(null);
   const [editorContent, setEditorContent] = useState('');
+  const [editorLoading, setEditorLoading] = useState(false);
   const [editorReloadKey, setEditorReloadKey] = useState(0);
   
   // Settings & Theme
@@ -118,9 +119,14 @@ function App() {
   };
 
   const handleSelectEntry = async (date: string) => {
-    const entry = await getLocalEntry(date);
+    // Mark loading and clear editor state synchronously so the editor doesn't
+    // mount with the previous entry's content while we fetch the new one.
+    setEditorLoading(true);
+    setEditorContent('');
     setActiveDate(date);
+    const entry = await getLocalEntry(date);
     setEditorContent(entry?.content || '');
+    setEditorLoading(false);
   };
 
   const handleCreateToday = () => {
@@ -154,8 +160,8 @@ function App() {
         isLoggedIn={isLoggedIn}
       />
 
-      {activeDate ? (
-        <JournalEditor 
+      {activeDate && !editorLoading ? (
+        <JournalEditor
           key={`${activeDate}_${editorReloadKey}`}
           date={activeDate}
           initialContent={editorContent}

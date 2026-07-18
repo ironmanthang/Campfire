@@ -16,11 +16,9 @@
 
 when i tried to edit md files in drive and open it in gg docs, it can create multiple files with the same data, then i open app and click sync now, i got error: `Failed to download file (status ${response.status}). If this file was created by another client, ensure both Client IDs are configured under the SAME Google Cloud Project.`
 
-brainstorm with me: how to add an import button? i was thing replace the text Legacy Data Management with "export/Import" and add the import button, the parse from a valid json/md (from the export button)? for when conflict happen, append the new import entried right below the original entry, afterimport success, show report of what files is appended?
 
-if i set auto sync do the the delete in the timeline browse and the keyword search trigger auto sync? , you should reference how the journal editor handle when the file is deleted/empty, then apply here. 
 
-check out how to prevent other deb steal my code, maybe check out "licensed under Apache-2.
+check out how to prevent other devs steal my code, maybe check out "licensed under Apache-2.", this is the opposite of what i want
 
 
 
@@ -34,6 +32,9 @@ Error
 Sync done. 1 entry need conflict resolution: 2026-07-18
 
 Close
+how to resovle this error, i try all ways, it do not allow, me to sovle the conflict, only when i delete the entire entry, then it will be resolved.
+
+does the export to json/md from the desktop the is also implemented in the mobile app the same way?
 
 ### UI/UX
 

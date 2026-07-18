@@ -27,6 +27,7 @@ export function TimelineView() {
     showNotification,
     handleExport,
     handleSync,
+    isDriveConnected,
     sidebarCollapsed,
     toggleSidebar
   } = useAppStore();
@@ -43,6 +44,13 @@ export function TimelineView() {
     defaultVal: 768,
     mode: "px",
   });
+
+  // Mirror useJournalSave's gate so we don't surface a confusing "Connect
+  // Google Drive" toast when the user deletes while disconnected.
+  const shouldAutoSyncOnDelete =
+    !!config.google_drive_auto_sync &&
+    !!config.google_drive_client_id &&
+    !!isDriveConnected;
 
   const {
     isSelecting,
@@ -63,6 +71,7 @@ export function TimelineView() {
     showNotification,
     handleExport,
     handleSync,
+    shouldAutoSync: shouldAutoSyncOnDelete,
   });
 
   // Load Timeline

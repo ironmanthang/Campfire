@@ -8,6 +8,7 @@ interface UseEntrySelectionProps {
   showNotification: (text: string, type: "success" | "error") => void;
   handleExport: (format: "json" | "text", dates?: string[]) => void;
   handleSync?: () => Promise<void>;
+  shouldAutoSync?: boolean;
 }
 
 export function useEntrySelection({
@@ -15,7 +16,8 @@ export function useEntrySelection({
   onDeleteSuccess,
   showNotification,
   handleExport,
-  handleSync
+  handleSync,
+  shouldAutoSync = true,
 }: UseEntrySelectionProps) {
   const { t } = useTranslation();
   const [isSelecting, setIsSelecting] = useState(false);
@@ -29,13 +31,19 @@ export function useEntrySelection({
 
   const deleteEntry = async (date: string) => {
     try {
+      // Delete the local .md file. We intentionally leave `sync_base` intact:
+      // `runSync` reads it as the signal that the user intentionally deleted
+      // this entry and will call `deleteFile` on the Drive copy. Wiping
+      // `sync_base` here used to cause the sync engine to fall into the
+      // "Remote exists, local doesn't → download" branch, re-pulling the
+      // cloud file. See sync.ts: "Local deleted (base exists). Deleting remote...".
       await invoke("delete_entry", { dirPath: journalDir, date });
-      // Clean up sync_base so the next sync knows this was intentional
-      await invoke("delete_sync_base", { dirPath: journalDir, date }).catch(() => {});
       onDeleteSuccess([date]);
       showNotification(t("timeline.notifications.entryDeleted"), "success");
-      // Propagate deletion to Drive immediately if auto-sync is on
-      handleSync?.().catch(console.error);
+      // Propagate deletion to Drive (gated to match useJournalSave behavior)
+      if (shouldAutoSync) {
+        handleSync?.().catch(console.error);
+      }
     } catch (err) {
       console.error(err);
       showNotification(t("timeline.notifications.failedToDeleteEntry"), "error");
@@ -46,19 +54,16 @@ export function useEntrySelection({
     if (selectedDates.size === 0) return;
     try {
       const dates = Array.from(selectedDates);
+      // See deleteEntry above for why we keep `sync_base` intact.
       await invoke("delete_entries", { dirPath: journalDir, dates });
-      // Clean up sync_base files so deletions propagate correctly on next sync
-      await Promise.all(
-        dates.map((date) =>
-          invoke("delete_sync_base", { dirPath: journalDir, date }).catch(() => {})
-        )
-      );
       onDeleteSuccess(dates);
       setSelectedDates(new Set());
       setIsSelecting(false);
       showNotification(t("timeline.notifications.entriesDeleted", { count: dates.length }), "success");
-      // Propagate deletions to Drive immediately if auto-sync is on
-      handleSync?.().catch(console.error);
+      // Propagate deletions to Drive (gated to match useJournalSave behavior)
+      if (shouldAutoSync) {
+        handleSync?.().catch(console.error);
+      }
     } catch (err) {
       console.error(err);
       showNotification(t("timeline.notifications.failedToDeleteEntries"), "error");

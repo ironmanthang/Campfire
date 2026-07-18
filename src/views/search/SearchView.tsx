@@ -26,7 +26,7 @@ export function SearchView() {
   const { t } = useTranslation();
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const { config, showNotification, handleExport, handleSync } = useAppStore();
+  const { config, showNotification, handleExport, handleSync, isDriveConnected } = useAppStore();
   const { ollamaConnected, modelsList } = useOllamaStore();
   const { searchQuery, searchMode, tagMode } = useSearchStore();
 
@@ -70,6 +70,13 @@ export function SearchView() {
     loadTagsMap();
   }, [config.journal_dir]);
 
+  // Mirror useJournalSave's gate so we don't surface a confusing "Connect
+  // Google Drive" toast when the user deletes while disconnected.
+  const shouldAutoSyncOnDelete =
+    !!config.google_drive_auto_sync &&
+    !!config.google_drive_client_id &&
+    !!isDriveConnected;
+
   const {
     isSelecting,
     setIsSelecting,
@@ -89,6 +96,7 @@ export function SearchView() {
     showNotification,
     handleExport,
     handleSync,
+    shouldAutoSync: shouldAutoSyncOnDelete,
   });
 
   const [searching, setSearching] = useState(false);

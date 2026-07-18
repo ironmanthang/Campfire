@@ -165,6 +165,56 @@ test('Local Deletion: local content is empty, remote exists -> remote deleted', 
   expect(syncBaseStore.has('2026-07-17')).toBe(false);
 });
 
+test('Regression: Timeline/Search delete (local gone, sync_base kept) -> remote deleted', async () => {
+  // This is the path the user hits when clicking "Delete Selected" in
+  // Timeline Browse or Keyword Search. The frontend now leaves `sync_base`
+  // intact (only the local .md is removed) so that runSync recognises the
+  // deletion as intentional and calls `deleteFile` on Drive. Previously the
+  // hook also wiped `sync_base`, which made the sync engine fall into the
+  // "download" branch and re-pull the cloud file.
+  syncBaseStore.set('2026-07-17', 'entry 1');
+  driveStore.set('2026-07-17.md', {
+    id: 'drive-2026-07-17.md',
+    name: '2026-07-17.md',
+    content: 'entry 1',
+    modifiedTime: new Date().toISOString()
+  });
+  // Note: localStore is intentionally empty (the .md was deleted).
+
+  const result = await runSync('mock-dir', mockProgressCallback);
+
+  // The cloud file must be gone, not downloaded back to the user.
+  expect(driveStore.has('2026-07-17.md')).toBe(false);
+  expect(syncBaseStore.has('2026-07-17')).toBe(false);
+  expect(result.modifiedDates).toEqual([]);
+});
+
+test('Regression: Timeline/Search bulk delete -> all remote copies deleted', async () => {
+  // Two entries selected and deleted at once. sync_base is kept for both,
+  // local .md files are gone.
+  syncBaseStore.set('2026-07-17', 'a');
+  syncBaseStore.set('2026-07-18', 'b');
+  driveStore.set('2026-07-17.md', {
+    id: 'drive-2026-07-17.md',
+    name: '2026-07-17.md',
+    content: 'a',
+    modifiedTime: new Date().toISOString()
+  });
+  driveStore.set('2026-07-18.md', {
+    id: 'drive-2026-07-18.md',
+    name: '2026-07-18.md',
+    content: 'b',
+    modifiedTime: new Date().toISOString()
+  });
+
+  await runSync('mock-dir', mockProgressCallback);
+
+  expect(driveStore.has('2026-07-17.md')).toBe(false);
+  expect(driveStore.has('2026-07-18.md')).toBe(false);
+  expect(syncBaseStore.has('2026-07-17')).toBe(false);
+  expect(syncBaseStore.has('2026-07-18')).toBe(false);
+});
+
 test('Conflict: both local and remote modified differently -> conflict markers written', async () => {
   const localTime = Date.now();
   const remoteTimeStr = new Date(localTime - 10000).toISOString(); // 10s difference

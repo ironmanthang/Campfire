@@ -23,5 +23,5 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run Sync Test Suite
-        run: npx vitest run src/services/sync/sync.test.ts mobile/src/services/sync.test.ts
+      - name: Run All Tests
+        run: npx vitest run

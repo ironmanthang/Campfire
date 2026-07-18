@@ -7,6 +7,12 @@ import {
 } from '../services/googleDrive';
 import { X, LogIn, LogOut, Sun, Moon, Check, AlertCircle, Download } from 'lucide-react';
 import { listLocalEntries } from '../services/db';
+import {
+  exportAsJson,
+  exportAsMarkdown,
+  downloadBlob,
+  defaultExportFilename,
+} from '../lib/exportJournal';
 
 interface SettingsModalProps {
   onClose: () => void;
@@ -83,44 +89,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, onThemeTo
   const handleExportJson = async () => {
     try {
       const allEntries = await listLocalEntries();
-      const exportData = allEntries.map(e => ({
-        date: e.date,
-        content: e.content
-      }));
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `journal_export_${new Date().toISOString().split('T')[0]}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
+      downloadBlob(exportAsJson(allEntries), defaultExportFilename('json'));
     } catch (err) {
       console.error(err);
       alert("Failed to export entries as JSON");
     }
   };
 
-  const handleExportText = async () => {
+  const handleExportMarkdown = async () => {
     try {
       const allEntries = await listLocalEntries();
-      const sorted = [...allEntries].sort((a, b) => a.date.localeCompare(b.date));
-      let compilation = '';
-      for (const entry of sorted) {
-        compilation += `========================================\n`;
-        compilation += `DATE: ${entry.date}\n`;
-        compilation += `========================================\n\n`;
-        compilation += `${entry.content}\n\n\n`;
-      }
-      const blob = new Blob([compilation], { type: 'text/plain;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `journal_export_${new Date().toISOString().split('T')[0]}.txt`;
-      a.click();
-      URL.revokeObjectURL(url);
+      downloadBlob(exportAsMarkdown(allEntries), defaultExportFilename('md'));
     } catch (err) {
       console.error(err);
-      alert("Failed to export entries as text compilation");
+      alert("Failed to export entries as Markdown");
     }
   };
 
@@ -249,19 +231,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, onThemeTo
                 <p className="text-xs text-text-secondary">Export your journals as offline files. No vendor lock-in.</p>
               </div>
               <div className="flex gap-2">
-                <button 
+                <button
                   onClick={handleExportJson}
                   className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold bg-bg-app border border-border-brand hover:border-accent-brand text-text-primary rounded-xl transition-all cursor-pointer"
                 >
                   <Download size={14} />
                   <span>Export JSON</span>
                 </button>
-                <button 
-                  onClick={handleExportText}
+                <button
+                  onClick={handleExportMarkdown}
                   className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold bg-bg-app border border-border-brand hover:border-accent-brand text-text-primary rounded-xl transition-all cursor-pointer"
                 >
                   <Download size={14} />
-                  <span>Export TXT</span>
+                  <span>Export Markdown</span>
                 </button>
               </div>
             </div>

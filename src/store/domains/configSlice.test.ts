@@ -3,6 +3,13 @@ import { save } from "@tauri-apps/plugin-dialog";
 import { invoke } from "@tauri-apps/api/core";
 import { createConfigSlice } from "./configSlice";
 
+// Pin the export filename's date component so this test stays deterministic
+// regardless of the day it runs. Production code calls `getLocalYYYYMMDD()` to
+// build the suggested filename; we override it here with a fixed value.
+vi.mock("../../lib/dateUtils", () => ({
+  getLocalYYYYMMDD: vi.fn(() => "2026-07-19"),
+}));
+
 vi.mock("@tauri-apps/plugin-dialog", () => ({
   save: vi.fn(),
 }));
@@ -39,7 +46,7 @@ describe("createConfigSlice handleExport", () => {
     expect(save).toHaveBeenCalledWith(
       expect.objectContaining({
         filters: [{ name: "Markdown Document", extensions: ["md"] }],
-        defaultPath: "journal_export_2026-07-18.md",
+        defaultPath: "journal_export_2026-07-19.md",
       }),
     );
   });

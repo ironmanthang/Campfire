@@ -80,24 +80,26 @@ export const TimelineHeader: React.FC<TimelineHeaderProps> = ({
 
   if (isSelecting) {
     return (
-      <SelectionToolbar
-        sidebarCollapsed={sidebarCollapsed}
-        onToggleSidebar={onToggleSidebar}
-        selectedCountLabel={selectedCountLabel}
-        isAllSelected={selectedCount === filteredTotal}
-        selectAllLabel={selectAllLabel}
-        deselectAllLabel={deselectAllLabel}
-        onSelectAllToggle={onSelectAllToggle}
-        onExport={onExport}
-        isExportDisabled={isExportDisabled}
-        onDelete={onDelete}
-        isDeleteDisabled={isDeleteDisabled}
-        onCancel={onCancelSelection}
-        exportJsonLabel={exportJsonLabel}
-        exportTextLabel={exportTextLabel}
-        deleteSelectedLabel={deleteSelectedLabel}
-        cancelLabel={cancelLabel}
-      />
+      <header className="relative z-20 p-6 border-b border-border-brand shrink-0 select-none min-h-[96px] bg-bg-surface/10 backdrop-blur-md flex items-center">
+        <SelectionToolbar
+          sidebarCollapsed={sidebarCollapsed}
+          onToggleSidebar={onToggleSidebar}
+          selectedCountLabel={selectedCountLabel}
+          isAllSelected={selectedCount === filteredTotal}
+          selectAllLabel={selectAllLabel}
+          deselectAllLabel={deselectAllLabel}
+          onSelectAllToggle={onSelectAllToggle}
+          onExport={onExport}
+          isExportDisabled={isExportDisabled}
+          onDelete={onDelete}
+          isDeleteDisabled={isDeleteDisabled}
+          onCancel={onCancelSelection}
+          exportJsonLabel={exportJsonLabel}
+          exportTextLabel={exportTextLabel}
+          deleteSelectedLabel={deleteSelectedLabel}
+          cancelLabel={cancelLabel}
+        />
+      </header>
     );
   }
 

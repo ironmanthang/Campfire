@@ -25,14 +25,40 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
     setContent(initialContent);
   }, [date]);
 
-  // Focus and place cursor at the end of the text on load/edit toggle
+  // Focus and place cursor at the end of the text on first mount per entry
+  // date, and when toggling between Edit and Preview. We do NOT depend on
+  // `content` here — otherwise every keystroke would re-focus the textarea
+  // and re-place the caret at the end, fighting the user's typing.
+  //
+  // The placement is deferred via rAF + a small timeout because on Android
+  // Chrome, `setSelectionRange` called synchronously inside a `useEffect`
+  // is silently ignored: the soft keyboard / IME input session isn't
+  // attached to the element yet, so the selection collapses to 0.
   useEffect(() => {
-    if (!isPreview && textareaRef.current) {
-      const textarea = textareaRef.current;
-      textarea.focus();
-      const length = textarea.value.length;
-      textarea.setSelectionRange(length, length);
-    }
+    if (isPreview || !textareaRef.current) return;
+    let cancelled = false;
+    let rafId = 0;
+    let timerId = 0;
+    const placeCaret = () => {
+      if (cancelled || !textareaRef.current) return;
+      const length = textareaRef.current.value.length;
+      textareaRef.current.focus();
+      textareaRef.current.setSelectionRange(length, length);
+    };
+    rafId = requestAnimationFrame(() => {
+      if (cancelled) return;
+      // Run on the next frame, then again after a small delay so the IME
+      // has time to attach. ~60ms covers the typical Android IME delay.
+      rafId = requestAnimationFrame(() => {
+        placeCaret();
+        timerId = window.setTimeout(placeCaret, 60);
+      });
+    });
+    return () => {
+      cancelled = true;
+      if (rafId) cancelAnimationFrame(rafId);
+      if (timerId) window.clearTimeout(timerId);
+    };
   }, [isPreview, date]);
 
   useEffect(() => {
