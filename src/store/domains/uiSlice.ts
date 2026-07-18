@@ -7,6 +7,14 @@ export interface NotificationMessage {
   type: "success" | "error";
 }
 
+export interface ImportReport {
+  source_format: string;
+  new_entries: string[];
+  appended_entries: string[];
+  skipped: { date: string; reason: string }[];
+  errors: { date: string | null; message: string }[];
+}
+
 export interface UiSlice {
   // Notifications
   statusMessage: NotificationMessage | null;
@@ -19,6 +27,9 @@ export interface UiSlice {
   triggerJournalRefresh: () => void;
   currentDate: string;
   setCurrentDate: (date: string) => void;
+
+  importReport: ImportReport | null;
+  setImportReport: (report: ImportReport | null) => void;
 
   // Layout
   sidebarCollapsed: boolean;
@@ -53,6 +64,9 @@ export const createUiSlice: StateCreator<
 
   journalRefreshKey: 0,
   triggerJournalRefresh: () => set((state) => ({ journalRefreshKey: state.journalRefreshKey + 1 })),
+
+  importReport: null,
+  setImportReport: (report) => set({ importReport: report }),
 
   currentDate: getLocalYYYYMMDD(),
   setCurrentDate: (date) => set({ currentDate: date }),

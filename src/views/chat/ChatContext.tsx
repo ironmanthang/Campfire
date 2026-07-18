@@ -48,6 +48,8 @@ export interface ChatContextType {
   setShowThinking: (val: boolean) => void;
   collapseToolResponse: boolean;
   setCollapseToolResponse: (val: boolean) => void;
+  showSuggestedPrompt: boolean;
+  setShowSuggestedPrompt: (val: boolean) => void;
   showChatSettings: boolean;
   setShowChatSettings: (show: boolean) => void;
   handleInitiateEditMessage: (index: number) => void;
@@ -55,6 +57,7 @@ export interface ChatContextType {
   setChatSubmissionMode: (mode: "queue" | "interrupt") => void;
   messageQueue: { text: string; attachments: DraftAttachment[] }[];
   cancelQueuedMessage: (index: number) => void;
+  chatResetCounter: number;
 }
 
 export const ChatContext = createContext<ChatContextType | null>(null);

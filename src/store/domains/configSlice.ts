@@ -6,6 +6,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { AppConfig } from "../../types";
 import { getLocalYYYYMMDD } from "../../lib/dateUtils";
 import { AppState } from "../useAppStore";
+import type { ImportReport } from "./uiSlice";
 
 export interface ConfigSlice {
   // State
@@ -20,6 +21,7 @@ export interface ConfigSlice {
 
   // Export (lives here since it only needs config + showNotification)
   handleExport: (format: "json" | "text", dates?: string[]) => Promise<void>;
+  handleImport: () => Promise<void>;
 }
 
 async function applyTheme(theme: "dark" | "light") {
@@ -124,8 +126,8 @@ export const createConfigSlice: StateCreator<
     const { config, showNotification } = get();
     if (!config.journal_dir) return;
     try {
-      const extension = format === "json" ? "json" : "txt";
-      const filterName = format === "json" ? "JSON Array" : "Plain Text Document";
+      const extension = format === "json" ? "json" : "md";
+      const filterName = format === "json" ? "JSON Array" : "Markdown Document";
       const savePath = await save({
         filters: [{ name: filterName, extensions: [extension] }],
         defaultPath: `journal_export_${getLocalYYYYMMDD()}.${extension}`,
@@ -142,6 +144,33 @@ export const createConfigSlice: StateCreator<
     } catch (err) {
       console.error(err);
       get().showNotification("Failed to export entries", "error");
+    }
+  },
+
+  handleImport: async () => {
+    const { config, showNotification } = get();
+    if (!config.journal_dir) return;
+
+    try {
+      const selected = await open({
+        title: "Import Journal Data",
+        multiple: false,
+        filters: [{ name: "JSON or Markdown", extensions: ["json", "md"] }],
+      });
+
+      if (!selected || Array.isArray(selected)) return;
+
+      const report = await invoke<ImportReport>("import_journal", {
+        dirPath: config.journal_dir,
+        filePath: selected,
+      });
+
+      get().setImportReport(report);
+      get().triggerJournalRefresh();
+      showNotification("Journal entries imported successfully!", "success");
+    } catch (err) {
+      console.error(err);
+      get().showNotification("Failed to import entries", "error");
     }
   },
 });

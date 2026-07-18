@@ -1,6 +1,7 @@
 import { Paperclip, FileText, X, Settings, Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useChatContext } from "../../views/chat/ChatContext";
+import { SuggestedPrompt } from "./SuggestedPrompt";
 
 export function ChatInputFooter() {
   const { t } = useTranslation();
@@ -37,6 +38,8 @@ export function ChatInputFooter() {
   return (
     <footer className="p-4 border-t border-border-brand bg-bg-surface/30 shrink-0">
       <div className="mx-auto w-full flex flex-col gap-2.5">
+        <SuggestedPrompt />
+
         {/* Attachment Previews */}
         {draftAttachments.length > 0 && (
           <div className="flex flex-wrap gap-2 pt-1 px-1 pb-2 overflow-x-auto max-h-32 scrollbar-thin select-none animate-fade-in">

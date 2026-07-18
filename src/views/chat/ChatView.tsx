@@ -62,11 +62,14 @@ export function ChatView({ visible }: { visible: boolean }) {
     setShowThinking,
     collapseToolResponse,
     setCollapseToolResponse,
+    showSuggestedPrompt,
+    setShowSuggestedPrompt,
     truncateHistory,
     chatSubmissionMode,
     setChatSubmissionMode,
     messageQueue,
     cancelQueuedMessage,
+    chatResetCounter,
   } = chatSession;
 
   // Hook 3: Drag, Drop, Paste and Select File Attachments
@@ -182,6 +185,8 @@ export function ChatView({ visible }: { visible: boolean }) {
     setShowThinking,
     collapseToolResponse,
     setCollapseToolResponse,
+    showSuggestedPrompt,
+    setShowSuggestedPrompt,
     showChatSettings,
     setShowChatSettings,
     handleInitiateEditMessage,
@@ -189,6 +194,7 @@ export function ChatView({ visible }: { visible: boolean }) {
     setChatSubmissionMode,
     messageQueue,
     cancelQueuedMessage,
+    chatResetCounter,
   }), [
     chatStartDate,
     setChatStartDate,
@@ -228,6 +234,8 @@ export function ChatView({ visible }: { visible: boolean }) {
     setShowThinking,
     collapseToolResponse,
     setCollapseToolResponse,
+    showSuggestedPrompt,
+    setShowSuggestedPrompt,
     showChatSettings,
     setShowChatSettings,
     handleInitiateEditMessage,
@@ -235,6 +243,7 @@ export function ChatView({ visible }: { visible: boolean }) {
     setChatSubmissionMode,
     messageQueue,
     cancelQueuedMessage,
+    chatResetCounter,
   ]);
 
   return (

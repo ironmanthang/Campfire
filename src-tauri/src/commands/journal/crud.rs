@@ -2,8 +2,101 @@ use std::fs;
 use std::path::Path;
 
 use super::helpers::{
-    extract_preview, extract_tags, is_valid_date_file, ExportedEntry, JournalEntryMetadata,
+    extract_preview, extract_tags, is_valid_date_file, ExportedEntry, ImportError, ImportReport,
+    ImportSkippedEntry, JournalEntryMetadata,
 };
+
+fn append_imported_content(original: &str, imported: &str, source_name: &str) -> String {
+    let mut combined = String::from(original.trim_end());
+    combined.push_str("\n\n---\n");
+    combined.push_str(&format!("*Imported from {}*\n\n", source_name));
+    combined.push_str(imported.trim_start());
+    combined
+}
+
+fn import_exported_entries(
+    dir_path: &Path,
+    source_name: &str,
+    source_format: &str,
+    entries: Vec<(String, String)>,
+) -> Result<ImportReport, String> {
+    let mut report = ImportReport {
+        source_format: source_format.to_string(),
+        new_entries: Vec::new(),
+        appended_entries: Vec::new(),
+        skipped: Vec::new(),
+        errors: Vec::new(),
+    };
+
+    for (date, content) in entries {
+        let file_name = format!("{}.md", date);
+        if !is_valid_date_file(&file_name) {
+            report.errors.push(ImportError {
+                date: Some(date),
+                message: "Invalid date format".to_string(),
+            });
+            continue;
+        }
+
+        if content.trim().is_empty() {
+            report.skipped.push(ImportSkippedEntry {
+                date,
+                reason: "empty content".to_string(),
+            });
+            continue;
+        }
+
+        let file_path = dir_path.join(&file_name);
+        if file_path.exists() {
+            let original = fs::read_to_string(&file_path).map_err(|e| e.to_string())?;
+            let merged = append_imported_content(&original, &content, source_name);
+            fs::write(&file_path, merged).map_err(|e| e.to_string())?;
+            report.appended_entries.push(date);
+        } else {
+            fs::write(&file_path, content).map_err(|e| e.to_string())?;
+            report.new_entries.push(date);
+        }
+    }
+
+    Ok(report)
+}
+
+fn parse_json_import(raw: &str) -> Result<Vec<(String, String)>, String> {
+    let entries: Vec<ExportedEntry> = serde_json::from_str(raw).map_err(|e| e.to_string())?;
+    Ok(entries.into_iter().map(|entry| (entry.date, entry.content)).collect())
+}
+
+fn parse_md_import(raw: &str) -> Result<Vec<(String, String)>, String> {
+    let mut entries = Vec::new();
+    let marker = "========================================";
+
+    let chunks: Vec<&str> = raw
+        .split(marker)
+        .map(|chunk| chunk.trim())
+        .filter(|chunk| !chunk.is_empty())
+        .collect();
+
+    let mut index = 0usize;
+    while index < chunks.len() {
+        let date_chunk = chunks[index];
+        let mut date_lines = date_chunk.lines();
+        let date_line = date_lines
+            .next()
+            .ok_or_else(|| "Invalid markdown export: missing date line".to_string())?
+            .trim();
+        let date = date_line
+            .strip_prefix("DATE: ")
+            .ok_or_else(|| "Invalid markdown export: missing DATE header".to_string())?
+            .to_string();
+
+        let content_chunk = chunks.get(index + 1).copied().unwrap_or("");
+        let content = content_chunk.trim().to_string();
+        entries.push((date, content));
+        index += 2;
+    }
+
+    Ok(entries)
+}
 
 #[tauri::command]
 pub fn list_entries(dir_path: String) -> Result<Vec<JournalEntryMetadata>, String> {
@@ -246,4 +339,29 @@ pub fn export_journal(
     }
 
     Ok(())
+}
+
+#[tauri::command]
+pub fn import_journal(dir_path: String, file_path: String) -> Result<ImportReport, String> {
+    let path = Path::new(&dir_path);
+    if !path.exists() {
+        return Err("Journal directory does not exist".to_string());
+    }
+
+    let source_name = Path::new(&file_path)
+        .file_name()
+        .and_then(|name| name.to_str())
+        .unwrap_or("import file")
+        .to_string();
+
+    let raw = fs::read_to_string(&file_path).map_err(|e| e.to_string())?;
+    let trimmed = raw.trim_start();
+    let entries = if trimmed.starts_with('[') {
+        parse_json_import(&raw)?
+    } else {
+        parse_md_import(&raw)?
+    };
+    let source_format = if trimmed.starts_with('[') { "json" } else { "md" };
+
+    import_exported_entries(path, &source_name, source_format, entries)
 }

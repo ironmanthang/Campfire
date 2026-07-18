@@ -17,6 +17,7 @@ import i18n from "i18next";
 import { useTranslation } from "react-i18next";
 import { useAppStore } from "./store/useAppStore";
 import { useOllamaStore } from "./store/useOllamaStore";
+import { ImportReportModal } from "./components/ImportReportModal";
 
 function App() {
   const t = useTranslation().t;
@@ -51,6 +52,8 @@ function App() {
     showNotification,
     syncResultDates,
     setSyncResultDates,
+    importReport,
+    setImportReport,
     triggerJournalRefresh
   } = useAppStore();
 
@@ -255,6 +258,15 @@ function App() {
             // newly-downloaded content instead of ghost (pre-sync) content.
             triggerJournalRefresh();
           }} 
+        />
+      )}
+
+      {importReport !== null && (
+        <ImportReportModal
+          report={importReport}
+          onClose={() => {
+            setImportReport(null);
+          }}
         />
       )}
 

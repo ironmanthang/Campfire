@@ -106,10 +106,31 @@ pub struct JournalEntryMetadata {
     pub word_count: usize,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct ExportedEntry {
     pub date: String,
     pub content: String,
     pub word_count: usize,
     pub tags: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ImportError {
+    pub date: Option<String>,
+    pub message: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ImportSkippedEntry {
+    pub date: String,
+    pub reason: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ImportReport {
+    pub source_format: String,
+    pub new_entries: Vec<String>,
+    pub appended_entries: Vec<String>,
+    pub skipped: Vec<ImportSkippedEntry>,
+    pub errors: Vec<ImportError>,
 }

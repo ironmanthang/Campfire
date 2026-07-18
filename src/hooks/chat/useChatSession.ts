@@ -43,7 +43,9 @@ export function useChatSession({ visible }: { visible: boolean }) {
   const [showThinking, setShowThinking] = usePersistedState("chat_show_thinking", true);
   const [collapseToolResponse, setCollapseToolResponse] = usePersistedState("chat_collapse_tool_response", true);
   const [chatSubmissionMode, setChatSubmissionMode] = usePersistedState<"queue" | "interrupt">("chat_submission_mode", "queue");
-  const [messageQueue, setMessageQueue] = useState<{ text: string; attachments: DraftAttachment[] }[]>([]);
+    const [showSuggestedPrompt, setShowSuggestedPrompt] = usePersistedState("chat_show_suggested_prompt", true);
+    const [messageQueue, setMessageQueue] = useState<{ text: string; attachments: DraftAttachment[] }[]>([]);
+  const [chatResetCounter, setChatResetCounter] = useState(0);
 
   // Load chat session from Tauri on mount
   useEffect(() => {
@@ -116,6 +118,7 @@ export function useChatSession({ visible }: { visible: boolean }) {
       chatAbortControllerRef.current = null;
     }
     setChatMessages([]);
+    setChatResetCounter((c) => c + 1);
     try {
       await invoke("save_chat_history", {
         session: {
@@ -395,6 +398,9 @@ export function useChatSession({ visible }: { visible: boolean }) {
     chatSubmissionMode,
     setChatSubmissionMode,
     messageQueue,
+      showSuggestedPrompt,
+      setShowSuggestedPrompt,
     cancelQueuedMessage,
+    chatResetCounter,
   };
 }

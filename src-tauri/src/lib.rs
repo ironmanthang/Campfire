@@ -16,6 +16,7 @@ pub fn run() {
             commands::journal::write_entry,
             commands::search::search_entries,
             commands::journal::export_journal,
+            commands::journal::import_journal,
             commands::journal::get_journal_context,
             commands::journal::get_journal_context_with_lines,
             commands::chat::load_chat_history,

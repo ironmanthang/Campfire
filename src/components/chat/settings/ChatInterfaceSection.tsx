@@ -10,6 +10,8 @@ export function ChatInterfaceSection() {
     setShowThinking,
     collapseToolResponse,
     setCollapseToolResponse,
+    showSuggestedPrompt,
+    setShowSuggestedPrompt,
     chatSubmissionMode,
     setChatSubmissionMode,
   } = useChatContext();
@@ -102,6 +104,28 @@ export function ChatInterfaceSection() {
               </label>
               <span className="text-xs text-text-secondary leading-relaxed">
                 {t("chatView.collapseToolsDesc", "Keep raw outputs of tool invocations collapsed by default.")}
+              </span>
+            </div>
+          </div>
+
+          {/* Suggested Prompt Toggle */}
+          <div className="flex items-start gap-3 p-2 rounded-lg hover:bg-bg-surface border border-transparent hover:border-border-brand/30 transition-all">
+            <input
+              id="setting-suggested-prompt"
+              type="checkbox"
+              checked={showSuggestedPrompt}
+              onChange={(e) => setShowSuggestedPrompt(e.target.checked)}
+              className="rounded border-border-brand text-accent-brand focus:ring-accent-brand bg-bg-input cursor-pointer mt-0.5 shrink-0 h-4 w-4"
+            />
+            <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+              <label
+                htmlFor="setting-suggested-prompt"
+                className="font-semibold text-text-primary cursor-pointer select-none"
+              >
+                {t("chatView.showSuggestedPromptLabel", "Show Suggested Prompt")}
+              </label>
+              <span className="text-xs text-text-secondary leading-relaxed">
+                {t("chatView.showSuggestedPromptDesc", "Show a quick prompt above the chat input so you can edit it before sending.")}
               </span>
             </div>
           </div>
