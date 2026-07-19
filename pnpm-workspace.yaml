@@ -1,0 +1,6 @@
+packages:
+  - core
+  - mobile
+  - desktop
+allowBuilds:
+  esbuild: true

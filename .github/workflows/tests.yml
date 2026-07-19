@@ -1,0 +1,43 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run core tests
+        run: pnpm --filter @campfire/core test
+
+      - name: Run mobile tests
+        run: pnpm --filter mobile test
+
+      - name: Run desktop tests
+        run: pnpm --filter desktop test
+
+      - name: Typecheck desktop
+        run: pnpm --filter desktop typecheck
+
+      - name: Build mobile (Pages smoke test)
+        run: pnpm --filter mobile build

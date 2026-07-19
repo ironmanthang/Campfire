@@ -1,5 +1,5 @@
 import React from 'react';
-import { Settings, CloudLightning, RefreshCw, AlertTriangle, Cloud, CloudOff } from 'lucide-react';
+import { Settings, RefreshCw, AlertTriangle, Cloud, CloudOff } from 'lucide-react';
 import { type SyncProgress } from '../services/sync';
 
 interface HeaderProps {
@@ -47,9 +47,11 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="flex items-center justify-between px-4 py-3 border-b border-border-brand bg-bg-surface shrink-0 select-none">
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-lg bg-accent-brand/10 flex items-center justify-center border border-accent-brand/20">
-          <CloudLightning className="text-accent-brand" size={18} />
-        </div>
+        <img
+          src="/logo.png"
+          alt="Campfire logo"
+          className="w-8 h-8 rounded-lg object-cover border border-border-brand/40"
+        />
         <span className="font-bold text-lg text-text-primary tracking-tight">Campfire</span>
       </div>
 
