@@ -1,11 +1,13 @@
 {
   "name": "desktop",
   "private": true,
+  "license": "UNLICENSED",
   "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build && pnpm exec javascript-obfuscator dist/assets --output dist/assets --compact true --control-flow-flattening true --string-array true --string-array-encoding base64",
+    "release": "tauri build",
     "preview": "vite preview",
     "tauri": "tauri",
     "i18n:check": "node scripts/i18n-check.js",
@@ -31,6 +33,7 @@
   "devDependencies": {
     "@tauri-apps/cli": "^2",
     "@types/react": "^19.1.8",
+    "javascript-obfuscator": "^4.1.0",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.6.0",
     "typescript": "~5.8.3",

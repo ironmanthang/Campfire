@@ -24,6 +24,7 @@ export function SuggestedPrompt() {
     showSuggestedPrompt,
     setChatInput,
     chatInputRef,
+    chatMessages,
   } = useChatContext();
 
   const [currentText, setCurrentText] = useState<string>(() => pickWeightedSeriousOrHumor());
@@ -36,8 +37,14 @@ export function SuggestedPrompt() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatResetCounter]);
 
-  // Hide while busy, over-limit, or disabled in settings.
-  if (!showSuggestedPrompt || isStreamingChat || loadingChatContext || tokenInfo.status === "blocked") {
+  // Hide while busy, over-limit, disabled in settings, or once the user has already started a conversation.
+  if (
+    !showSuggestedPrompt ||
+    isStreamingChat ||
+    loadingChatContext ||
+    tokenInfo.status === "blocked" ||
+    chatMessages.length > 0
+  ) {
     return null;
   }
 

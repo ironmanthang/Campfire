@@ -10,3 +10,15 @@ To make it run automatically before each push, set `git config core.hooksPath .g
 ## Recommended IDE Setup
 
 - [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+
+## Contact & Commercial Licensing
+
+This repository is private and the source code is proprietary. If you are
+interested in purchasing a commercial license, paid access, or discussing
+support/customization, please contact:
+
+- Name: Nguyễn Như Thắng
+- Email: nguyennhuthang25121974@gmail.com
+
+When contacting, please include the intended use, number of users/licenses,
+and any support or customization requirements.

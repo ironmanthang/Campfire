@@ -38,5 +38,8 @@ export default defineConfig({
     alias: {
       '@campfire/core': path.resolve(__dirname, '../core/src')
     }
+  },
+  build: {
+    sourcemap: false,
   }
 })
