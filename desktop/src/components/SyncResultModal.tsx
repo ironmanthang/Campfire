@@ -1,4 +1,5 @@
 import { X, CheckCircle } from "lucide-react";
+import { useRef } from "react";
 import { formatToDDMMYY } from "../lib/dateUtils";
 
 interface SyncResultModalProps {
@@ -7,9 +8,48 @@ interface SyncResultModalProps {
 }
 
 export function SyncResultModal({ updatedDates, onClose }: SyncResultModalProps) {
+  const modalRef = useRef<HTMLDivElement | null>(null);
+  const pointerStartedInsideRef = useRef(false);
+  const pointerMovedRef = useRef(false);
+  const activePointerIdRef = useRef<number | null>(null);
+  const startPosRef = useRef<{ x: number; y: number } | null>(null);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in">
-      <div className="bg-bg-surface border border-border-brand rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4">
+    <div
+      onPointerDown={(e) => {
+        const target = e.target as Node;
+        pointerStartedInsideRef.current = modalRef.current?.contains(target) ?? false;
+        pointerMovedRef.current = false;
+        activePointerIdRef.current = e.pointerId;
+        startPosRef.current = { x: e.clientX, y: e.clientY };
+      }}
+      onPointerMove={(e) => {
+        if (activePointerIdRef.current !== e.pointerId) return;
+        const start = startPosRef.current;
+        if (!start) return;
+        if (Math.hypot(e.clientX - start.x, e.clientY - start.y) > 6) pointerMovedRef.current = true;
+      }}
+      onPointerUp={(e) => {
+        if (activePointerIdRef.current !== e.pointerId) return;
+        if (pointerStartedInsideRef.current) {
+          pointerStartedInsideRef.current = false;
+          activePointerIdRef.current = null;
+          startPosRef.current = null;
+          return;
+        }
+        if (pointerMovedRef.current) {
+          pointerMovedRef.current = false;
+          activePointerIdRef.current = null;
+          startPosRef.current = null;
+          return;
+        }
+        activePointerIdRef.current = null;
+        startPosRef.current = null;
+        onClose();
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in"
+    >
+      <div ref={modalRef} className="bg-bg-surface border border-border-brand rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 text-accent-brand">
             <CheckCircle className="h-6 w-6 shrink-0" />

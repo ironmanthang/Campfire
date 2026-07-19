@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { X, Send, CheckCircle, AlertCircle, FileText } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
@@ -74,6 +74,12 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
     return `${minutes}m ${seconds}s`;
   };
 
+  const modalRef = useRef<HTMLDivElement | null>(null);
+  const pointerStartedInsideRef = useRef(false);
+  const pointerMovedRef = useRef(false);
+  const activePointerIdRef = useRef<number | null>(null);
+  const startPosRef = useRef<{ x: number; y: number } | null>(null);
+
   if (!isOpen) return null;
 
   // Gather system details
@@ -135,10 +141,41 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
 
   return (
     <div
-      onClick={handleClose}
+      onPointerDown={(e) => {
+        const target = e.target as Node;
+        pointerStartedInsideRef.current = modalRef.current?.contains(target) ?? false;
+        pointerMovedRef.current = false;
+        activePointerIdRef.current = e.pointerId;
+        startPosRef.current = { x: e.clientX, y: e.clientY };
+      }}
+      onPointerMove={(e) => {
+        if (activePointerIdRef.current !== e.pointerId) return;
+        const start = startPosRef.current;
+        if (!start) return;
+        if (Math.hypot(e.clientX - start.x, e.clientY - start.y) > 6) pointerMovedRef.current = true;
+      }}
+      onPointerUp={(e) => {
+        if (activePointerIdRef.current !== e.pointerId) return;
+        if (pointerStartedInsideRef.current) {
+          pointerStartedInsideRef.current = false;
+          activePointerIdRef.current = null;
+          startPosRef.current = null;
+          return;
+        }
+        if (pointerMovedRef.current) {
+          pointerMovedRef.current = false;
+          activePointerIdRef.current = null;
+          startPosRef.current = null;
+          return;
+        }
+        activePointerIdRef.current = null;
+        startPosRef.current = null;
+        handleClose();
+      }}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in"
     >
       <div
+        ref={modalRef}
         onClick={(e) => e.stopPropagation()}
         className="bg-bg-surface border border-border-brand rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[85vh] overflow-hidden"
       >

@@ -1,20 +1,40 @@
 import { useState } from "react";
-import { Sparkles, ChevronDown, ChevronRight } from "lucide-react";
+import { Sparkles, ChevronDown, ChevronRight, Copy, Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAppStore } from "../../../store/useAppStore";
+import { getSystemInstruction } from "../../../services/prompts";
+import { useChatContext } from "../../../views/chat/ChatContext";
 
 export function ChatSystemSection() {
   const { t } = useTranslation();
   const { config, updateConfigField } = useAppStore();
+  const { chatStartDate, chatEndDate, chatContextText } = useChatContext();
 
   const [collapsed, setCollapsed] = useState(() => {
     return localStorage.getItem("chat_settings_sys_instr_collapsed") === "true";
   });
+  const [copied, setCopied] = useState(false);
 
   const toggleCollapsed = () => {
     const next = !collapsed;
     setCollapsed(next);
     localStorage.setItem("chat_settings_sys_instr_collapsed", String(next));
+  };
+
+  const systemInstructionPreview = (config.system_instruction_mode || "default") === "default"
+    ? getSystemInstruction(config.user_name || "", chatStartDate, chatEndDate, chatContextText, config)
+    : "";
+
+  const handleCopyDefaultInstruction = async () => {
+    if (!systemInstructionPreview) return;
+
+    try {
+      await navigator.clipboard.writeText(systemInstructionPreview);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    } catch (err) {
+      console.error("Failed to copy system instruction", err);
+    }
   };
 
   return (
@@ -65,8 +85,27 @@ export function ChatSystemSection() {
             </div>
           </div>
 
-          {/* Textarea Input (only for append or override) */}
-          {(config.system_instruction_mode === "append" || config.system_instruction_mode === "override") && (
+          {/* Default preview or editable textarea */}
+          {config.system_instruction_mode === "default" ? (
+            <div className="flex flex-col gap-2 p-1 animate-fade-in">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-semibold text-text-primary">
+                  {t("chatView.currentSystemPrompt", "Current System Prompt")}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCopyDefaultInstruction}
+                  className="inline-flex items-center gap-1 rounded-lg border border-border-brand/60 bg-bg-input px-2.5 py-1.5 text-[11px] font-semibold text-text-secondary transition-colors hover:border-accent-brand hover:text-accent-brand"
+                >
+                  {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                  {copied ? t("common.copied", "Copied") : t("common.copy", "Copy")}
+                </button>
+              </div>
+              <pre className="w-full whitespace-pre-wrap rounded-xl border border-border-brand/60 bg-bg-input px-3 py-3 text-[11px] leading-5 text-text-primary font-mono overflow-auto max-h-72">
+                {systemInstructionPreview}
+              </pre>
+            </div>
+          ) : (
             <div className="flex flex-col gap-2 p-1 animate-fade-in">
               <span className="font-semibold text-text-primary">
                 {config.system_instruction_mode === "append"

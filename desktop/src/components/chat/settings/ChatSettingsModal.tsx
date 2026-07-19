@@ -12,6 +12,10 @@ interface ChatSettingsModalProps {
 export function ChatSettingsModal({ onClose }: ChatSettingsModalProps) {
   const { t } = useTranslation();
   const modalRef = useRef<HTMLDivElement>(null);
+  const pointerStartedInsideRef = useRef(false);
+  const pointerMovedRef = useRef(false);
+  const activePointerIdRef = useRef<number | null>(null);
+  const startPosRef = useRef<{ x: number; y: number } | null>(null);
 
   // Close on Escape key press
   useEffect(() => {
@@ -24,7 +28,41 @@ export function ChatSettingsModal({ onClose }: ChatSettingsModalProps) {
 
   return (
     <div
-      onClick={onClose}
+      onPointerDown={(e) => {
+        const target = e.target as Node;
+        pointerStartedInsideRef.current = modalRef.current?.contains(target) ?? false;
+        pointerMovedRef.current = false;
+        activePointerIdRef.current = e.pointerId;
+        startPosRef.current = { x: e.clientX, y: e.clientY };
+      }}
+      onPointerMove={(e) => {
+        if (activePointerIdRef.current !== e.pointerId) return;
+        const start = startPosRef.current;
+        if (!start) return;
+        const dx = e.clientX - start.x;
+        const dy = e.clientY - start.y;
+        if (Math.hypot(dx, dy) > 6) pointerMovedRef.current = true;
+      }}
+      onPointerUp={(e) => {
+        if (activePointerIdRef.current !== e.pointerId) return;
+        // If the pointer down started inside the modal, ignore
+        if (pointerStartedInsideRef.current) {
+          pointerStartedInsideRef.current = false;
+          activePointerIdRef.current = null;
+          startPosRef.current = null;
+          return;
+        }
+        // If pointer moved (drag), do not treat as a click
+        if (pointerMovedRef.current) {
+          pointerMovedRef.current = false;
+          activePointerIdRef.current = null;
+          startPosRef.current = null;
+          return;
+        }
+        activePointerIdRef.current = null;
+        startPosRef.current = null;
+        onClose();
+      }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
     >
       <div

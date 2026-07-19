@@ -1,5 +1,6 @@
 import { Sparkles, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useRef } from "react";
 
 interface SearchHelpModalProps {
   onClose: () => void;
@@ -8,13 +9,49 @@ interface SearchHelpModalProps {
 
 export function SearchHelpModal({ onClose, embeddingModel }: SearchHelpModalProps) {
   const { t } = useTranslation();
+  const modalRef = useRef<HTMLDivElement | null>(null);
+  const pointerStartedInsideRef = useRef(false);
+  const pointerMovedRef = useRef(false);
+  const activePointerIdRef = useRef<number | null>(null);
+  const startPosRef = useRef<{ x: number; y: number } | null>(null);
 
   return (
-    <div 
-      onClick={onClose}
+    <div
+      onPointerDown={(e) => {
+        const target = e.target as Node;
+        pointerStartedInsideRef.current = modalRef.current?.contains(target) ?? false;
+        pointerMovedRef.current = false;
+        activePointerIdRef.current = e.pointerId;
+        startPosRef.current = { x: e.clientX, y: e.clientY };
+      }}
+      onPointerMove={(e) => {
+        if (activePointerIdRef.current !== e.pointerId) return;
+        const start = startPosRef.current;
+        if (!start) return;
+        if (Math.hypot(e.clientX - start.x, e.clientY - start.y) > 6) pointerMovedRef.current = true;
+      }}
+      onPointerUp={(e) => {
+        if (activePointerIdRef.current !== e.pointerId) return;
+        if (pointerStartedInsideRef.current) {
+          pointerStartedInsideRef.current = false;
+          activePointerIdRef.current = null;
+          startPosRef.current = null;
+          return;
+        }
+        if (pointerMovedRef.current) {
+          pointerMovedRef.current = false;
+          activePointerIdRef.current = null;
+          startPosRef.current = null;
+          return;
+        }
+        activePointerIdRef.current = null;
+        startPosRef.current = null;
+        onClose();
+      }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
     >
-      <div 
+      <div
+        ref={modalRef}
         onClick={(e) => e.stopPropagation()}
         className="relative w-full max-w-2xl bg-bg-surface border border-border-brand rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[85vh]"
       >

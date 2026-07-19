@@ -1,9 +1,7 @@
 # Project Roadmap & Progress
 
 ## Completed Tasks (Always keep this under 5 tasks)
-- [x] Rename app to **Campfire** and update AI system instructions to the subtle "Voice of the Campfire/Narrator" persona.
-- [x] Set custom desktop app logo: generated Tauri multi-size assets from my_logo.png and added my_logo_small.png to the sidebar UI with fallback.
-- [x] Add customizable system instructions: support default, append, and override modes inside Chat Settings modal.
+
 
 ---
 
@@ -16,14 +14,6 @@
 
 when i tried to edit md files in drive and open it in gg docs, it can create multiple files with the same data, then i open app and click sync now, i got error: `Failed to download file (status ${response.status}). If this file was created by another client, ensure both Client IDs are configured under the SAME Google Cloud Project.`
 
-
-
-check out how to prevent other devs steal my code, maybe check out "licensed under Apache-2.", this is the opposite of what i want
-
-
-
-
-right when i click in an entry on mobile, the cursor move to the front or the end of the text??
 
 
 
