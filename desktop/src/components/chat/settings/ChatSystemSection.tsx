@@ -26,10 +26,13 @@ export function ChatSystemSection() {
     : "";
 
   const handleCopyDefaultInstruction = async () => {
-    if (!systemInstructionPreview) return;
+    const defaultRaw = t("chatView.systemInstruction", { returnObjects: true });
+    const defaultStr = Array.isArray(defaultRaw)
+      ? defaultRaw.join("\n")
+      : (defaultRaw as string);
 
     try {
-      await navigator.clipboard.writeText(systemInstructionPreview);
+      await navigator.clipboard.writeText(defaultStr);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1500);
     } catch (err) {
