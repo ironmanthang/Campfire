@@ -47,6 +47,9 @@ export class TauriLocalStore implements LocalStore {
       content: entry.content,
       timestampMs: entry.lastModified,
     });
+    if (entry.baseContent !== undefined) {
+      await this.writeSyncBase(entry.date, entry.baseContent);
+    }
   }
 
   async update(date: string, patch: Partial<LocalEntry>): Promise<void> {
@@ -65,8 +68,11 @@ export class TauriLocalStore implements LocalStore {
         timestampMs: patch.lastModified,
       });
     }
-    // synced and baseContent are not stored as Tauri state on the desktop;
-    // the engine tracks them via writeSyncBase.
+    if (patch.baseContent !== undefined) {
+      await this.writeSyncBase(date, patch.baseContent);
+    }
+    // synced is not stored as Tauri state on the desktop;
+    // the engine tracks it via writeSyncBase.
   }
 
   async delete(date: string): Promise<void> {

@@ -166,12 +166,33 @@ function App() {
           date={activeDate}
           initialContent={editorContent}
           onSave={handleEditorSave}
-          onBack={() => {
+          onBack={async () => {
+            if (activeDate) {
+              await saveLocalEntry(activeDate, editorContent);
+            }
             setActiveDate(null);
             loadEntries();
             const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';
             if (autoSync && isLoggedIn) {
               handleSync();
+            }
+          }}
+          onDateChange={async (newDate) => {
+            if (!newDate) {
+              if (activeDate) {
+                await saveLocalEntry(activeDate, editorContent);
+              }
+              setActiveDate(null);
+              loadEntries();
+              const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';
+              if (autoSync && isLoggedIn) {
+                handleSync();
+              }
+            } else {
+              if (activeDate) {
+                await saveLocalEntry(activeDate, editorContent);
+              }
+              await handleSelectEntry(newDate);
             }
           }}
         />

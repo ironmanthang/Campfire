@@ -43,9 +43,19 @@ export async function saveLocalEntry(date: string, content: string): Promise<voi
 }
 
 export async function deleteLocalEntry(date: string): Promise<void> {
-  await db.entries.delete(date);
+  const existing = await db.entries.get(date);
+  if (existing) {
+    await db.entries.put({
+      date,
+      content: '',
+      lastModified: Date.now(),
+      synced: false,
+      baseContent: existing.baseContent
+    });
+  }
 }
 
 export async function listLocalEntries(): Promise<LocalJournalEntry[]> {
-  return await db.entries.orderBy('date').reverse().toArray();
+  const all = await db.entries.orderBy('date').reverse().toArray();
+  return all.filter(e => e.content.trim() !== '');
 }

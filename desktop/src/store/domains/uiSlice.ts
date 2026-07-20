@@ -49,11 +49,14 @@ export const createUiSlice: StateCreator<
     const { notificationTimeout } = get();
     if (notificationTimeout) clearTimeout(notificationTimeout);
     set({ statusMessage: { text, type } });
-    const duration = type === "success" ? 4000 : 10000;
-    const timeout = setTimeout(() => {
-      set({ statusMessage: null, notificationTimeout: null });
-    }, duration);
-    set({ notificationTimeout: timeout });
+    if (type === "success") {
+      const timeout = setTimeout(() => {
+        set({ statusMessage: null, notificationTimeout: null });
+      }, 4000);
+      set({ notificationTimeout: timeout });
+    } else {
+      set({ notificationTimeout: null });
+    }
   },
 
   clearNotification: () => {

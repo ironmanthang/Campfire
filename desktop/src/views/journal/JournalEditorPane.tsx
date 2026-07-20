@@ -18,6 +18,7 @@ interface JournalEditorPaneProps {
   overlayRef: React.RefObject<HTMLDivElement | null>;
   handleTextChange: (text: string) => void;
   editorWidthPercent: number;
+  initialSyncInProgress: boolean;
 }
 
 export function JournalEditorPane({
@@ -36,6 +37,7 @@ export function JournalEditorPane({
   overlayRef,
   handleTextChange,
   editorWidthPercent,
+  initialSyncInProgress,
 }: JournalEditorPaneProps) {
   const { t } = useTranslation();
 
@@ -106,10 +108,12 @@ export function JournalEditorPane({
           </div>
         </div>
       )}
-      {loadingEntry ? (
+      {loadingEntry || initialSyncInProgress ? (
         <div className="flex-1 flex flex-col items-center justify-center gap-2">
           <Loader2 className="h-6 w-6 animate-spin text-accent-brand" />
-          <span className="text-xs text-text-secondary">{t("journalEditor.loadingFlatFile")}</span>
+          <span className="text-xs text-text-secondary">
+            {initialSyncInProgress ? "Syncing with cloud memory..." : t("journalEditor.loadingFlatFile")}
+          </span>
         </div>
       ) : (
         <div className="flex-1 w-full relative overflow-hidden">

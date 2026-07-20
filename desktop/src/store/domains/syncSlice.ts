@@ -13,6 +13,7 @@ export interface SyncSlice {
   syncPending: "none" | "auto" | "manual";
   syncResultDates: string[] | null;
   lastConflictedDates: string[];
+  initialSyncInProgress: boolean;
 
   checkDriveStatus: () => Promise<void>;
   handleSync: (isManual?: boolean, isStartupSync?: boolean) => Promise<void>;
@@ -34,6 +35,7 @@ export const createSyncSlice: StateCreator<
   syncPending: "none",
   syncResultDates: null,
   lastConflictedDates: [],
+  initialSyncInProgress: false,
 
   setSyncResultDates: (dates) => set({ syncResultDates: dates }),
 
@@ -71,6 +73,9 @@ export const createSyncSlice: StateCreator<
     }
 
     set({ syncProgress: { status: "connecting", message: "Connecting to Google Drive...", filesProcessed: 0, totalFiles: 0 } });
+    if (isStartupSync) {
+      set({ initialSyncInProgress: true });
+    }
 
     try {
       await invoke("create_journal_backup", { dirPath: config.journal_dir });
@@ -93,6 +98,7 @@ export const createSyncSlice: StateCreator<
           );
         }
         set({ lastConflictedDates: conflictedDates });
+        get().triggerJournalRefresh();
       } else {
         if (get().lastConflictedDates.length > 0) set({ lastConflictedDates: [] });
         if (isManual && get().syncPending === "none" && !hasDownloads) {
@@ -111,6 +117,9 @@ export const createSyncSlice: StateCreator<
       set({ syncProgress: { status: "error", message: errMsg, filesProcessed: 0, totalFiles: 0 } });
       if (isManual) get().showNotification(errMsg, "error");
     } finally {
+      if (isStartupSync) {
+        set({ initialSyncInProgress: false });
+      }
       const pendingType = get().syncPending;
       if (pendingType !== "none") {
         set({ syncPending: "none" });

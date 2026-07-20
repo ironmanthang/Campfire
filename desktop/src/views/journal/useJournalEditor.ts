@@ -23,6 +23,7 @@ export function useJournalEditor() {
     handleSync,
     syncProgress,
     journalRefreshKey,
+    initialSyncInProgress,
   } = useAppStore();
 
   const { handleTagClick } = useSearchStore();
@@ -149,6 +150,7 @@ export function useJournalEditor() {
     handleTextChange,
     stepDate,
     highlightedText,
+    initialSyncInProgress,
     t,
   };
 }

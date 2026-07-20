@@ -1,19 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, Eye, Edit2, Calendar } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Eye, Edit2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { DatePicker } from './DatePicker';
 
 interface JournalEditorProps {
   date: string;
   initialContent: string;
   onSave: (content: string) => void;
   onBack: () => void;
+  onDateChange: (newDate: string) => void;
 }
 
 export const JournalEditor: React.FC<JournalEditorProps> = ({ 
   date, 
   initialContent, 
   onSave, 
-  onBack 
+  onBack,
+  onDateChange
 }) => {
   const [content, setContent] = useState(initialContent);
   const [isPreview, setIsPreview] = useState(false);
@@ -85,6 +88,16 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
     });
   };
 
+  const handleStepDate = (amount: number) => {
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return;
+    d.setDate(d.getDate() + amount);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    onDateChange(`${y}-${m}-${day}`);
+  };
+
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-bg-app">
       {/* Sub-Header */}
@@ -97,10 +110,25 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
           <span>Back</span>
         </button>
 
-        <span className="text-xs font-semibold text-text-secondary flex items-center gap-1">
-          <Calendar size={12} className="text-accent-brand" />
-          {date}
-        </span>
+        <div className="flex items-center gap-1">
+          <button 
+            onClick={() => handleStepDate(-1)}
+            className="p-1.5 hover:bg-bg-app rounded-xl transition-colors text-text-secondary cursor-pointer"
+            title="Previous Day"
+          >
+            <ChevronLeft size={16} />
+          </button>
+
+          <DatePicker value={date} onChange={onDateChange} />
+
+          <button 
+            onClick={() => handleStepDate(1)}
+            className="p-1.5 hover:bg-bg-app rounded-xl transition-colors text-text-secondary cursor-pointer"
+            title="Next Day"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
 
         <button 
           onClick={() => setIsPreview(!isPreview)}

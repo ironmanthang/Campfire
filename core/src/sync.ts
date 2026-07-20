@@ -228,6 +228,7 @@ export async function runSync(
         if (local.content.trim() === '') {
           logger.log(`[Sync] Entry ${date}: Local content is empty. Cleaning up...`);
           await drive.deleteFile(remote.id);
+          await store.delete(date);
           await store.deleteSyncBase(date);
           continue;
         }
@@ -277,7 +278,8 @@ export async function runSync(
             logger.log(`[Sync] Entry ${date}: Only local changed. Uploading local...`);
             const updateResult = await drive.updateFileContent(remote.id, local.content);
             const newRemoteTime = parseDriveTime(updateResult.modifiedTime);
-            await store.update(date, { lastModified: newRemoteTime, synced: true, baseContent: local.content });
+            await store.update(date, { lastModified: newRemoteTime, synced: true });
+            await store.writeSyncBase(date, local.content);
             // local→cloud upload: do NOT push to downloadedDates (no modal needed)
           } else {
             // Both local and cloud differ from the base AND from each other.

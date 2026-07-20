@@ -38,6 +38,7 @@ export function JournalEditorView() {
     handleTextChange,
     stepDate,
     highlightedText,
+    initialSyncInProgress,
   } = useJournalEditor();
 
   return (
@@ -62,6 +63,7 @@ export function JournalEditorView() {
         <JournalEditorPane
           entryContent={entryContent}
           loadingEntry={loadingEntry}
+          initialSyncInProgress={initialSyncInProgress}
           showFindBar={showFindBar}
           findQuery={findQuery}
           setFindQuery={setFindQuery}
