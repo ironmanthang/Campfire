@@ -1,12 +1,13 @@
 import React from "react";
-import { X, CheckCircle } from "lucide-react";
+import { X, CheckCircle, BookOpen } from "lucide-react";
 
 interface SyncResultModalProps {
   updatedDates: string[];
   onClose: () => void;
+  onSelectEntry?: (date: string) => void;
 }
 
-export const SyncResultModal: React.FC<SyncResultModalProps> = ({ updatedDates, onClose }) => {
+export const SyncResultModal: React.FC<SyncResultModalProps> = ({ updatedDates, onClose, onSelectEntry }) => {
   // Simple date formatter for display
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
@@ -43,9 +44,20 @@ export const SyncResultModal: React.FC<SyncResultModalProps> = ({ updatedDates, 
             {updatedDates.map((date) => (
               <div 
                 key={date} 
-                className="text-xs font-semibold px-3 py-2 bg-bg-app border border-border-brand/40 rounded-lg text-text-primary"
+                className="flex items-center justify-between text-xs font-semibold pl-3 pr-2 py-1.5 bg-bg-app border border-border-brand/40 rounded-lg text-text-primary"
               >
-                {formatDate(date)} ({date})
+                <span>{formatDate(date)} ({date})</span>
+                {onSelectEntry && (
+                  <button
+                    onClick={() => {
+                      onSelectEntry(date);
+                    }}
+                    className="p-1 rounded-md hover:bg-bg-surface border border-transparent hover:border-border-brand/40 text-text-secondary hover:text-accent-brand transition-all duration-150 cursor-pointer shrink-0"
+                    title="Open entry"
+                  >
+                    <BookOpen className="h-4 w-4" />
+                  </button>
+                )}
               </div>
             ))}
           </div>
