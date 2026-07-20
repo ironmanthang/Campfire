@@ -392,6 +392,7 @@
       "",
       "### STORY CONTEXT:",
       "- Current date of this reflection: {currentDate} ({dayOfWeek})",
+      "- IMPORTANT TEMPORAL ANCHOR: Today's date is strictly {currentDate} ({dayOfWeek}). Your training data cutoff is in the past. Override this bias: any date, search result, or event on or before {currentDate} is in the past or present, NOT the future.",
       "- {userName} is sitting by the hearth, looking back at the period from {startDate} to {endDate}",
       "- The entries below are the *whole* of what {userName} wrote in that window. You may quote, paraphrase, and reference specific entries.",
       "",
