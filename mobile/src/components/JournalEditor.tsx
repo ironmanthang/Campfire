@@ -11,6 +11,7 @@ interface JournalEditorProps {
   onBack: () => void;
   onDateChange: (newDate: string) => void;
   onResolveConflict: (choice: 'local' | 'remote' | 'both') => void;
+  isLoading?: boolean;
 }
 
 export const JournalEditor: React.FC<JournalEditorProps> = ({ 
@@ -19,16 +20,28 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
   onSave, 
   onBack,
   onDateChange,
-  onResolveConflict
+  onResolveConflict,
+  isLoading = false
 }) => {
   const [content, setContent] = useState(initialContent);
   const [isPreview, setIsPreview] = useState(false);
   const [words, setWords] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const wasLoadingRef = useRef(isLoading);
+
+  // If we just finished loading, reset content to the loaded initialContent
+  useEffect(() => {
+    if (wasLoadingRef.current && !isLoading) {
+      setContent(initialContent);
+    }
+    wasLoadingRef.current = isLoading;
+  }, [isLoading, initialContent]);
 
   // Reset content when switching to a different entry date
   useEffect(() => {
-    setContent(initialContent);
+    if (!isLoading) {
+      setContent(initialContent);
+    }
   }, [date]);
 
   // Focus and place cursor at the end of the text on first mount per entry
@@ -68,6 +81,8 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
   }, [isPreview, date]);
 
   useEffect(() => {
+    if (isLoading) return;
+
     // Calculate word count
     const trimmed = content.trim();
     if (!trimmed) {
@@ -78,7 +93,7 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
     
     // Save content to DB
     onSave(content);
-  }, [content]);
+  }, [content, isLoading]);
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
@@ -109,7 +124,7 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
       </div>
 
       {/* Conflict Resolution Banner */}
-      {hasConflictMarkers(content) && (
+      {!isLoading && hasConflictMarkers(content) && (
         <div className="mx-4 mt-3 p-3.5 rounded-2xl border border-amber-500/20 bg-amber-500/5 backdrop-blur-md flex flex-col gap-3 animate-fade-in select-none">
           <div className="flex items-start gap-2.5">
             <div className="p-1.5 rounded-xl bg-amber-500/10 text-amber-500 shrink-0 mt-0.5">
@@ -165,7 +180,8 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
               ref={textareaRef}
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder={`Write your diary for ${formatDate(date)}...\nUse #tags to categorize your thoughts.`}
+              placeholder={isLoading ? "Loading diary..." : `Write your diary for ${formatDate(date)}...\nUse #tags to categorize your thoughts.`}
+              disabled={isLoading}
               className="flex-1 w-full bg-transparent text-text-primary resize-none outline-none text-base leading-relaxed placeholder:text-text-secondary/50 font-sans"
             />
           </div>

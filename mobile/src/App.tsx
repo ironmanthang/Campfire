@@ -15,6 +15,7 @@ function App() {
   const [entries, setEntries] = useState<LocalJournalEntry[]>([]);
   const [activeDate, setActiveDate] = useState<string | null>(null);
   const [editorContent, setEditorContent] = useState('');
+  const [editorLoadedDate, setEditorLoadedDate] = useState<string | null>(null);
   const [editorLoading, setEditorLoading] = useState(false);
   const [editorReloadKey, setEditorReloadKey] = useState(0);
   
@@ -45,18 +46,28 @@ function App() {
     activeDateRef.current = activeDate;
   }, [activeDate]);
 
+  const editorLoadedDateRef = useRef(editorLoadedDate);
+  useEffect(() => {
+    editorLoadedDateRef.current = editorLoadedDate;
+  }, [editorLoadedDate]);
+
   const isLoggedInRef = useRef(isLoggedIn);
   useEffect(() => {
     isLoggedInRef.current = isLoggedIn;
   }, [isLoggedIn]);
 
+  const saveCurrentEntry = async () => {
+    if (editorLoadedDateRef.current) {
+      await saveLocalEntry(editorLoadedDateRef.current, editorContentRef.current);
+      await loadEntries();
+    }
+  };
+
   useEffect(() => {
     const handlePopState = async (e: PopStateEvent) => {
       const dateInState = e.state?.activeDate || null;
       if (dateInState !== activeDateRef.current) {
-        if (activeDateRef.current) {
-          await saveLocalEntry(activeDateRef.current, editorContentRef.current);
-        }
+        await saveCurrentEntry();
         setActiveDate(dateInState);
         await loadEntries();
         const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';
@@ -136,6 +147,7 @@ function App() {
         const entry = await getLocalEntry(activeDate);
         if (entry) {
           setEditorContent(entry.content);
+          setEditorLoadedDate(activeDate);
           setEditorReloadKey(prev => prev + 1);
         }
       }
@@ -165,6 +177,7 @@ function App() {
     // mount with the previous entry's content while we fetch the new one.
     setEditorLoading(true);
     setEditorContent('');
+    setEditorLoadedDate(null);
     setActiveDate(date);
 
     if (window.history.state?.activeDate !== date) {
@@ -172,15 +185,22 @@ function App() {
     }
 
     const entry = await getLocalEntry(date);
-    setEditorContent(entry?.content || '');
-    setEditorLoading(false);
+    if (activeDateRef.current === date) {
+      setEditorContent(entry?.content || '');
+      setEditorLoadedDate(date);
+      setEditorLoading(false);
+    }
   };
 
   const handleSwitchEntryDate = async (newDate: string) => {
+    saveCurrentEntry();
     setActiveDate(newDate);
     window.history.replaceState({ activeDate: newDate }, '');
     const entry = await getLocalEntry(newDate);
-    setEditorContent(entry?.content || '');
+    if (activeDateRef.current === newDate) {
+      setEditorContent(entry?.content || '');
+      setEditorLoadedDate(newDate);
+    }
   };
 
   const handleCreateToday = () => {
@@ -195,15 +215,15 @@ function App() {
 
   // Debounced DB writer
   useEffect(() => {
-    if (!activeDate) return;
+    if (!editorLoadedDate || editorLoadedDate !== activeDate) return;
     
     const t = setTimeout(async () => {
-      await saveLocalEntry(activeDate, editorContent);
+      await saveLocalEntry(editorLoadedDate, editorContent);
       loadEntries();
     }, 400); // 400ms debounce
     
     return () => clearTimeout(t);
-  }, [editorContent, activeDate]);
+  }, [editorContent, activeDate, editorLoadedDate]);
 
   return (
     <div className="flex flex-col h-full bg-bg-app transition-colors duration-200 relative">
@@ -219,11 +239,10 @@ function App() {
           key={`${activeDate}_${editorReloadKey}`}
           date={activeDate}
           initialContent={editorContent}
+          isLoading={!editorLoadedDate || editorLoadedDate !== activeDate}
           onSave={handleEditorSave}
           onBack={async () => {
-            if (activeDate) {
-              await saveLocalEntry(activeDate, editorContent);
-            }
+            await saveCurrentEntry();
             if (window.history.state?.activeDate) {
               window.history.back();
             } else {
@@ -237,9 +256,7 @@ function App() {
           }}
           onDateChange={async (newDate) => {
             if (!newDate) {
-              if (activeDate) {
-                await saveLocalEntry(activeDate, editorContent);
-              }
+              await saveCurrentEntry();
               if (window.history.state?.activeDate) {
                 window.history.back();
               } else {
@@ -251,9 +268,7 @@ function App() {
                 }
               }
             } else {
-              if (activeDate) {
-                await saveLocalEntry(activeDate, editorContent);
-              }
+              await saveCurrentEntry();
               await handleSwitchEntryDate(newDate);
             }
           }}
@@ -263,6 +278,7 @@ function App() {
             const resolved = await resolveLocalConflict(activeDate, choice);
             if (resolved !== null) {
               setEditorContent(resolved);
+              setEditorLoadedDate(activeDate);
               setEditorReloadKey(prev => prev + 1);
               await loadEntries();
               const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { type LocalJournalEntry } from '../services/db';
-import { Plus, Search, Calendar, FileText } from 'lucide-react';
+import { Plus, Search, Calendar, FileText, SlidersHorizontal } from 'lucide-react';
 
 interface JournalListProps {
   entries: LocalJournalEntry[];
@@ -14,6 +14,9 @@ export const JournalList: React.FC<JournalListProps> = ({
   onCreateToday 
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [dateRange, setDateRange] = useState<'all' | '30d' | '3m' | 'year'>('all');
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
 
   // Format date cleanly
   const formatDate = (dateStr: string) => {
@@ -60,29 +63,62 @@ export const JournalList: React.FC<JournalListProps> = ({
     return trimmed.split(/\s+/).length;
   };
 
-  // Filter entries based on search query (text content or tags)
+  // Filter entries based on search query (text content or tags) and date range
   const filteredEntries = entries.filter(entry => {
     const query = searchQuery.toLowerCase().trim();
-    if (!query) return true;
-    
-    // Support searching for tags specifically (e.g. "#ideas")
-    if (query.startsWith('#')) {
-      const tagQuery = query.substring(1);
-      const tags = extractTags(entry.content).map(t => t.toLowerCase());
-      return tags.some(t => t.includes(tagQuery));
+    if (query) {
+      // Support searching for tags specifically (e.g. "#ideas")
+      if (query.startsWith('#')) {
+        const tagQuery = query.substring(1);
+        const tags = extractTags(entry.content).map(t => t.toLowerCase());
+        if (!tags.some(t => t.includes(tagQuery))) return false;
+      } else {
+        const matches = (
+          entry.date.includes(query) ||
+          entry.content.toLowerCase().includes(query)
+        );
+        if (!matches) return false;
+      }
     }
     
-    return (
-      entry.date.includes(query) ||
-      entry.content.toLowerCase().includes(query)
-    );
+    // Filter by Date Range
+    if (dateRange !== 'all') {
+      const entryDateObj = new Date(entry.date);
+      const entryTime = entryDateObj.getTime();
+      if (isNaN(entryTime)) return true;
+      
+      const now = new Date();
+      const diffTime = now.getTime() - entryTime;
+      
+      if (dateRange === '30d') {
+        const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+        if (diffTime > thirtyDaysMs) return false;
+      } else if (dateRange === '3m') {
+        const ninetyDaysMs = 90 * 24 * 60 * 60 * 1000;
+        if (diffTime > ninetyDaysMs) return false;
+      } else if (dateRange === 'year') {
+        if (entryDateObj.getFullYear() !== now.getFullYear()) return false;
+      }
+    }
+    
+    return true;
+  });
+
+  // Sort entries based on Sort Order
+  const sortedEntries = [...filteredEntries].sort((a, b) => {
+    const timeA = new Date(a.date).getTime();
+    const timeB = new Date(b.date).getTime();
+    
+    if (isNaN(timeA) || isNaN(timeB)) return 0;
+    
+    return sortOrder === 'newest' ? timeB - timeA : timeA - timeB;
   });
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-bg-app relative">
-      {/* Search Bar */}
-      <div className="px-4 py-3 bg-bg-surface border-b border-border-brand shrink-0">
-        <div className="relative flex items-center">
+      {/* Search Bar & Filter */}
+      <div className="px-4 py-3 bg-bg-surface border-b border-border-brand shrink-0 flex items-center gap-2 select-none">
+        <div className="relative flex-1 flex items-center">
           <Search size={16} className="absolute left-3 text-text-secondary" />
           <input 
             type="text" 
@@ -92,12 +128,23 @@ export const JournalList: React.FC<JournalListProps> = ({
             className="w-full pl-9 pr-4 py-2 text-sm rounded-xl border border-border-brand bg-bg-input text-text-primary outline-none focus:border-accent-brand transition-all"
           />
         </div>
+        <button 
+          onClick={() => setIsFilterOpen(true)}
+          className={`p-2 rounded-xl border transition-all active:scale-95 shrink-0 cursor-pointer ${
+            dateRange !== 'all' || sortOrder !== 'newest'
+              ? 'border-accent-brand bg-accent-brand/10 text-accent-brand font-bold' 
+              : 'border-border-brand bg-bg-input text-text-secondary hover:text-text-primary'
+          }`}
+          title="Filter Entries"
+        >
+          <SlidersHorizontal size={18} />
+        </button>
       </div>
 
       {/* Entries List */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0 pb-24 select-none">
-        {filteredEntries.length > 0 ? (
-          filteredEntries.map((entry) => {
+        {sortedEntries.length > 0 ? (
+          sortedEntries.map((entry) => {
             const words = getWordCount(entry.content);
             const tags = extractTags(entry.content);
             
@@ -150,7 +197,7 @@ export const JournalList: React.FC<JournalListProps> = ({
           <div className="flex flex-col items-center justify-center py-12 text-center text-text-secondary">
             <FileText size={48} className="text-border-brand mb-3" />
             <p className="text-sm font-medium">No journal entries found</p>
-            {searchQuery && <p className="text-xs mt-1">Try clearing your search query</p>}
+            {(searchQuery || dateRange !== 'all') && <p className="text-xs mt-1">Try clearing your filters or search query</p>}
           </div>
         )}
       </div>
@@ -162,6 +209,89 @@ export const JournalList: React.FC<JournalListProps> = ({
       >
         <Plus size={26} />
       </button>
+
+      {/* Filter Modal Sheet */}
+      {isFilterOpen && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end justify-center select-none" 
+          onClick={() => setIsFilterOpen(false)}
+        >
+          <div 
+            className="w-full max-w-md bg-bg-surface border-t border-border-brand rounded-t-3xl p-5 space-y-5 shadow-2xl animate-fade-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex justify-between items-center pb-2 border-b border-border-brand">
+              <span className="font-bold text-text-primary text-base">Filter Entries</span>
+              <button 
+                onClick={() => {
+                  setDateRange('all');
+                  setSortOrder('newest');
+                }}
+                className="text-xs font-semibold text-accent-brand hover:underline cursor-pointer"
+              >
+                Reset All
+              </button>
+            </div>
+
+            {/* Date Range Selection */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">Date Range</label>
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  { value: 'all', label: 'All' },
+                  { value: '30d', label: '30d' },
+                  { value: '3m', label: '3m' },
+                  { value: 'year', label: 'This Yr' }
+                ].map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setDateRange(opt.value as any)}
+                    className={`py-2 px-1 text-xs font-bold rounded-xl text-center border transition-all active:scale-95 cursor-pointer ${
+                      dateRange === opt.value
+                        ? 'bg-accent-brand text-bg-app border-accent-brand'
+                        : 'bg-bg-input text-text-secondary border-border-brand hover:text-text-primary'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Sort Order Selection */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">Sort Order</label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { value: 'newest', label: 'Newest First' },
+                  { value: 'oldest', label: 'Oldest First' }
+                ].map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setSortOrder(opt.value as any)}
+                    className={`py-2 px-3 text-xs font-bold rounded-xl text-center border transition-all active:scale-95 cursor-pointer ${
+                      sortOrder === opt.value
+                        ? 'bg-accent-brand text-bg-app border-accent-brand'
+                        : 'bg-bg-input text-text-secondary border-border-brand hover:text-text-primary'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Apply Button */}
+            <button
+              onClick={() => setIsFilterOpen(false)}
+              className="w-full py-3 rounded-2xl bg-accent-brand hover:bg-accent-brand-hover text-bg-app text-sm font-bold shadow-md shadow-accent-brand/20 transition-all active:scale-[0.98] cursor-pointer"
+            >
+              Apply Filters
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

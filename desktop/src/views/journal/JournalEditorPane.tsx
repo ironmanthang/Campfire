@@ -121,7 +121,7 @@ export function JournalEditorPane({
       ) : (
         <div className="flex-1 flex flex-col overflow-hidden w-full h-full">
           {hasConflictMarkers(entryContent) && (
-            <div className="mx-6 mt-4 p-4 rounded-2xl border border-amber-500/20 bg-amber-500/5 backdrop-blur-md flex items-center justify-between gap-4 animate-fade-in select-none">
+            <div className="mx-6 mt-4 p-4 rounded-2xl border border-amber-500/20 bg-amber-500/5 backdrop-blur-md flex flex-col gap-4 animate-fade-in select-none">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500 shrink-0">
                   <AlertTriangle className="h-5 w-5" />
@@ -131,7 +131,7 @@ export function JournalEditorPane({
                   <span className="text-xs text-text-secondary">Keep your version or overwrite with the cloud version to resolve:</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-2 pl-12 flex-wrap">
                 <button
                   type="button"
                   onClick={() => resolveConflict("local")}
