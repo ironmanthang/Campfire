@@ -48,8 +48,6 @@ body {
   height: 100vh;
   height: 100dvh;
   /* Prevent bounce scrolling on mobile iOS browsers */
-  position: fixed;
-  width: 100%;
   overflow: hidden;
 }
 

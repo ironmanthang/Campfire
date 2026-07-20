@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { type LocalJournalEntry } from '../services/db';
 import { Plus, Search, Calendar, FileText, SlidersHorizontal } from 'lucide-react';
 
@@ -15,8 +15,28 @@ export const JournalList: React.FC<JournalListProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [dateRange, setDateRange] = useState<'all' | '30d' | '3m' | 'year'>('all');
-  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const [dateRange, setDateRange] = useState<'all' | '30d' | '3m' | 'year'>(() => {
+    const saved = localStorage.getItem('campfire_mobile_filter_dateRange');
+    if (saved === '30d' || saved === '3m' || saved === 'year') {
+      return saved;
+    }
+    return 'all';
+  });
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>(() => {
+    const saved = localStorage.getItem('campfire_mobile_filter_sortOrder');
+    if (saved === 'oldest') {
+      return saved;
+    }
+    return 'newest';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('campfire_mobile_filter_dateRange', dateRange);
+  }, [dateRange]);
+
+  useEffect(() => {
+    localStorage.setItem('campfire_mobile_filter_sortOrder', sortOrder);
+  }, [sortOrder]);
 
   // Format date cleanly
   const formatDate = (dateStr: string) => {
@@ -213,11 +233,11 @@ export const JournalList: React.FC<JournalListProps> = ({
       {/* Filter Modal Sheet */}
       {isFilterOpen && (
         <div 
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end justify-center select-none" 
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 select-none" 
           onClick={() => setIsFilterOpen(false)}
         >
           <div 
-            className="w-full max-w-md bg-bg-surface border-t border-border-brand rounded-t-3xl p-5 space-y-5 shadow-2xl animate-fade-in"
+            className="w-full max-w-md bg-bg-surface border border-border-brand rounded-2xl p-5 space-y-5 shadow-2xl animate-fade-in"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}

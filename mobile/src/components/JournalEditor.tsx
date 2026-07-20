@@ -37,48 +37,22 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
     wasLoadingRef.current = isLoading;
   }, [isLoading, initialContent]);
 
-  // Reset content when switching to a different entry date
+  // Reset content and scroll position to top when switching to a different entry date
   useEffect(() => {
     if (!isLoading) {
       setContent(initialContent);
+      if (textareaRef.current) {
+        textareaRef.current.scrollTop = 0;
+      }
     }
-  }, [date]);
+  }, [date, initialContent, isLoading]);
 
-  // Focus and place cursor at the end of the text on first mount per entry
-  // date, and when toggling between Edit and Preview. We do NOT depend on
-  // `content` here — otherwise every keystroke would re-focus the textarea
-  // and re-place the caret at the end, fighting the user's typing.
-  //
-  // The placement is deferred via rAF + a small timeout because on Android
-  // Chrome, `setSelectionRange` called synchronously inside a `useEffect`
-  // is silently ignored: the soft keyboard / IME input session isn't
-  // attached to the element yet, so the selection collapses to 0.
+  // Reset scroll to top when entering edit mode from preview
   useEffect(() => {
-    if (isPreview || !textareaRef.current) return;
-    let cancelled = false;
-    let rafId = 0;
-    let timerId = 0;
-    const placeCaret = () => {
-      if (cancelled || !textareaRef.current) return;
-      const length = textareaRef.current.value.length;
-      textareaRef.current.focus();
-      textareaRef.current.setSelectionRange(length, length);
-    };
-    rafId = requestAnimationFrame(() => {
-      if (cancelled) return;
-      // Run on the next frame, then again after a small delay so the IME
-      // has time to attach. ~60ms covers the typical Android IME delay.
-      rafId = requestAnimationFrame(() => {
-        placeCaret();
-        timerId = window.setTimeout(placeCaret, 60);
-      });
-    });
-    return () => {
-      cancelled = true;
-      if (rafId) cancelAnimationFrame(rafId);
-      if (timerId) window.clearTimeout(timerId);
-    };
-  }, [isPreview, date]);
+    if (!isPreview && textareaRef.current) {
+      textareaRef.current.scrollTop = 0;
+    }
+  }, [isPreview]);
 
   useEffect(() => {
     if (isLoading) return;
