@@ -1,23 +1,9 @@
-# Project Roadmap & Progress
+# Pending Objectives
 
-## Completed Tasks (Always keep this under 5 tasks)
-
-
----
-
-## Pending Objectives
-
-## product backlog
-
-### logic
-
-# error:
-
-## feature:
+# product backlog
 
 
 
-### UI/UX
 
 
 ## Future Plans & Monetization Setup

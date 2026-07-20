@@ -6,8 +6,8 @@ import { hasConflictMarkers } from '../services/merge';
 
 interface JournalEditorProps {
   date: string;
-  initialContent: string;
-  onSave: (content: string) => void;
+  content: string;
+  onChange: (content: string) => void;
   onBack: () => void;
   onDateChange: (newDate: string) => void;
   onResolveConflict: (choice: 'local' | 'remote' | 'both') => void;
@@ -16,36 +16,22 @@ interface JournalEditorProps {
 
 export const JournalEditor: React.FC<JournalEditorProps> = ({ 
   date, 
-  initialContent, 
-  onSave, 
+  content, 
+  onChange, 
   onBack,
   onDateChange,
   onResolveConflict,
   isLoading = false
 }) => {
-  const [content, setContent] = useState(initialContent);
   const [isPreview, setIsPreview] = useState(false);
-  const [words, setWords] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const wasLoadingRef = useRef(isLoading);
 
-  // If we just finished loading, reset content to the loaded initialContent
+  // Reset scroll position to top when switching to a different entry date
   useEffect(() => {
-    if (wasLoadingRef.current && !isLoading) {
-      setContent(initialContent);
+    if (textareaRef.current) {
+      textareaRef.current.scrollTop = 0;
     }
-    wasLoadingRef.current = isLoading;
-  }, [isLoading, initialContent]);
-
-  // Reset content and scroll position to top when switching to a different entry date
-  useEffect(() => {
-    if (!isLoading) {
-      setContent(initialContent);
-      if (textareaRef.current) {
-        textareaRef.current.scrollTop = 0;
-      }
-    }
-  }, [date, initialContent, isLoading]);
+  }, [date]);
 
   // Reset scroll to top when entering edit mode from preview
   useEffect(() => {
@@ -54,20 +40,9 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
     }
   }, [isPreview]);
 
-  useEffect(() => {
-    if (isLoading) return;
-
-    // Calculate word count
-    const trimmed = content.trim();
-    if (!trimmed) {
-      setWords(0);
-    } else {
-      setWords(trimmed.split(/\s+/).length);
-    }
-    
-    // Save content to DB
-    onSave(content);
-  }, [content, isLoading]);
+  // Calculate word count
+  const trimmed = content.trim();
+  const words = trimmed ? trimmed.split(/\s+/).length : 0;
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
@@ -153,7 +128,7 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
             <textarea
               ref={textareaRef}
               value={content}
-              onChange={(e) => setContent(e.target.value)}
+              onChange={(e) => onChange(e.target.value)}
               placeholder={isLoading ? "Loading diary..." : `Write your diary for ${formatDate(date)}...\nUse #tags to categorize your thoughts.`}
               disabled={isLoading}
               className="flex-1 w-full bg-transparent text-text-primary resize-none outline-none text-base leading-relaxed placeholder:text-text-secondary/50 font-sans"

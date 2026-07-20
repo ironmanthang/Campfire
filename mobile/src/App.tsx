@@ -68,8 +68,26 @@ function App() {
       const dateInState = e.state?.activeDate || null;
       if (dateInState !== activeDateRef.current) {
         await saveCurrentEntry();
+        activeDateRef.current = dateInState;
         setActiveDate(dateInState);
         await loadEntries();
+        
+        if (dateInState) {
+          setEditorLoading(true);
+          setEditorContent('');
+          setEditorLoadedDate(null);
+          const entry = await getLocalEntry(dateInState);
+          if (activeDateRef.current === dateInState) {
+            setEditorContent(entry?.content || '');
+            setEditorLoadedDate(dateInState);
+            setEditorLoading(false);
+          }
+        } else {
+          setEditorContent('');
+          setEditorLoadedDate(null);
+          setEditorLoading(false);
+        }
+
         const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';
         if (autoSync && isLoggedInRef.current) {
           handleSync();
@@ -167,22 +185,11 @@ function App() {
     }
   };
 
-  const handleSelectEntry = async (date: string) => {
-    if (syncProgress.status === 'connecting' || syncProgress.status === 'syncing') {
-      setToastMessage("Syncing in progress. Please wait...");
-      setTimeout(() => setToastMessage(null), 2000);
-      return;
-    }
-    // Mark loading and clear editor state synchronously so the editor doesn't
-    // mount with the previous entry's content while we fetch the new one.
-    setEditorLoading(true);
+  const loadEntryForEditor = async (date: string) => {
     setEditorContent('');
     setEditorLoadedDate(null);
+    activeDateRef.current = date;
     setActiveDate(date);
-
-    if (window.history.state?.activeDate !== date) {
-      window.history.pushState({ activeDate: date }, '');
-    }
 
     const entry = await getLocalEntry(date);
     if (activeDateRef.current === date) {
@@ -192,15 +199,23 @@ function App() {
     }
   };
 
-  const handleSwitchEntryDate = async (newDate: string) => {
-    saveCurrentEntry();
-    setActiveDate(newDate);
-    window.history.replaceState({ activeDate: newDate }, '');
-    const entry = await getLocalEntry(newDate);
-    if (activeDateRef.current === newDate) {
-      setEditorContent(entry?.content || '');
-      setEditorLoadedDate(newDate);
+  const handleSelectEntry = async (date: string) => {
+    if (syncProgress.status === 'connecting' || syncProgress.status === 'syncing') {
+      setToastMessage("Syncing in progress. Please wait...");
+      setTimeout(() => setToastMessage(null), 2000);
+      return;
     }
+    setEditorLoading(true);
+    if (window.history.state?.activeDate !== date) {
+      window.history.pushState({ activeDate: date }, '');
+    }
+    await loadEntryForEditor(date);
+  };
+
+  const handleSwitchEntryDate = async (newDate: string) => {
+    await saveCurrentEntry();
+    window.history.replaceState({ activeDate: newDate }, '');
+    await loadEntryForEditor(newDate);
   };
 
   const handleCreateToday = () => {
@@ -238,9 +253,9 @@ function App() {
         <JournalEditor
           key={`${activeDate}_${editorReloadKey}`}
           date={activeDate}
-          initialContent={editorContent}
+          content={editorContent}
           isLoading={!editorLoadedDate || editorLoadedDate !== activeDate}
-          onSave={handleEditorSave}
+          onChange={handleEditorSave}
           onBack={async () => {
             await saveCurrentEntry();
             if (window.history.state?.activeDate) {
