@@ -44,6 +44,17 @@ export function Sidebar({
 
   const [hoverPeekVisible, setHoverPeekVisible] = useState(false);
   const hideTimeoutRef = useRef<any | null>(null);
+  const [showDonateHeart, setShowDonateHeart] = useState(
+    localStorage.getItem("show_donate_heart") !== "false"
+  );
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      setShowDonateHeart(localStorage.getItem("show_donate_heart") !== "false");
+    };
+    window.addEventListener("donate-heart-changed", handleUpdate);
+    return () => window.removeEventListener("donate-heart-changed", handleUpdate);
+  }, []);
 
   // Clear timeouts on unmount
   useEffect(() => {
@@ -217,14 +228,16 @@ export function Sidebar({
             </div>
 
             {/* Donation Heart */}
-            <button
-              onClick={() => onOpenAbout("me")}
-              onMouseDown={(e) => e.preventDefault()}
-              className="p-2 rounded-lg hover:bg-red-500/10 flex items-center justify-center cursor-pointer donate-heart-btn"
-              title={t("sidebar.donateTooltip") || "Support me :D"}
-            >
-              <Heart className="h-4.5 w-4.5 donate-heart animate-heartbeat" />
-            </button>
+            {showDonateHeart && (
+              <button
+                onClick={() => onOpenAbout("me")}
+                onMouseDown={(e) => e.preventDefault()}
+                className="p-2 rounded-lg hover:bg-red-500/10 flex items-center justify-center cursor-pointer donate-heart-btn"
+                title={t("sidebar.donateTooltip") || "Support me :D"}
+              >
+                <Heart className="h-4.5 w-4.5 donate-heart animate-heartbeat" />
+              </button>
+            )}
           </div>
         </div>
       </aside>

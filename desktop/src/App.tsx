@@ -18,6 +18,8 @@ import { useTranslation } from "react-i18next";
 import { useAppStore } from "./store/useAppStore";
 import { useOllamaStore } from "./store/useOllamaStore";
 import { ImportReportModal } from "./components/ImportReportModal";
+import { invoke } from "@tauri-apps/api/core";
+import { calculateStreak } from "./lib/streakUtils";
 
 function App() {
   const t = useTranslation().t;
@@ -26,6 +28,9 @@ function App() {
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [showDevPanel, setShowDevPanel] = useState(false);
+
+  const [showDonateBanner, setShowDonateBanner] = useState(false);
+  const [bannerReason, setBannerReason] = useState<"count" | "streak" | null>(null);
 
   // Toggle tool executor panel on Ctrl + Alt + T (development only)
   useEffect(() => {
@@ -54,7 +59,8 @@ function App() {
     setSyncResultDates,
     importReport,
     setImportReport,
-    triggerJournalRefresh
+    triggerJournalRefresh,
+    journalRefreshKey
   } = useAppStore();
 
   const {
@@ -65,6 +71,42 @@ function App() {
   useEffect(() => {
     loadConfig();
   }, [loadConfig]);
+
+  useEffect(() => {
+    if (!config.journal_dir) return;
+
+    const checkStats = async () => {
+      const dismissed = localStorage.getItem("donate-reminder-dismissed") === "true";
+      const hasDonated = localStorage.getItem("has_donated") === "true";
+      if (dismissed || hasDonated) {
+        setShowDonateBanner(false);
+        return;
+      }
+
+      try {
+        const list: { date: string }[] = await invoke("list_entries", {
+          dirPath: config.journal_dir,
+        });
+        const count = list.length;
+        const dates = list.map((e) => e.date);
+        const streak = calculateStreak(dates);
+
+        if (count >= 10 || streak >= 30) {
+          setShowDonateBanner(true);
+          setBannerReason(count >= 10 ? "count" : "streak");
+        } else {
+          setShowDonateBanner(false);
+        }
+      } catch (err) {
+        console.error("Failed to check stats for donation banner:", err);
+      }
+    };
+
+    checkStats();
+
+    window.addEventListener("donate-banner-refresh", checkStats);
+    return () => window.removeEventListener("donate-banner-refresh", checkStats);
+  }, [config.journal_dir, journalRefreshKey]);
 
   // Poll Ollama status on active view updates
   useEffect(() => {
@@ -188,6 +230,40 @@ function App() {
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col h-full overflow-hidden relative">
+        {/* Soft Donation Reminder Banner */}
+        {showDonateBanner && (
+          <div className="bg-accent-brand/10 border-b border-border-brand/40 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fade-in shrink-0">
+            <div className="flex items-center gap-3">
+              <span className="text-lg">🎉</span>
+              <p className="text-xs font-semibold leading-relaxed text-text-primary">
+                {bannerReason === "count"
+                  ? t("donateBanner.countMessage", { count: 10 })
+                  : t("donateBanner.streakMessage", { streak: 30 })}
+              </p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+              <button
+                onClick={() => {
+                  setAboutInitialTab("me");
+                  setIsAboutOpen(true);
+                }}
+                className="px-3.5 py-1.5 rounded-lg bg-accent-brand text-bg-app font-bold text-xs shadow hover:bg-accent-brand/90 transition-all cursor-pointer"
+              >
+                {t("donateBanner.supportBtn")}
+              </button>
+              <button
+                onClick={() => {
+                  localStorage.setItem("donate-reminder-dismissed", "true");
+                  setShowDonateBanner(false);
+                }}
+                className="px-3 py-1.5 rounded-lg bg-bg-surface border border-border-brand hover:border-accent-brand text-xs font-bold text-text-primary transition-all cursor-pointer"
+              >
+                {t("donateBanner.maybeLaterBtn")}
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Success toast notification */}
         {statusMessage && statusMessage.type === "success" && (
           <div

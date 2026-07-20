@@ -23,6 +23,18 @@ Trust Badges: Directly under the button, display small, recognizable icons for A
 
 Browser Handoff: When they click the button, trigger the OS to open your Ko-fi link in their default system browser (like Chrome or Safari) rather than inside the app. Users feel much safer entering credit card info in their familiar browser window.
 
+Preset Tier,Amount,Metaphor,Description
+Tier 1,$3.00 – $5.00,🧋 Buy me a Boba,"""A quick thank-you! Keeps the developer caffeinated during late-night coding sessions."""
+Tier 2 (Recommended),$10.00,🪵 Campfire Fuel,"""Covers dedicated dev time focused on local LLM speed optimizations and bug fixes."""
+Tier 3,$25.00,🛡️ Privacy Champion,"""For power users who value 100% offline journal privacy. Earns a shoutout in the next release notes!"""
+Custom,Any $,🎁 Custom Amount,"""Give whatever feels right to you — every bit helps keep Campfire free for everyone."""
+
+Preset Tier,Amount,Metaphor,Description
+Tier 1,35.000đ – 50.000đ,🧋 Ly Trà Sữa,"""Món quà nhỏ tiếp thêm năng lượng để phát triển ứng dụng mỗi ngày."""
+Tier 2 (Mặc định),100.000đ,☕ Bữa Cà Phê & Bánh,"""Mức ủng hộ tuyệt vời giúp duy trì Campfire hoàn toàn miễn phí và không quảng cáo."""
+Tier 3,200.000đ – 500.000đ,🚀 Người Đồng Hành,"""Dành cho người dùng yêu thích sự riêng tư. Tên bạn sẽ được tri ân tại phần About của ứng dụng!"""
+
+
 ## Future Plans & Monetization Setup
 - [ ] **International Payments (Ko-fi + PayPal)** — Set up a Ko-fi profile connected to a PayPal Vietnam personal account to accept credit cards, Apple Pay, Google Pay, and PayPal from international users.
   - *Fee strategy:* Set a minimum donation threshold of $2.00 ("Buy me a Boba") to avoid high PayPal microtransaction fees ($0.30 fixed fee per transaction makes $1.00 tips highly inefficient).

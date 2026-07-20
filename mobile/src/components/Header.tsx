@@ -1,10 +1,11 @@
 import React from 'react';
-import { Settings, RefreshCw, AlertTriangle, Cloud, CloudOff } from 'lucide-react';
+import { Settings, RefreshCw, AlertTriangle, Cloud, CloudOff, Heart } from 'lucide-react';
 import { type SyncProgress } from '../services/sync';
 
 interface HeaderProps {
   onSettingsOpen: () => void;
   onSync: () => void;
+  onDonateOpen: () => void;
   syncProgress: SyncProgress;
   isLoggedIn: boolean;
 }
@@ -12,6 +13,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ 
   onSettingsOpen, 
   onSync, 
+  onDonateOpen,
   syncProgress,
   isLoggedIn
 }) => {
@@ -67,6 +69,15 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="text-xs font-semibold text-text-secondary hidden xs:inline">
             {!isLoggedIn ? 'Offline' : syncProgress.status === 'syncing' ? 'Syncing' : 'Sync'}
           </span>
+        </button>
+
+        {/* Donation Heart */}
+        <button 
+          onClick={onDonateOpen}
+          className="p-2 rounded-xl bg-bg-app border border-border-brand hover:border-accent-brand text-red-500 hover:text-red-600 transition-all active:scale-95 animate-pulse"
+          title="Support me :D"
+        >
+          <Heart size={18} className="fill-red-500/10" />
         </button>
 
         {/* Settings Trigger */}

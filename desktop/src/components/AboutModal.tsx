@@ -1,7 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { X, Shield, Cpu, FileText, Heart, ExternalLink } from "lucide-react";
+import { X } from "lucide-react";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { BANK_ID, ACCOUNT_NO, ACCOUNT_NAME } from "../lib/constants";
+import { AboutAppTab } from "./about/AboutAppTab";
+import { AboutMeTab } from "./about/AboutMeTab";
+import { HonorSystemDialog } from "./about/HonorSystemDialog";
 
 interface AboutModalProps {
   isOpen: boolean;
@@ -10,8 +14,13 @@ interface AboutModalProps {
 }
 
 export function AboutModal({ isOpen, onClose, initialTab = "app" }: AboutModalProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState<"app" | "me">("app");
+  const [donationTab, setDonationTab] = useState<"vietqr" | "kofi">("vietqr");
+  const [showHonorPrompt, setShowHonorPrompt] = useState(false);
+  const [isQrExpanded, setIsQrExpanded] = useState(false);
+  const [customMessage, setCustomMessage] = useState("");
+
   const modalRef = useRef<HTMLDivElement | null>(null);
   const pointerStartedInsideRef = useRef(false);
   const pointerMovedRef = useRef(false);
@@ -21,10 +30,10 @@ export function AboutModal({ isOpen, onClose, initialTab = "app" }: AboutModalPr
   useEffect(() => {
     if (isOpen) {
       setActiveTab(initialTab);
+      setDonationTab(i18n.language === "vi" ? "vietqr" : "kofi");
+      setShowHonorPrompt(false);
     }
-  }, [isOpen, initialTab]);
-  const [isQrExpanded, setIsQrExpanded] = useState(false);
-  const [customMessage, setCustomMessage] = useState("");
+  }, [isOpen, initialTab, i18n.language]);
 
   // Close on Escape key press
   useEffect(() => {
@@ -47,6 +56,27 @@ export function AboutModal({ isOpen, onClose, initialTab = "app" }: AboutModalPr
   }, [isOpen, onClose, isQrExpanded]);
 
   if (!isOpen) return null;
+
+  const handleKofiClick = async () => {
+    try {
+      await openUrl("https://ko-fi.com/thang504");
+      setShowHonorPrompt(true);
+    } catch (err) {
+      console.error("Failed to open Ko-fi link:", err);
+    }
+  };
+
+  const handleDeclareDonated = () => {
+    localStorage.setItem("has_donated", "true");
+    setShowHonorPrompt(false);
+    window.dispatchEvent(new Event("donate-heart-changed"));
+    window.dispatchEvent(new Event("donate-banner-refresh"));
+  };
+
+  const handleCloseQr = () => {
+    setIsQrExpanded(false);
+    setShowHonorPrompt(true);
+  };
 
   // Helper to remove accents and special characters for banking text
   const getCleanTransferMessage = (msg: string) => {
@@ -71,7 +101,6 @@ export function AboutModal({ isOpen, onClose, initialTab = "app" }: AboutModalPr
     <div
       onPointerDown={(e) => {
         const target = e.target as Node;
-        // store whether pointer started inside the modal
         pointerStartedInsideRef.current = modalRef.current?.contains(target) ?? false;
         pointerMovedRef.current = false;
         activePointerIdRef.current = e.pointerId;
@@ -86,7 +115,6 @@ export function AboutModal({ isOpen, onClose, initialTab = "app" }: AboutModalPr
       onPointerUp={(e) => {
         if (activePointerIdRef.current !== e.pointerId) return;
         if (pointerStartedInsideRef.current) {
-          // reset state and ignore
           pointerStartedInsideRef.current = false;
           activePointerIdRef.current = null;
           startPosRef.current = null;
@@ -145,128 +173,16 @@ export function AboutModal({ isOpen, onClose, initialTab = "app" }: AboutModalPr
         {/* Modal Body / Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin">
           {activeTab === "app" ? (
-            <div className="space-y-5 animate-fade-in">
-              <div className="text-center space-y-2">
-                <h3 className="text-2xl font-black tracking-tight text-accent-brand flex items-center justify-center gap-2">
-                  {t("aboutModal.appTitle")}
-                  <span className="text-xs font-mono text-text-secondary bg-bg-app/50 border border-border-brand/40 px-2 py-0.5 rounded-full font-normal select-text">
-                    {t("sidebar.version")}
-                  </span>
-                </h3>
-                <p className="text-sm font-medium text-text-secondary leading-relaxed px-4">
-                  {t("aboutModal.appTagline")}
-                </p>
-              </div>
-
-              <blockquote className="border-l-4 border-accent-brand bg-bg-app/20 p-4 rounded-r-xl text-sm italic text-text-secondary leading-relaxed">
-                "{t("aboutModal.appDesc")}"
-              </blockquote>
-
-              <div className="space-y-4 pt-2">
-                <div className="flex items-start gap-4">
-                  <div className="p-2 rounded-xl bg-accent-brand/10 text-accent-brand shrink-0">
-                    <Shield className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-text-primary">
-                      {t("aboutModal.featureLocalTitle")}
-                    </h4>
-                    <p className="text-xs text-text-secondary mt-1">
-                      {t("aboutModal.featureLocalDesc")}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="p-2 rounded-xl bg-accent-brand/10 text-accent-brand shrink-0">
-                    <Cpu className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-text-primary">
-                      {t("aboutModal.featureAiTitle")}
-                    </h4>
-                    <p className="text-xs text-text-secondary mt-1">
-                      {t("aboutModal.featureAiDesc")}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="p-2 rounded-xl bg-accent-brand/10 text-accent-brand shrink-0">
-                    <FileText className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-text-primary">
-                      {t("aboutModal.featureMarkdownTitle")}
-                    </h4>
-                    <p className="text-xs text-text-secondary mt-1">
-                      {t("aboutModal.featureMarkdownDesc")}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <AboutAppTab />
           ) : (
-            <div className="space-y-5 animate-fade-in">
-              <div className="space-y-3">
-                <h3 className="text-lg font-bold text-text-primary">
-                  {t("aboutModal.meTitle")}
-                </h3>
-                <p className="text-sm text-text-secondary leading-relaxed">
-                  {t("aboutModal.meStory1")}
-                </p>
-                <p className="text-sm text-text-secondary leading-relaxed">
-                  {t("aboutModal.meStory2")}
-                </p>
-              </div>
-
-              {/* Donation Section */}
-              <div className="border border-border-brand/40 bg-bg-app/20 rounded-2xl p-5 space-y-4">
-                <div className="flex items-center gap-3">
-                  <Heart className="h-5 w-5 text-red-500 fill-red-500/20 shrink-0" />
-                  <h4 className="text-sm font-bold text-text-primary">
-                    {t("aboutModal.supportTitle")}
-                  </h4>
-                </div>
-
-                <p className="text-xs text-text-secondary leading-relaxed">
-                  {t("aboutModal.supportDesc")}
-                </p>
-
-                {/* Custom Support Message */}
-                <div className="space-y-2 border-t border-border-brand/20 pt-4">
-                  <label className="block text-[10px] font-bold text-text-secondary uppercase tracking-wider">
-                    {t("aboutModal.supportMessageLabel")}
-                  </label>
-                  <input
-                    type="text"
-                    maxLength={25}
-                    value={customMessage}
-                    onChange={(e) => setCustomMessage(e.target.value)}
-                    placeholder={t("aboutModal.supportMessagePlaceholder")}
-                    className="w-full px-3 py-2 rounded-xl border border-border-brand/40 bg-bg-input text-text-primary text-xs font-semibold placeholder:text-text-secondary/40 focus:border-accent-brand focus:ring-1 focus:ring-accent-brand/35 outline-none transition-colors"
-                  />
-                  <div className="flex justify-between items-start text-[10px] text-text-secondary/60 leading-normal gap-4">
-                    <span>
-                      {t("aboutModal.supportNotifyTip")}
-                    </span>
-                    <span className="shrink-0 font-mono text-[9px] bg-bg-app/30 border border-border-brand/20 px-1.5 py-0.5 rounded">
-                      {customMessage.length}/25
-                    </span>
-                  </div>
-                </div>
-
-                <div className="pt-2">
-                  <button
-                    onClick={() => setIsQrExpanded(true)}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-accent-brand hover:bg-accent-brand/90 text-bg-app font-bold text-sm shadow-md transition-all cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
-                  >
-                    <span>{t("aboutModal.donateButton")}</span>
-                    <ExternalLink className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
+            <AboutMeTab
+              donationTab={donationTab}
+              setDonationTab={setDonationTab}
+              customMessage={customMessage}
+              setCustomMessage={setCustomMessage}
+              onVietQrDonate={() => setIsQrExpanded(true)}
+              onKofiDonate={handleKofiClick}
+            />
           )}
         </div>
       </div>
@@ -275,8 +191,8 @@ export function AboutModal({ isOpen, onClose, initialTab = "app" }: AboutModalPr
       {isQrExpanded && (
         <div
           onClick={(e) => {
-            e.stopPropagation(); // Prevent propagation so that the parent AboutModal doesn't close!
-            setIsQrExpanded(false);
+            e.stopPropagation();
+            handleCloseQr();
           }}
           className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-black/90 backdrop-blur-md p-6 animate-fade-in cursor-zoom-out"
         >
@@ -286,7 +202,7 @@ export function AboutModal({ isOpen, onClose, initialTab = "app" }: AboutModalPr
           >
             <div className="w-full flex justify-end mb-2">
               <button
-                onClick={() => setIsQrExpanded(false)}
+                onClick={handleCloseQr}
                 className="p-1.5 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
               >
                 <X className="h-5 w-5" />
@@ -322,6 +238,13 @@ export function AboutModal({ isOpen, onClose, initialTab = "app" }: AboutModalPr
           </span>
         </div>
       )}
+
+      {/* Honor System Modal */}
+      <HonorSystemDialog
+        isOpen={showHonorPrompt}
+        onYes={handleDeclareDonated}
+        onNo={() => setShowHonorPrompt(false)}
+      />
     </div>
   );
 }

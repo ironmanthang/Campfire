@@ -8,6 +8,7 @@ import { JournalList } from './components/JournalList';
 import { JournalEditor } from './components/JournalEditor';
 import { SettingsModal } from './components/SettingsModal';
 import { SyncResultModal } from './components/SyncResultModal';
+import { DonateModal } from './components/DonateModal';
 
 import { useRef } from 'react';
 
@@ -21,6 +22,7 @@ function App() {
   
   // Settings & Theme
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isDonateOpen, setIsDonateOpen] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     return (localStorage.getItem('past_you_theme') as 'light' | 'dark') || 'dark';
   });
@@ -327,6 +329,7 @@ function App() {
       <Header 
         onSettingsOpen={() => setIsSettingsOpen(true)}
         onSync={handleSync}
+        onDonateOpen={() => setIsDonateOpen(true)}
         syncProgress={syncProgress}
         isLoggedIn={isLoggedIn}
       />
@@ -403,6 +406,11 @@ function App() {
           theme={theme}
         />
       )}
+
+      <DonateModal 
+        isOpen={isDonateOpen}
+        onClose={() => setIsDonateOpen(false)}
+      />
 
       {toastMessage && (
         <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-50 bg-accent-brand text-bg-app px-4 py-2 rounded-xl shadow-lg text-xs font-bold transition-all duration-300 border border-accent-brand/10 select-none pointer-events-none">
