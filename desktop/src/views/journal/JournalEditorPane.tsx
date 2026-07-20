@@ -1,6 +1,7 @@
 import React from "react";
-import { Loader2, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight, X, AlertTriangle } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { hasConflictMarkers } from "../../services/sync/merge";
 
 interface JournalEditorPaneProps {
   entryContent: string;
@@ -19,6 +20,7 @@ interface JournalEditorPaneProps {
   handleTextChange: (text: string) => void;
   editorWidthPercent: number;
   initialSyncInProgress: boolean;
+  resolveConflict: (choice: "local" | "remote" | "both") => Promise<void>;
 }
 
 export function JournalEditorPane({
@@ -38,6 +40,7 @@ export function JournalEditorPane({
   handleTextChange,
   editorWidthPercent,
   initialSyncInProgress,
+  resolveConflict,
 }: JournalEditorPaneProps) {
   const { t } = useTranslation();
 
@@ -116,9 +119,46 @@ export function JournalEditorPane({
           </span>
         </div>
       ) : (
-        <div className="flex-1 w-full relative overflow-hidden">
-          {/* Highlight Overlay */}
-          <div
+        <div className="flex-1 flex flex-col overflow-hidden w-full h-full">
+          {hasConflictMarkers(entryContent) && (
+            <div className="mx-6 mt-4 p-4 rounded-2xl border border-amber-500/20 bg-amber-500/5 backdrop-blur-md flex items-center justify-between gap-4 animate-fade-in select-none">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500 shrink-0">
+                  <AlertTriangle className="h-5 w-5" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold text-text-primary">Sync Conflict Detected</span>
+                  <span className="text-xs text-text-secondary">Keep your version or overwrite with the cloud version to resolve:</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => resolveConflict("local")}
+                  className="px-3.5 py-1.5 rounded-xl bg-accent-brand text-bg-app hover:bg-accent-brand-hover text-xs font-semibold shadow-sm transition-all cursor-pointer"
+                >
+                  Keep My Version
+                </button>
+                <button
+                  type="button"
+                  onClick={() => resolveConflict("remote")}
+                  className="px-3.5 py-1.5 rounded-xl bg-bg-surface border border-border-brand hover:border-accent-brand text-text-primary text-xs font-semibold shadow-sm transition-all cursor-pointer"
+                >
+                  Keep Cloud Version
+                </button>
+                <button
+                  type="button"
+                  onClick={() => resolveConflict("both")}
+                  className="px-3.5 py-1.5 rounded-xl bg-bg-surface border border-border-brand hover:border-accent-brand text-text-primary text-xs font-semibold shadow-sm transition-all cursor-pointer"
+                >
+                  Keep Both
+                </button>
+              </div>
+            </div>
+          )}
+          <div className="flex-1 w-full relative overflow-hidden mt-2">
+            {/* Highlight Overlay */}
+            <div
             ref={overlayRef}
             className="absolute inset-0 w-full h-full p-6 pointer-events-none font-mono text-sm leading-relaxed whitespace-pre-wrap break-words text-transparent border-none select-none overlay-scroll-container"
             style={{
@@ -161,6 +201,7 @@ export function JournalEditorPane({
             className="absolute inset-0 w-full h-full p-6 bg-transparent text-text-primary text-sm leading-relaxed border-none focus:outline-none resize-none font-mono overflow-y-auto scrollbar-thin"
           />
         </div>
+      </div>
       )}
     </div>
   );

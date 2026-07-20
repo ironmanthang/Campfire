@@ -80,6 +80,31 @@ the last unrelated error is ui error in mobile, after delete an entry, when i cl
 
 the above 4 errors, even if we fix it, later in the future when add new features, it may cause these errors back, so should we make test cases? how do we make test cases for those situations?
 
+# error:
+
+remember this could also happen in mobile, in mobile shouldnt it be easier?be cause the auto sync dont trigger everytime text is save, and user dont click on back until they delete all teh marker, but right now when i click on the sync button after delete all marker, it still said conflict (the local part in the conflict is the new text i expect to sovle the conflict)
+The DatePicker opens above the button
+
+[JournalEditor.tsx#L176-181](textBlock;file:///d%3A/program/Campfire/mobile/src/components/JournalEditor.tsx#L176-181) get rid of the autosaved text. 
+
+
+a major error: when i go back, while the sync icon is rotaing (syncing) i immidiately click on a random date, it
+
+when i click on the left/right arrow, it will flash the Journal     
+List home screen really fast before move to the next date
+
+right now on Journal List home screen, if i hold and drag my finger, it can chose the text to copy: i dont want that, prevent user from able to do that, they can only copy/interact with the entry when they click to go to editor.
+
+## feature:
+
+how fast can the sync algorithm work when there are 200+ entries?
+
+i want when user is in editor mode, clicking the return on their phone will also like when click on the back button, right now, it just lead them to their home screen. 
+
+i want to switch the position of the top (the banner with back, preview and date picker) and the bottom (that show words count). the "back, date picker, date arrow, preview" will be on 
+
+i want to add filter button on mobile (maybe a pop up window to chose from to All 30d 3m This yr?). allow user to ratate the app, right now its just portrait, even if i set my phone setting to auto rotate, when i rotate the phone, the app still set portrait.
+
 
 ### UI/UX
 

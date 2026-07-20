@@ -274,3 +274,27 @@ export function hasConflictMarkers(content: string): boolean {
   // Use regex with multiline so ^ and $ work per line.
   return /<<<<<<<.*?\n[\s\S]*?=======\n[\s\S]*?>>>>>>>/m.test(content);
 }
+
+export interface ParsedConflict {
+  localContent: string;
+  remoteContent: string;
+}
+
+export function parseConflictBlock(content: string): ParsedConflict | null {
+  if (!content) return null;
+  const regex = /<<<<<<< [^\n]*\n([\s\S]*?)\n=======\n(?:Remote \([^\n]*\)\n)?([\s\S]*?)\n>>>>>>>/m;
+  const match = content.match(regex);
+  if (!match) return null;
+  return {
+    localContent: match[1],
+    remoteContent: match[2]
+  };
+}
+
+export function resolveConflictKeepBoth(content: string): string {
+  if (!content) return "";
+  const regex = /<<<<<<< [^\n]*\n([\s\S]*?)\n=======\n(?:Remote \([^\n]*\)\n)?([\s\S]*?)\n>>>>>>>/gm;
+  return content.replace(regex, (_, local, remote) => {
+    return `${local}\n\n${remote}`;
+  });
+}

@@ -48,6 +48,7 @@ export function useJournalEditor() {
     editorTags,
     saveEntryImmediate,
     handleTextChange,
+    resolveConflict,
   } = useJournalSave({
     config,
     currentDate,
@@ -151,6 +152,7 @@ export function useJournalEditor() {
     stepDate,
     highlightedText,
     initialSyncInProgress,
+    resolveConflict,
     t,
   };
 }

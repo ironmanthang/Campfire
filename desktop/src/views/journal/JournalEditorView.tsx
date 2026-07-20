@@ -39,6 +39,7 @@ export function JournalEditorView() {
     stepDate,
     highlightedText,
     initialSyncInProgress,
+    resolveConflict,
   } = useJournalEditor();
 
   return (
@@ -77,6 +78,7 @@ export function JournalEditorView() {
           overlayRef={overlayRef}
           handleTextChange={handleTextChange}
           editorWidthPercent={editorWidthPercent}
+          resolveConflict={resolveConflict}
         />
 
         {/* Drag Handle Divider */}

@@ -59,3 +59,28 @@ export async function listLocalEntries(): Promise<LocalJournalEntry[]> {
   const all = await db.entries.orderBy('date').reverse().toArray();
   return all.filter(e => e.content.trim() !== '');
 }
+
+export async function resolveLocalConflict(date: string, choice: 'local' | 'remote' | 'both'): Promise<string | null> {
+  const entry = await db.entries.get(date);
+  if (!entry) return null;
+
+  const { parseConflictBlock, resolveConflictKeepBoth } = await import('./merge');
+  const parsed = parseConflictBlock(entry.content);
+  if (!parsed) return null;
+
+  let resolvedVal = "";
+  if (choice === "both") {
+    resolvedVal = resolveConflictKeepBoth(entry.content);
+  } else {
+    resolvedVal = choice === "local" ? parsed.localContent : parsed.remoteContent;
+  }
+
+  await db.entries.put({
+    date,
+    content: resolvedVal,
+    lastModified: Date.now(),
+    synced: false,
+    baseContent: parsed.remoteContent
+  });
+  return resolvedVal;
+}

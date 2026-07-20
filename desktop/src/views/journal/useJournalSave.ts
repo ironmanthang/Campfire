@@ -171,6 +171,54 @@ export function useJournalSave({
     entryContentRef.current = text;
   };
 
+  const resolveConflict = useCallback(async (choice: "local" | "remote" | "both") => {
+    if (!config.journal_dir) return;
+    const { parseConflictBlock } = await import("../../services/sync/merge");
+    const parsed = parseConflictBlock(entryContentRef.current);
+    if (!parsed) {
+      showNotification("Could not parse conflict markers. Please resolve manually.", "error");
+      return;
+    }
+
+    const localVal = parsed.localContent;
+    const remoteVal = parsed.remoteContent;
+    let resolvedVal = "";
+    if (choice === "both") {
+      const { resolveConflictKeepBoth } = await import("../../services/sync/merge");
+      resolvedVal = resolveConflictKeepBoth(entryContentRef.current);
+    } else {
+      resolvedVal = choice === "local" ? localVal : remoteVal;
+    }
+
+    setEntryContent(resolvedVal);
+    entryContentRef.current = resolvedVal;
+    setIsDirty(false);
+    isDirtyRef.current = false;
+
+    try {
+      await invoke("write_entry", {
+        dirPath: config.journal_dir,
+        date: currentDate,
+        content: resolvedVal,
+      });
+
+      await invoke("write_sync_base", {
+        dirPath: config.journal_dir,
+        date: currentDate,
+        content: remoteVal,
+      });
+
+      showNotification(`Conflict resolved using ${choice === "local" ? "your" : choice === "remote" ? "cloud" : "both"} version!`, "success");
+
+      if (config.google_drive_auto_sync && config.google_drive_client_id && isDriveConnected) {
+        handleSync().catch(console.error);
+      }
+    } catch (err) {
+      console.error("Failed to resolve conflict:", err);
+      showNotification("Failed to save resolved entry.", "error");
+    }
+  }, [config.journal_dir, currentDate, config.google_drive_auto_sync, config.google_drive_client_id, isDriveConnected, handleSync, showNotification]);
+
   // Save on unmount
   useEffect(() => {
     return () => {
@@ -189,5 +237,6 @@ export function useJournalSave({
     editorTags,
     saveEntryImmediate,
     handleTextChange,
+    resolveConflict,
   };
 }

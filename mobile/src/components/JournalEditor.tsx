@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, Eye, Edit2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Eye, Edit2, AlertTriangle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { DatePicker } from './DatePicker';
+import { hasConflictMarkers } from '../services/merge';
 
 interface JournalEditorProps {
   date: string;
@@ -9,6 +10,7 @@ interface JournalEditorProps {
   onSave: (content: string) => void;
   onBack: () => void;
   onDateChange: (newDate: string) => void;
+  onResolveConflict: (choice: 'local' | 'remote' | 'both') => void;
 }
 
 export const JournalEditor: React.FC<JournalEditorProps> = ({ 
@@ -16,7 +18,8 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
   initialContent, 
   onSave, 
   onBack,
-  onDateChange
+  onDateChange,
+  onResolveConflict
 }) => {
   const [content, setContent] = useState(initialContent);
   const [isPreview, setIsPreview] = useState(false);
@@ -100,8 +103,77 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-bg-app">
-      {/* Sub-Header */}
-      <div className="px-4 py-2 bg-bg-surface border-b border-border-brand flex items-center justify-between shrink-0 select-none">
+      {/* Top status bar */}
+      <div className="px-4 py-2 border-b border-border-brand bg-bg-surface flex justify-between text-xs font-semibold text-text-secondary shrink-0 select-none">
+        <span>{words} {words === 1 ? 'word' : 'words'}</span>
+      </div>
+
+      {/* Conflict Resolution Banner */}
+      {hasConflictMarkers(content) && (
+        <div className="mx-4 mt-3 p-3.5 rounded-2xl border border-amber-500/20 bg-amber-500/5 backdrop-blur-md flex flex-col gap-3 animate-fade-in select-none">
+          <div className="flex items-start gap-2.5">
+            <div className="p-1.5 rounded-xl bg-amber-500/10 text-amber-500 shrink-0 mt-0.5">
+              <AlertTriangle size={16} />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xs font-bold text-text-primary">Sync Conflict Detected</span>
+              <span className="text-[10px] text-text-secondary leading-normal">Keep your local version or overwrite with the cloud version to resolve this conflict.</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-1.5">
+            <button
+              onClick={() => onResolveConflict("local")}
+              className="py-2 px-1 rounded-xl bg-accent-brand text-bg-app text-[10px] font-bold shadow-sm transition-all active:scale-95 cursor-pointer text-center truncate"
+              title="Keep My Version"
+            >
+              Keep Mine
+            </button>
+            <button
+              onClick={() => onResolveConflict("remote")}
+              className="py-2 px-1 rounded-xl bg-bg-surface border border-border-brand hover:border-accent-brand text-text-primary text-[10px] font-bold shadow-sm transition-all active:scale-95 cursor-pointer text-center truncate"
+              title="Keep Cloud Version"
+            >
+              Keep Cloud
+            </button>
+            <button
+              onClick={() => onResolveConflict("both")}
+              className="py-2 px-1 rounded-xl bg-bg-surface border border-border-brand hover:border-accent-brand text-text-primary text-[10px] font-bold shadow-sm transition-all active:scale-95 cursor-pointer text-center truncate"
+              title="Keep Both Versions"
+            >
+              Keep Both
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Editor Content Area */}
+      <div className="flex-1 flex flex-col min-h-0 relative">
+        {isPreview ? (
+          /* Preview Panel */
+          <div className="flex-1 overflow-y-auto px-5 py-4 markdown-preview text-text-primary">
+            <h1 className="text-xl font-bold border-b border-border-brand pb-2 mb-4">{formatDate(date)}</h1>
+            {content.trim() ? (
+              <ReactMarkdown>{content}</ReactMarkdown>
+            ) : (
+              <p className="text-text-secondary italic text-sm">Nothing written yet. Click 'Edit' to start writing.</p>
+            )}
+          </div>
+        ) : (
+          /* Textarea Input Panel */
+          <div className="flex-1 flex flex-col min-h-0 p-4">
+            <textarea
+              ref={textareaRef}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder={`Write your diary for ${formatDate(date)}...\nUse #tags to categorize your thoughts.`}
+              className="flex-1 w-full bg-transparent text-text-primary resize-none outline-none text-base leading-relaxed placeholder:text-text-secondary/50 font-sans"
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Bottom Sub-Header Banner */}
+      <div className="px-4 py-2 bg-bg-surface border-t border-border-brand flex items-center justify-between shrink-0 select-none">
         <button 
           onClick={onBack}
           className="flex items-center gap-1 -ml-2 text-sm font-semibold text-text-secondary hover:text-text-primary px-2 py-1.5 rounded-xl hover:bg-bg-app transition-colors"
@@ -146,38 +218,6 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
             </>
           )}
         </button>
-      </div>
-
-      {/* Editor Content Area */}
-      <div className="flex-1 flex flex-col min-h-0 relative">
-        {isPreview ? (
-          /* Preview Panel */
-          <div className="flex-1 overflow-y-auto px-5 py-4 markdown-preview text-text-primary">
-            <h1 className="text-xl font-bold border-b border-border-brand pb-2 mb-4">{formatDate(date)}</h1>
-            {content.trim() ? (
-              <ReactMarkdown>{content}</ReactMarkdown>
-            ) : (
-              <p className="text-text-secondary italic text-sm">Nothing written yet. Click 'Edit' to start writing.</p>
-            )}
-          </div>
-        ) : (
-          /* Textarea Input Panel */
-          <div className="flex-1 flex flex-col min-h-0 p-4">
-            <textarea
-              ref={textareaRef}
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder={`Write your diary for ${formatDate(date)}...\nUse #tags to categorize your thoughts.`}
-              className="flex-1 w-full bg-transparent text-text-primary resize-none outline-none text-base leading-relaxed placeholder:text-text-secondary/50 font-sans"
-            />
-          </div>
-        )}
-      </div>
-
-      {/* Bottom status bar */}
-      <div className="px-4 py-2 border-t border-border-brand bg-bg-surface flex justify-between text-xs font-semibold text-text-secondary shrink-0 select-none">
-        <span>{words} {words === 1 ? 'word' : 'words'}</span>
-        <span className="text-green-500/95 font-medium">Autosaved</span>
       </div>
     </div>
   );

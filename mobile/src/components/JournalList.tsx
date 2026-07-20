@@ -95,7 +95,7 @@ export const JournalList: React.FC<JournalListProps> = ({
       </div>
 
       {/* Entries List */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0 pb-24">
+      <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0 pb-24 select-none">
         {filteredEntries.length > 0 ? (
           filteredEntries.map((entry) => {
             const words = getWordCount(entry.content);

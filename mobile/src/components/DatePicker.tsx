@@ -132,7 +132,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, classNa
 
       {open && (
         <div
-          className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-bg-surface border border-border-brand rounded-2xl shadow-xl p-4 w-[280px] select-none animate-fade-in"
+          className="absolute z-50 top-full left-1/2 transform -translate-x-1/2 mt-2 bg-bg-surface border border-border-brand rounded-2xl shadow-xl p-4 w-[280px] select-none animate-fade-in"
           onMouseDown={(e) => e.stopPropagation()}
           onTouchStart={(e) => e.stopPropagation()}
         >
