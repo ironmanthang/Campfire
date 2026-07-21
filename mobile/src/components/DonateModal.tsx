@@ -8,19 +8,11 @@ interface DonateModalProps {
 
 export const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => {
   const [donationTab, setDonationTab] = useState<'vietqr' | 'kofi'>('kofi');
-  const [showHonorPrompt, setShowHonorPrompt] = useState(false);
 
   if (!isOpen) return null;
 
   const handleKofiClick = () => {
     window.open('https://ko-fi.com/thang504', '_blank');
-    setShowHonorPrompt(true);
-  };
-
-  const handleDeclareDonated = () => {
-    localStorage.setItem('has_donated', 'true');
-    setShowHonorPrompt(false);
-    onClose();
   };
 
   return (
@@ -86,12 +78,7 @@ export const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => 
                   <div><strong>Owner:</strong> NGUYEN NHU THANG</div>
                   <div><strong>Content:</strong> Donate Campfire</div>
                 </div>
-                <button
-                  onClick={() => setShowHonorPrompt(true)}
-                  className="w-full py-2.5 rounded-xl bg-accent-brand hover:bg-accent-brand/90 text-bg-app font-bold text-xs transition-all"
-                >
-                  I've completed the transfer
-                </button>
+
               </div>
             ) : (
               <div className="space-y-4">
@@ -102,7 +89,7 @@ export const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => 
                   onClick={handleKofiClick}
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-accent-brand hover:bg-accent-brand/90 text-bg-app font-bold text-sm shadow-md transition-all active:scale-95"
                 >
-                  <span>Buy me a Boba on Ko-fi 🧋</span>
+                  <span>Support my poor soul on Ko-fi 🥀:</span>
                   <ExternalLink size={16} />
                 </button>
 
@@ -119,34 +106,7 @@ export const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => 
         </div>
       </div>
 
-      {/* Honor System Modal */}
-      {showHonorPrompt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4">
-          <div className="bg-bg-surface border border-border-brand rounded-2xl w-full max-w-sm p-6 shadow-2xl flex flex-col items-center text-center space-y-4">
-            <div className="p-3 rounded-full bg-accent-brand/10 text-accent-brand">
-              <Heart className="h-8 w-8 animate-pulse text-red-500 fill-red-500/20" />
-            </div>
-            <h3 className="text-lg font-bold text-text-primary">Thank You!</h3>
-            <p className="text-xs text-text-secondary leading-relaxed">
-              We opened the support link or displayed the transfer details. Did your donation go through?
-            </p>
-            <div className="w-full flex flex-col gap-2 pt-2">
-              <button
-                onClick={handleDeclareDonated}
-                className="w-full py-2.5 rounded-xl bg-accent-brand hover:bg-accent-brand/90 text-bg-app font-bold text-sm shadow-md transition-all cursor-pointer"
-              >
-                Yes, I donated! 🎉
-              </button>
-              <button
-                onClick={() => setShowHonorPrompt(false)}
-                className="w-full py-2.5 rounded-xl bg-bg-surface border border-border-brand hover:border-accent-brand text-text-primary text-xs font-bold transition-all cursor-pointer"
-              >
-                Not yet / Maybe later
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 };

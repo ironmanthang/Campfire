@@ -1,8 +1,10 @@
 
 # request feature
 
+when open the mobile app??i want it to show the logo of the app D:\program\Campfire\logo.png. right now it just show the tauri logo.
 
-in mobile gg sync, add user gmail info just like in desktop
+add desktop link, to the mobile when later publish to microsoft store
+
 
 
 a title could be:"support my poor soul on Ko-fi:"?

@@ -5,7 +5,6 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { BANK_ID, ACCOUNT_NO, ACCOUNT_NAME } from "../../../lib/constants";
 import { AboutAppTab } from "../../about/AboutAppTab";
 import { AboutMeTab } from "../../about/AboutMeTab";
-import { HonorSystemDialog } from "../../about/HonorSystemDialog";
 
 interface AboutModalProps {
   isOpen: boolean;
@@ -17,7 +16,6 @@ export function AboutModal({ isOpen, onClose, initialTab = "app" }: AboutModalPr
   const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState<"app" | "me">("app");
   const [donationTab, setDonationTab] = useState<"vietqr" | "kofi">("vietqr");
-  const [showHonorPrompt, setShowHonorPrompt] = useState(false);
   const [isQrExpanded, setIsQrExpanded] = useState(false);
   const [customMessage, setCustomMessage] = useState("");
 
@@ -31,7 +29,6 @@ export function AboutModal({ isOpen, onClose, initialTab = "app" }: AboutModalPr
     if (isOpen) {
       setActiveTab(initialTab);
       setDonationTab(i18n.language === "vi" ? "vietqr" : "kofi");
-      setShowHonorPrompt(false);
       setIsQrExpanded(false);
     }
   }, [isOpen, initialTab, i18n.language]);
@@ -42,7 +39,6 @@ export function AboutModal({ isOpen, onClose, initialTab = "app" }: AboutModalPr
       if (e.key === "Escape") {
         if (isQrExpanded) {
           setIsQrExpanded(false);
-          setShowHonorPrompt(true);
         } else {
           onClose();
         }
@@ -62,22 +58,13 @@ export function AboutModal({ isOpen, onClose, initialTab = "app" }: AboutModalPr
   const handleKofiClick = async () => {
     try {
       await openUrl("https://ko-fi.com/thang504");
-      setShowHonorPrompt(true);
     } catch (err) {
       console.error("Failed to open Ko-fi link:", err);
     }
   };
 
-  const handleDeclareDonated = () => {
-    localStorage.setItem("has_donated", "true");
-    setShowHonorPrompt(false);
-    window.dispatchEvent(new Event("donate-heart-changed"));
-    window.dispatchEvent(new Event("donate-banner-refresh"));
-  };
-
   const handleCloseQr = () => {
     setIsQrExpanded(false);
-    setShowHonorPrompt(true);
   };
 
   // Helper to remove accents and special characters for banking text
@@ -247,12 +234,7 @@ export function AboutModal({ isOpen, onClose, initialTab = "app" }: AboutModalPr
         </div>
       )}
 
-      {/* Honor System Modal */}
-      <HonorSystemDialog
-        isOpen={showHonorPrompt}
-        onYes={handleDeclareDonated}
-        onNo={() => setShowHonorPrompt(false)}
-      />
+
     </div>
   );
 }
