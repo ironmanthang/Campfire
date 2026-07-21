@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms of Service - Campfire Journal</title>
+  <link rel="icon" type="image/png" href="/icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      color-scheme: light;
+      --bg-app: #FAF8F5;
+      --bg-surface: #F0ECE3;
+      --text-primary: #201D1A;
+      --text-secondary: #6E685F;
+      --color-accent: #C68B59;
+      --border-color: #E6DFD3;
+      --bg-card: #FCFAF7;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        color-scheme: dark;
+        --bg-app: #141210;
+        --bg-surface: #1C1917;
+        --text-primary: #E6E1DC;
+        --text-secondary: #968F85;
+        --color-accent: #D4A373;
+        --border-color: #282420;
+        --bg-card: #0B0A09;
+      }
+    }
+
+    body {
+      background-color: var(--bg-app);
+      color: var(--text-primary);
+      font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .wrapper {
+      max-width: 760px;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 40px 24px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      animation: fadeIn 0.8s ease-out;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .logo-container {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+    }
+
+    .brand-name {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      margin: 0;
+      background: linear-gradient(135deg, var(--text-primary) 30%, var(--color-accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      margin: 4px 0 16px 0;
+    }
+
+    /* Language Switcher */
+    .lang-selector {
+      display: inline-flex;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      padding: 4px;
+      border-radius: 12px;
+      gap: 4px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    }
+
+    .lang-btn {
+      background: none;
+      border: none;
+      padding: 6px 14px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .lang-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .lang-btn.active {
+      background-color: var(--color-accent);
+      color: var(--bg-app);
+    }
+
+    main {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.03);
+      animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-top: 0;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 16px;
+      letter-spacing: -0.015em;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-top: 32px;
+      margin-bottom: 16px;
+      letter-spacing: -0.01em;
+    }
+
+    p {
+      color: var(--text-secondary);
+      margin-top: 0;
+      margin-bottom: 16px;
+      font-size: 0.975rem;
+    }
+
+    ul {
+      margin-top: 0;
+      margin-bottom: 20px;
+      padding-left: 20px;
+    }
+
+    li {
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      font-size: 0.975rem;
+    }
+
+    .highlight-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 20px;
+      margin: 24px 0;
+    }
+
+    .highlight-card h3 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--color-accent);
+    }
+
+    .highlight-card p {
+      margin-bottom: 0;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    footer a {
+      color: var(--color-accent);
+      text-decoration: none;
+      font-weight: 500;
+      margin: 0 8px;
+      transition: color 0.2s ease;
+    }
+
+    footer a:hover {
+      color: var(--text-primary);
+      text-decoration: underline;
+    }
+
+    /* Bilingual display rules */
+    html[lang="en"] .lang-vi {
+      display: none;
+    }
+    html[lang="vi"] .lang-en {
+      display: none;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 640px) {
+      .wrapper {
+        padding: 24px 16px;
+      }
+      main {
+        padding: 24px;
+        border-radius: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <header>
+      <div class="logo-container">
+        <img class="logo-icon" src="/icon.png" alt="Campfire Logo" />
+        <span class="brand-name">Campfire</span>
+      </div>
+      <p class="subtitle lang-en">Offline-First Private Journaling</p>
+      <p class="subtitle lang-vi">Nhật ký Ngoại tuyến Tối ưu Riêng tư</p>
+
+      <div class="lang-selector">
+        <button id="btn-en" class="lang-btn" onclick="setLanguage('en')">English</button>
+        <button id="btn-vi" class="lang-btn" onclick="setLanguage('vi')">Tiếng Việt</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- ENGLISH CONTENT -->
+      <div class="lang-en">
+        <h1>Terms of Service</h1>
+        <p>Last updated: July 21, 2026</p>
+
+        <p>
+          Welcome to Campfire. By accessing or using our application (the "Service"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, please do not use the Service.
+        </p>
+
+        <h2>1. Use of the Service</h2>
+        <p>
+          Campfire is a client-side offline-first utility that allows you to write, edit, and manage local journal entries on your own device. The application requires no account registration, and your data is stored securely in your browser's IndexedDB.
+        </p>
+
+        <h2>2. User Content & Ownership</h2>
+        <p>
+          <strong>Your Ownership:</strong> You retain full and exclusive ownership of all text, images, logs, and metadata that you write or upload to the Service ("User Content"). We do not own, access, or claim any rights to your User Content.
+        </p>
+        <p>
+          <strong>Local Responsibility:</strong> Because the Service stores data locally, you are entirely responsible for backing up your data. Clearing your browser cache or resetting your device without having set up cloud sync or manual exports will result in permanent loss of your User Content.
+        </p>
+
+        <h2>3. Google Drive Sync Feature</h2>
+        <p>
+          You may optionally connect your personal Google Drive account to authorize Campfire to backup your logs to a folder on your personal Google Drive storage space.
+        </p>
+        <div class="highlight-card">
+          <h3>Google Drive Sync Integration Conditions:</h3>
+          <ul>
+            <li>
+              <strong>Single-Client Access:</strong> Access is restricted using the Google `drive.file` scope. The application only accesses files and folders it creates (e.g. `CampfireJournal` folder).
+            </li>
+            <li>
+              <strong>Direct Operations:</strong> All actions are executed locally on your device via standard client-side API requests directly to Google endpoints. No proxy server handles your data or login keys.
+            </li>
+            <li>
+              <strong>Compliance:</strong> Your use of the sync feature is also governed by the Google APIs Terms of Service.
+            </li>
+          </ul>
+        </div>
+
+        <h2>4. Prohibited Conduct</h2>
+        <p>
+          You agree not to use the Service in any manner that could interfere with, disrupt, or damage the performance or security of the client application, Google APIs, or others' access. You may not distribute malicious code or exploit software vulnerabilities.
+        </p>
+
+        <h2>5. Disclaimer of Warranties</h2>
+        <p>
+          THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT ANY WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED. WE DISCLAIM ALL WARRANTIES, INCLUDING BUT NOT LIMITED TO TITLE, SECURITY, RELIABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+        </p>
+
+        <h2>6. Limitation of Liability</h2>
+        <p>
+          TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT SHALL THE DEVELOPERS OF CAMPFIRE BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, INCLUDING LOSS OF DATA, REVENUE, CORRUPTION OF JOURNAL CONTENT, SYSTEM ISSUES, OR HARDWARE MALFUNCTIONS, ARISING OUT OF OR IN CONNECTION WITH THE USE OR INABILITY TO USE THE SERVICE.
+        </p>
+
+        <h2>7. Changes to Terms</h2>
+        <p>
+          We reserve the right, at our sole discretion, to modify or replace these Terms at any time. The date of the last update is indicated at the top of these Terms.
+        </p>
+
+        <h2>8. Governing Law</h2>
+        <p>
+          These Terms shall be governed by and construed in accordance with the laws of your local jurisdiction, without regard to conflict of law principles.
+        </p>
+      </div>
+
+      <!-- VIETNAMESE CONTENT -->
+      <div class="lang-vi">
+        <h1>Điều khoản Dịch vụ</h1>
+        <p>Cập nhật lần cuối: 21 tháng 7, 2026</p>
+
+        <p>
+          Chào mừng bạn đến với Campfire. Bằng việc truy cập hoặc sử dụng ứng dụng của chúng tôi ("Dịch vụ"), bạn đồng ý chịu sự ràng buộc bởi các Điều khoản Dịch vụ này ("Điều khoản"). Nếu bạn không đồng ý với các Điều khoản này, vui lòng không sử dụng Dịch vụ.
+        </p>
+
+        <h2>1. Sử dụng Dịch vụ</h2>
+        <p>
+          Campfire là một công cụ tiện ích hoạt động phía máy khách, ưu tiên ngoại tuyến, cho phép bạn viết, chỉnh sửa và quản lý các ghi chép nhật ký cục bộ trên thiết bị của riêng mình. Ứng dụng không yêu cầu đăng ký tài khoản và dữ liệu của bạn được lưu trữ bảo mật trong cơ sở dữ liệu IndexedDB của trình duyệt.
+        </p>
+
+        <h2>2. Sở hữu và Quản lý Nội dung Người dùng</h2>
+        <p>
+          <strong>Quyền sở hữu của bạn:</strong> Bạn sở hữu toàn bộ bản quyền đối với tất cả văn bản, hình ảnh, nhật ký và siêu dữ liệu mà bạn tạo ra hoặc lưu trữ trên Dịch vụ ("Nội dung Người dùng"). Chúng tôi không sở hữu, truy cập hoặc yêu cầu bất kỳ quyền nào đối với Nội dung Người dùng của bạn.
+        </p>
+        <p>
+          <strong>Trách nhiệm Cục bộ:</strong> Vì Dịch vụ lưu trữ dữ liệu hoàn toàn cục bộ, bạn hoàn toàn tự chịu trách nhiệm về việc sao lưu dữ liệu của mình. Việc xóa cache trình duyệt hoặc khôi phục cài đặt gốc của thiết bị mà không thiết lập đồng bộ hóa đám mây hoặc xuất dữ liệu thủ công sẽ dẫn đến mất mát vĩnh viễn Nội dung Người dùng của bạn.
+        </p>
+
+        <h2>3. Tính năng Đồng bộ Google Drive</h2>
+        <p>
+          Bạn có thể tùy chọn kết nối tài khoản Google Drive cá nhân để cấp quyền cho Campfire sao lưu nhật ký vào một thư mục trên tài khoản Google Drive của bạn.
+        </p>
+        <div class="highlight-card">
+          <h3>Các điều kiện tích hợp đồng bộ Google Drive:</h3>
+          <ul>
+            <li>
+              <strong>Truy cập Giới hạn:</strong> Quyền truy cập được giới hạn thông qua phạm vi Google `drive.file`. Ứng dụng chỉ có quyền truy cập vào các tệp tin và thư mục do chính ứng dụng tạo ra (ví dụ: thư mục `CampfireJournal`).
+            </li>
+            <li>
+              <strong>Tương tác Trực tiếp:</strong> Mọi hành động được thực hiện cục bộ trên thiết bị của bạn thông qua các yêu cầu API trực tiếp từ trình duyệt đến máy chủ Google. Không có máy chủ trung gian nào xử lý dữ liệu hoặc mã đăng nhập của bạn.
+            </li>
+            <li>
+              <strong>Tuân thủ:</strong> Việc sử dụng tính năng đồng bộ này cũng chịu sự ràng buộc bởi Điều khoản Dịch vụ Google APIs.
+            </li>
+          </ul>
+        </div>
+
+        <h2>4. Hành vi Nghiêm cấm</h2>
+        <p>
+          Bạn đồng ý không sử dụng Dịch vụ theo bất kỳ cách nào có thể gây cản trở, làm gián đoạn hoặc tổn hại đến hiệu suất hoặc bảo mật của ứng dụng khách, Google APIs hoặc quyền truy cập của người dùng khác. Bạn không được phân tán mã độc hoặc khai thác các lỗ hổng phần mềm của ứng dụng.
+        </p>
+
+        <h2>5. Miễn trừ Bảo đảm</h2>
+        <p>
+          DỊCH VỤ ĐƯỢC CUNG CẤP "NGUYÊN TRẠNG" VÀ "SẴN CÓ" MÀ KHÔNG CÓ BẤT KỲ BẢO ĐẢM NÀO, DÙ LÀ RÕ RÀNG HAY NGỤ Ý. CHÚNG TÔI MIỄN TRỪ TẤT CẢ CÁC BẢO ĐẢM, BAO GỒM NHƯNG KHÔNG GIỚI HẠN Ở CÁC BẢO ĐẢM VỀ QUYỀN SỞ HỮU, AN NINH, ĐỘ TIN CẬY, SỰ PHÙ HỢP CHO MỘT MỤC ĐÍCH CỤ THỂ VÀ KHÔNG VI PHẠM.
+        </p>
+
+        <h2>6. Giới hạn Trách nhiệm Pháp lý</h2>
+        <p>
+          TRONG PHẠM VI TỐI ĐA ĐƯỢC PHÁP LUẬT CHO PHÉP, NHÀ PHÁT TRIỂN CỦA CAMPFIRE SẼ KHÔNG CHỊU TRÁCH NHIỆM CHO BẤT KỲ THIỆT HẠI TRỰC TIẾP, GIÁN TIẾP, ĐẶC BIỆT, NGẪU NHIÊN HOẶC HỆ QUẢ NÀO, BAO GỒM MẤT MÁT DỮ LIỆU, DOANH THU, SỰ HƯ HỎNG CỦA NỘI DUNG NHẬT KÝ, SỰ CỐ HỆ THỐNG HOẶC LỖI THIẾT BỊ, PHÁT SINH TỪ HOẶC LIÊN QUAN ĐẾN VIỆC SỬ DỤNG HOẶC KHÔNG THỂ SỬ DỤNG DỊCH VỤ.
+        </p>
+
+        <h2>7. Thay đổi Điều khoản</h2>
+        <p>
+          Chúng tôi có quyền, theo quyết định riêng của mình, sửa đổi hoặc thay thế các Điều khoản này bất kỳ lúc nào. Ngày cập nhật mới nhất được ghi ở đầu trang Điều khoản này.
+        </p>
+
+        <h2>8. Luật Áp dụng</h2>
+        <p>
+          Các Điều khoản này sẽ được điều chỉnh và giải thích theo luật pháp của khu vực tài phán địa phương của bạn, không liên quan đến các nguyên tắc xung đột luật.
+        </p>
+      </div>
+    </main>
+
+    <footer>
+      <p class="lang-en">
+        &copy; 2026 Campfire. All rights reserved.
+        <a href="/privacy/">Privacy Policy</a>
+      </p>
+      <p class="lang-vi">
+        &copy; 2026 Campfire. Bảo lưu mọi quyền.
+        <a href="/privacy/">Chính sách Bảo mật</a>
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    function setLanguage(lang) {
+      document.documentElement.setAttribute('lang', lang);
+      document.querySelectorAll('.lang-btn').forEach(function(btn) {
+        btn.classList.remove('active');
+      });
+      document.getElementById('btn-' + lang).classList.add('active');
+      localStorage.setItem('campfire_lang', lang);
+    }
+
+    // Auto-detect language
+    var savedLang = localStorage.getItem('campfire_lang');
+    var browserLang = navigator.language && navigator.language.slice(0, 2) === 'vi' ? 'vi' : 'en';
+    setLanguage(savedLang || browserLang);
+  </script>
+</body>
+</html>

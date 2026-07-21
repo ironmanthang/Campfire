@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy - Campfire Journal</title>
+  <link rel="icon" type="image/png" href="/icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      color-scheme: light;
+      --bg-app: #FAF8F5;
+      --bg-surface: #F0ECE3;
+      --text-primary: #201D1A;
+      --text-secondary: #6E685F;
+      --color-accent: #C68B59;
+      --border-color: #E6DFD3;
+      --bg-card: #FCFAF7;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        color-scheme: dark;
+        --bg-app: #141210;
+        --bg-surface: #1C1917;
+        --text-primary: #E6E1DC;
+        --text-secondary: #968F85;
+        --color-accent: #D4A373;
+        --border-color: #282420;
+        --bg-card: #0B0A09;
+      }
+    }
+
+    body {
+      background-color: var(--bg-app);
+      color: var(--text-primary);
+      font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .wrapper {
+      max-width: 760px;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 40px 24px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      animation: fadeIn 0.8s ease-out;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .logo-container {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+    }
+
+    .brand-name {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      margin: 0;
+      background: linear-gradient(135deg, var(--text-primary) 30%, var(--color-accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      margin: 4px 0 16px 0;
+    }
+
+    /* Language Switcher */
+    .lang-selector {
+      display: inline-flex;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      padding: 4px;
+      border-radius: 12px;
+      gap: 4px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    }
+
+    .lang-btn {
+      background: none;
+      border: none;
+      padding: 6px 14px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .lang-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .lang-btn.active {
+      background-color: var(--color-accent);
+      color: var(--bg-app);
+    }
+
+    main {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.03);
+      animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-top: 0;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 16px;
+      letter-spacing: -0.015em;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-top: 32px;
+      margin-bottom: 16px;
+      letter-spacing: -0.01em;
+    }
+
+    p {
+      color: var(--text-secondary);
+      margin-top: 0;
+      margin-bottom: 16px;
+      font-size: 0.975rem;
+    }
+
+    ul {
+      margin-top: 0;
+      margin-bottom: 20px;
+      padding-left: 20px;
+    }
+
+    li {
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      font-size: 0.975rem;
+    }
+
+    .highlight-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 20px;
+      margin: 24px 0;
+    }
+
+    .highlight-card h3 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--color-accent);
+    }
+
+    .highlight-card p {
+      margin-bottom: 0;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    footer a {
+      color: var(--color-accent);
+      text-decoration: none;
+      font-weight: 500;
+      margin: 0 8px;
+      transition: color 0.2s ease;
+    }
+
+    footer a:hover {
+      color: var(--text-primary);
+      text-decoration: underline;
+    }
+
+    /* Bilingual display rules */
+    html[lang="en"] .lang-vi {
+      display: none;
+    }
+    html[lang="vi"] .lang-en {
+      display: none;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 640px) {
+      .wrapper {
+        padding: 24px 16px;
+      }
+      main {
+        padding: 24px;
+        border-radius: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <header>
+      <div class="logo-container">
+        <img class="logo-icon" src="/icon.png" alt="Campfire Logo" />
+        <span class="brand-name">Campfire</span>
+      </div>
+      <p class="subtitle lang-en">Offline-First Private Journaling</p>
+      <p class="subtitle lang-vi">Nhật ký Ngoại tuyến Tối ưu Riêng tư</p>
+
+      <div class="lang-selector">
+        <button id="btn-en" class="lang-btn" onclick="setLanguage('en')">English</button>
+        <button id="btn-vi" class="lang-btn" onclick="setLanguage('vi')">Tiếng Việt</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- ENGLISH CONTENT -->
+      <div class="lang-en">
+        <h1>Privacy Policy</h1>
+        <p>Last updated: July 21, 2026</p>
+
+        <p>
+          At Campfire, your privacy is our primary design objective. Campfire is designed as an <strong>offline-first</strong> diary and journal application, meaning you retain complete control over your private records.
+        </p>
+
+        <h2>1. Information We Collect</h2>
+        <p>
+          <strong>Your Content:</strong> All journal entries, moods, tags, and photos you create are stored entirely locally on your own device using local browser database storage (IndexedDB). They are never transmitted to our servers or processed by any third party unless you explicitly choose to configure backup sync.
+        </p>
+        <p>
+          <strong>Personal Data:</strong> Campfire does not require any account registration or subscription, and we do not collect any personal identifying information, device analytics, or usage statistics.
+        </p>
+
+        <h2>2. Google Drive Sync Integration</h2>
+        <p>
+          Campfire provides an optional cloud synchronization feature utilizing Google Drive API to help you back up your journals securely.
+        </p>
+        <div class="highlight-card">
+          <h3>How Google Drive Sync Protects Your Privacy:</h3>
+          <ul>
+            <li>
+              <strong>Direct Connection:</strong> The sync feature operates entirely client-to-Google directly from your browser. There is no intermediate server hosting, tracking, or proxying your login token or file data.
+            </li>
+            <li>
+              <strong>Limited Scope Permission (`drive.file`):</strong> Campfire requests permissions to view and manage only files and folders that you have explicitly opened or created with this application (the `CampfireJournal` folder). The application cannot view, access, or modify any other files or folders in your Google Drive.
+            </li>
+            <li>
+              <strong>Folder Isolation:</strong> All journal files are uploaded to a dedicated folder named `CampfireJournal` in your Google Drive storage.
+            </li>
+          </ul>
+        </div>
+
+        <h2>3. Third-Party Services</h2>
+        <p>
+          Campfire does not include third-party advertising, analytics libraries, trackers, or marketing tools. The only external API interaction occurs when you connect your personal Google Drive for data backup.
+        </p>
+
+        <h2>4. Data Retention and Deletion</h2>
+        <p>
+          Since your data is stored locally on your device, you are in complete control of its retention. You can clear your local database at any time by wiping your browser's application cache/site data or by clearing data from the settings panel inside the application. You can disconnect your Google Account and revoke access at any time through your Google Account security permissions console.
+        </p>
+
+        <h2>5. Changes to This Policy</h2>
+        <p>
+          We may update our Privacy Policy from time to time. We will notify you of any changes by updating the "Last updated" date of this Privacy Policy.
+        </p>
+
+        <h2>6. Contact Us</h2>
+        <p>
+          If you have any questions or feedback about our privacy practices, you can view our public source code repository on GitHub or get in touch.
+        </p>
+      </div>
+
+      <!-- VIETNAMESE CONTENT -->
+      <div class="lang-vi">
+        <h1>Chính sách Bảo mật</h1>
+        <p>Cập nhật lần cuối: 21 tháng 7, 2026</p>
+
+        <p>
+          Tại Campfire, bảo mật của bạn là mục tiêu thiết kế hàng đầu của chúng tôi. Campfire được xây dựng như một ứng dụng viết nhật ký và ghi chép <strong>ưu tiên ngoại tuyến (offline-first)</strong>, nghĩa là bạn giữ toàn quyền kiểm soát đối với các bản ghi cá nhân của mình.
+        </p>
+
+        <h2>1. Thông tin Chúng tôi Thu thập</h2>
+        <p>
+          <strong>Nội dung của bạn:</strong> Tất cả các bài viết nhật ký, cảm xúc, thẻ tag và hình ảnh bạn tạo ra đều được lưu trữ hoàn toàn cục bộ trên thiết bị của bạn thông qua cơ sở dữ liệu trình duyệt (IndexedDB). Chúng không bao giờ được gửi đến máy chủ của chúng tôi hoặc bị xử lý bởi bất kỳ bên thứ ba nào trừ khi bạn chủ động thiết lập đồng bộ hóa sao lưu.
+        </p>
+        <p>
+          <strong>Dữ liệu cá nhân:</strong> Campfire không yêu cầu đăng ký tài khoản hoặc đăng ký gói dịch vụ, và chúng tôi hoàn toàn không thu thập bất kỳ thông tin nhận dạng cá nhân, phân tích thiết bị hoặc thống kê sử dụng nào.
+        </p>
+
+        <h2>2. Tích hợp Đồng bộ Google Drive</h2>
+        <p>
+          Campfire cung cấp tính năng đồng bộ hóa đám mây tùy chọn sử dụng Google Drive API để giúp bạn sao lưu nhật ký của mình một cách an toàn.
+        </p>
+        <div class="highlight-card">
+          <h3>Cách Đồng bộ Google Drive bảo vệ quyền riêng tư của bạn:</h3>
+          <ul>
+            <li>
+              <strong>Kết nối Trực tiếp:</strong> Tính năng đồng bộ hóa hoạt động hoàn toàn trực tiếp từ trình duyệt của bạn đến Google. Không có máy chủ trung gian nào lưu trữ, theo dõi hoặc chuyển tiếp mã đăng nhập hay tệp tin của bạn.
+            </li>
+            <li>
+              <strong>Quyền truy cập Giới hạn (`drive.file`):</strong> Campfire yêu cầu quyền xem và quản lý chỉ các tệp tin và thư mục mà bạn đã mở hoặc tạo trực tiếp bằng ứng dụng này (thư mục `CampfireJournal`). Ứng dụng không thể xem, truy cập hoặc sửa đổi bất kỳ tệp tin hay thư mục nào khác trong Google Drive của bạn.
+            </li>
+            <li>
+              <strong>Phân vùng Thư mục:</strong> Tất cả các tệp nhật ký đều được tải lên một thư mục chuyên biệt tên là `CampfireJournal` trong bộ lưu trữ Google Drive của bạn.
+            </li>
+          </ul>
+        </div>
+
+        <h2>3. Dịch vụ của Bên thứ ba</h2>
+        <p>
+          Campfire không tích hợp quảng cáo bên thứ ba, thư viện phân tích, công cụ theo dõi hay tiếp thị. Tương tác API bên ngoài duy nhất chỉ xảy ra khi bạn kết nối tài khoản Google Drive cá nhân của mình để sao lưu dữ liệu.
+        </p>
+
+        <h2>4. Lưu giữ và Xóa Dữ liệu</h2>
+        <p>
+          Do dữ liệu được lưu trữ cục bộ trên thiết bị của bạn, bạn hoàn toàn làm chủ việc lưu trữ dữ liệu này. Bạn có thể xóa toàn bộ cơ sở dữ liệu cục bộ bất kỳ lúc nào bằng cách xóa bộ nhớ cache/dữ liệu trang web của trình duyệt hoặc bấm nút xóa dữ liệu trong bảng cài đặt của ứng dụng. Bạn cũng có thể ngắt kết nối Tài khoản Google và thu hồi quyền truy cập bất kỳ lúc nào thông qua bảng điều khiển bảo mật tài khoản Google của bạn.
+        </p>
+
+        <h2>5. Thay đổi đối với Chính sách này</h2>
+        <p>
+          Chúng tôi có thể cập nhật Chính sách Bảo mật theo thời gian. Chúng tôi sẽ thông báo cho bạn về bất kỳ thay đổi nào bằng cách cập nhật ngày "Cập nhật lần cuối" ở đầu trang Chính sách Bảo mật này.
+        </p>
+
+        <h2>6. Liên hệ</h2>
+        <p>
+          Nếu bạn có bất kỳ câu hỏi hoặc phản hồi nào về chính sách bảo mật của chúng tôi, bạn có thể xem kho lưu trữ mã nguồn công khai của chúng tôi trên GitHub hoặc liên hệ trực tiếp.
+        </p>
+      </div>
+    </main>
+
+    <footer>
+      <p class="lang-en">
+        &copy; 2026 Campfire. All rights reserved.
+        <a href="/terms/">Terms of Service</a>
+      </p>
+      <p class="lang-vi">
+        &copy; 2026 Campfire. Bảo lưu mọi quyền.
+        <a href="/terms/">Điều khoản Dịch vụ</a>
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    function setLanguage(lang) {
+      document.documentElement.setAttribute('lang', lang);
+      document.querySelectorAll('.lang-btn').forEach(function(btn) {
+        btn.classList.remove('active');
+      });
+      document.getElementById('btn-' + lang).classList.add('active');
+      localStorage.setItem('campfire_lang', lang);
+    }
+
+    // Auto-detect language
+    var savedLang = localStorage.getItem('campfire_lang');
+    var browserLang = navigator.language && navigator.language.slice(0, 2) === 'vi' ? 'vi' : 'en';
+    setLanguage(savedLang || browserLang);
+  </script>
+</body>
+</html>

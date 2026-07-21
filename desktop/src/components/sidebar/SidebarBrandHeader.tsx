@@ -1,9 +1,8 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronLeft } from "lucide-react";
-import { open } from "@tauri-apps/plugin-dialog";
-import { invoke } from "@tauri-apps/api/core";
 import { useAppStore } from "../../store/useAppStore";
+import { LogoModal } from "../LogoModal";
 
 interface SidebarBrandHeaderProps {
   isCollapsed: boolean;
@@ -13,6 +12,8 @@ interface SidebarBrandHeaderProps {
 export function SidebarBrandHeader({ isCollapsed, onToggle }: SidebarBrandHeaderProps) {
   const { t } = useTranslation();
   const { config, updateConfigField, toggleSidebar } = useAppStore();
+
+  const [isLogoModalOpen, setIsLogoModalOpen] = useState(false);
 
   const localTitleRef = useRef<HTMLInputElement>(null);
   const localSubtitleRef = useRef<HTMLInputElement>(null);
@@ -44,25 +45,6 @@ export function SidebarBrandHeader({ isCollapsed, onToggle }: SidebarBrandHeader
     }
   };
 
-  const handleSelectLogo = async () => {
-    try {
-      const selected = await open({
-        multiple: false,
-        filters: [{
-          name: "Images",
-          extensions: ["png", "jpg", "jpeg", "webp", "gif", "svg"]
-        }],
-        title: t("sidebar.changeLogoTitle") || "Select Logo Image"
-      });
-      if (selected && typeof selected === "string") {
-        const base64 = await invoke<string>("read_image_as_base64", { path: selected });
-        await updateConfigField("custom_logo", base64);
-      }
-    } catch (err) {
-      console.error("Failed to select logo:", err);
-    }
-  };
-
   const localTitle = config.custom_title || t("sidebar.title");
   const localSubtitle = config.custom_subtitle || t("sidebar.subtitle");
 
@@ -70,7 +52,7 @@ export function SidebarBrandHeader({ isCollapsed, onToggle }: SidebarBrandHeader
     <div className="py-5 pl-4 pr-3 border-b border-border-brand flex items-center justify-between gap-2.5">
       <div className="flex items-center gap-3 flex-1 min-w-0">
         {/* Logo with Hover Edit Overlay */}
-        <div className="relative group cursor-pointer shrink-0" onClick={handleSelectLogo}>
+        <div className="relative group cursor-pointer shrink-0" onClick={() => setIsLogoModalOpen(true)}>
           <img
             src={config.custom_logo || "/logo.png?v=2"}
             alt="Campfire Logo"
@@ -128,6 +110,10 @@ export function SidebarBrandHeader({ isCollapsed, onToggle }: SidebarBrandHeader
       >
         <ChevronLeft className={`h-4.5 w-4.5 transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`} />
       </button>
+
+      {isLogoModalOpen && (
+        <LogoModal onClose={() => setIsLogoModalOpen(false)} />
+      )}
     </div>
   );
 }

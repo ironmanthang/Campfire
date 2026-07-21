@@ -8,6 +8,7 @@ interface HeaderProps {
   onDonateOpen: () => void;
   syncProgress: SyncProgress;
   isLoggedIn: boolean;
+  customLogo: string | null;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
@@ -15,7 +16,8 @@ export const Header: React.FC<HeaderProps> = ({
   onSync, 
   onDonateOpen,
   syncProgress,
-  isLoggedIn
+  isLoggedIn,
+  customLogo
 }) => {
   const getSyncIcon = () => {
     if (!isLoggedIn) return <CloudOff className="text-text-secondary" size={18} />;
@@ -50,7 +52,7 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="flex items-center justify-between px-4 py-3 border-b border-border-brand bg-bg-surface shrink-0 select-none">
       <div className="flex items-center gap-2">
         <img
-          src="/logo.png"
+          src={customLogo || "/logo.png"}
           alt="Campfire logo"
           className="w-8 h-8 rounded-lg object-cover border border-border-brand/40"
         />

@@ -30,7 +30,7 @@ pub async fn start_gdrive_auth(app: AppHandle, client_id: String, client_secret:
     let redirect_uri_encoded = format!("http%3A%2F%2F127.0.0.1%3A{}", port);
 
     let auth_url = format!(
-        "https://accounts.google.com/o/oauth2/v2/auth?client_id={}&redirect_uri={}&response_type=code&scope=https://www.googleapis.com/auth/drive&access_type=offline&prompt=consent",
+        "https://accounts.google.com/o/oauth2/v2/auth?client_id={}&redirect_uri={}&response_type=code&scope=https://www.googleapis.com/auth/drive.file&access_type=offline&prompt=consent",
         client_id,
         redirect_uri_encoded
     );

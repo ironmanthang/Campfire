@@ -22,8 +22,6 @@ export function IdentitySection() {
     showNotification
   } = useAppStore();
 
-  const [clientIdInput, setClientIdInput] = useState(config.google_drive_client_id || "");
-  const [clientSecretInput, setClientSecretInput] = useState(config.google_drive_client_secret || "");
   const [backups, setBackups] = useState<number[]>([]);
   const [restoringBackup, setRestoringBackup] = useState<number | null>(null);
   const [backingUp, setBackingUp] = useState(false);
@@ -212,51 +210,27 @@ export function IdentitySection() {
         </div>
         <p className="text-xs text-text-secondary">
           Sync your journal entries securely to Google Drive.
-          Please use a <strong>Desktop Application</strong> OAuth Client ID to avoid port configuration issues.
         </p>
 
-        {/* Client ID Input */}
-        <div className="space-y-1.5">
-          <label className="block text-xs font-semibold text-text-secondary">OAuth Client ID</label>
-          <input
-            type="text"
-            value={clientIdInput}
-            onChange={(e) => setClientIdInput(e.target.value)}
-            placeholder="Enter your Google OAuth Client ID"
-            disabled={isDriveConnected}
-            className="w-full px-3.5 py-2 rounded-lg border border-border-brand bg-bg-input text-text-primary text-sm focus:outline-none focus:border-accent-brand transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-          />
-        </div>
-
-        {/* Client Secret Input */}
-        <div className="space-y-1.5">
-          <label className="block text-xs font-semibold text-text-secondary">OAuth Client Secret</label>
-          <div className="flex gap-2">
-            <input
-              type="password"
-              value={clientSecretInput}
-              onChange={(e) => setClientSecretInput(e.target.value)}
-              placeholder={isDriveConnected ? "••••••••••••••••" : "Enter your Google OAuth Client Secret"}
-              disabled={isDriveConnected}
-              className="flex-1 px-3.5 py-2 rounded-lg border border-border-brand bg-bg-input text-text-primary text-sm focus:outline-none focus:border-accent-brand transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-            />
-            {isDriveConnected ? (
-              <button
-                onClick={disconnectDrive}
-                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors shrink-0"
-              >
-                Disconnect
-              </button>
-            ) : (
-              <button
-                onClick={() => startDriveAuth(clientIdInput, clientSecretInput)}
-                className="px-4 py-2 bg-accent-brand text-bg-app rounded-lg text-sm font-medium hover:bg-accent-brand-hover transition-colors shrink-0"
-              >
-                Connect Account
-              </button>
-            )}
-          </div>
-        </div>
+        {!isDriveConnected ? (
+          <button
+            onClick={() => {
+              const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
+              const clientSecret = import.meta.env.VITE_GOOGLE_CLIENT_SECRET || "";
+              startDriveAuth(clientId, clientSecret);
+            }}
+            className="w-full py-2.5 bg-accent-brand text-bg-app hover:bg-accent-brand-hover rounded-xl text-xs font-semibold transition-colors text-center cursor-pointer font-medium"
+          >
+            Connect Account
+          </button>
+        ) : (
+          <button
+            onClick={disconnectDrive}
+            className="w-full py-2.5 bg-red-500/10 hover:bg-red-500/15 border border-red-500/25 text-red-500 rounded-xl text-xs font-semibold transition-colors text-center cursor-pointer font-medium"
+          >
+            Disconnect Account
+          </button>
+        )}
 
         {isDriveConnected && (
           <div className="space-y-4 bg-bg-surface/30 p-3.5 border border-border-brand/40 rounded-xl">
@@ -270,7 +244,7 @@ export function IdentitySection() {
                 type="checkbox"
                 checked={config.google_drive_auto_sync}
                 onChange={(e) => updateConfigField("google_drive_auto_sync", e.target.checked)}
-                className="w-4 h-4 rounded border-border-brand bg-bg-input text-accent-brand focus:ring-accent-brand"
+                className="w-4 h-4 rounded border-border-brand bg-bg-input text-accent-brand focus:ring-accent-brand cursor-pointer"
               />
             </div>
 
@@ -280,7 +254,7 @@ export function IdentitySection() {
                 <button
                   onClick={() => handleSync(true)}
                   disabled={syncProgress.status === 'syncing' || syncProgress.status === 'connecting'}
-                  className="px-4 py-2 bg-accent-brand text-bg-app hover:bg-accent-brand-hover rounded-lg text-xs font-semibold transition-colors disabled:opacity-50"
+                  className="px-4 py-2 bg-accent-brand text-bg-app hover:bg-accent-brand-hover rounded-lg text-xs font-semibold transition-colors disabled:opacity-50 cursor-pointer"
                 >
                   {syncProgress.status === 'syncing' || syncProgress.status === 'connecting' ? 'Syncing...' : 'Sync Now'}
                 </button>

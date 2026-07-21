@@ -27,11 +27,10 @@ export function useTokenCapacity(activeModel: string, modelsList: OllamaModelInf
     loadOllamaContextLength();
   }, []);
 
-  // Compute capacity limit for the token meter display
   const capacityLimit = useMemo(() => {
     const currentModelInfo = modelsList.find((m) => m.name === activeModel);
     const isCloudModel = currentModelInfo ? currentModelInfo.size === 0 : activeModel.includes("cloud");
-    return ollamaConfiguredContextLength || currentModelInfo?.contextLength || (isCloudModel ? 128000 : 8192);
+    return currentModelInfo?.contextLength || ollamaConfiguredContextLength || (isCloudModel ? 128000 : 8192);
   }, [modelsList, activeModel, ollamaConfiguredContextLength]);
 
   // Calculate Token volumes in selected ranges

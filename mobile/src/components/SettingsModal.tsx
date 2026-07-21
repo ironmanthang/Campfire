@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { 
   getStoredAuthState, 
-  saveAuthState, 
   requestDriveAuth, 
   clearAuthState 
 } from '../services/googleDrive';
-import { X, LogIn, LogOut, Sun, Moon, Check, AlertCircle, Download } from 'lucide-react';
+import { X, LogIn, LogOut, Sun, Moon, AlertCircle, Download } from 'lucide-react';
 import { listLocalEntries } from '../services/db';
 import {
   exportAsJson,
@@ -18,20 +17,44 @@ interface SettingsModalProps {
   onClose: () => void;
   onThemeToggle: () => void;
   theme: 'light' | 'dark';
+  customLogo: string | null;
+  onLogoChange: (logo: string | null) => void;
 }
 
-export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, onThemeToggle, theme }) => {
-  const [clientId, setClientId] = useState('');
+export const SettingsModal: React.FC<SettingsModalProps> = ({ 
+  onClose, 
+  onThemeToggle, 
+  theme,
+  customLogo,
+  onLogoChange
+}) => {
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
   const [autoSync, setAutoSync] = useState(true);
   const [logs, setLogs] = useState<string[]>([]);
 
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      localStorage.setItem('past_you_custom_logo', base64String);
+      onLogoChange(base64String);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleResetLogo = () => {
+    localStorage.removeItem('past_you_custom_logo');
+    onLogoChange(null);
+  };
+
   useEffect(() => {
     const auth = getStoredAuthState();
-    setClientId(auth.clientId);
     setIsLoggedIn(!!auth.accessToken && Date.now() < auth.expiresAt);
     
     const storedAutoSync = localStorage.getItem('past_you_auto_sync');
@@ -50,22 +73,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, onThemeTo
     localStorage.setItem('past_you_auto_sync', String(val));
   };
 
-  const handleSaveClientId = () => {
-    const current = getStoredAuthState();
-    saveAuthState({
-      ...current,
-      clientId: clientId.trim()
-    });
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 2000);
-  };
-
   const handleLogin = async () => {
     setAuthError(null);
     setAuthLoading(true);
     try {
       if (!clientId.trim()) {
-        throw new Error('Please enter a Google OAuth Client ID first.');
+        throw new Error('Google OAuth Client ID is not configured in the environment.');
       }
       await requestDriveAuth(clientId.trim());
       setIsLoggedIn(true);
@@ -145,30 +158,47 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, onThemeTo
 
           <hr className="border-border-brand" />
 
+          {/* Custom Logo setting */}
+          <div className="space-y-3">
+            <div>
+              <h3 className="font-semibold text-text-primary">App Logo</h3>
+              <p className="text-xs text-text-secondary">Customize the in-app header logo. Supports standard image formats.</p>
+            </div>
+            <div className="flex items-center gap-4">
+              <img 
+                src={customLogo || "/logo.png"} 
+                alt="Logo preview" 
+                className="w-12 h-12 rounded-xl object-cover border border-border-brand bg-bg-app/40 shrink-0"
+              />
+              <div className="flex gap-2 flex-1">
+                <label className="flex-1 flex items-center justify-center py-2 px-3 text-xs font-semibold bg-accent-brand hover:bg-accent-brand-hover text-bg-app rounded-xl transition-all cursor-pointer text-center select-none active:scale-95">
+                  <span>Upload Image</span>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleLogoUpload} 
+                    className="hidden" 
+                  />
+                </label>
+                {customLogo && (
+                  <button
+                    onClick={handleResetLogo}
+                    className="py-2 px-3 text-xs font-semibold bg-bg-app border border-border-brand hover:border-red-500 hover:text-red-500 text-text-primary rounded-xl transition-all cursor-pointer select-none active:scale-95"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <hr className="border-border-brand" />
+
           {/* Google Drive Configuration */}
           <div className="space-y-4">
             <div>
               <h3 className="font-semibold text-text-primary">Google Drive Sync</h3>
-              <p className="text-xs text-text-secondary">Provide your Google OAuth Client ID to sync diaries to your Google Drive folder.</p>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Client ID</label>
-              <div className="flex gap-2">
-                <input 
-                  type="text" 
-                  value={clientId}
-                  onChange={(e) => setClientId(e.target.value)}
-                  placeholder="xxxxxx.apps.googleusercontent.com"
-                  className="flex-1 px-3 py-2 text-sm rounded-xl border border-border-brand bg-bg-input text-text-primary outline-none focus:border-accent-brand transition-all"
-                />
-                <button 
-                  onClick={handleSaveClientId}
-                  className="px-3 py-2 text-sm font-medium bg-bg-app border border-border-brand text-text-primary hover:border-accent-brand rounded-xl transition-all"
-                >
-                  {saveSuccess ? <Check size={16} className="text-green-500" /> : 'Save'}
-                </button>
-              </div>
+              <p className="text-xs text-text-secondary">Sync your diaries securely to your Google Drive folder.</p>
             </div>
             {/* Auto-Sync Toggle */}
             {isLoggedIn && (
@@ -265,6 +295,27 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, onThemeTo
                   <span className="italic text-text-secondary">No sync cycles recorded yet.</span>
                 )}
               </div>
+            </div>
+
+            {/* Privacy & Terms Links */}
+            <div className="flex justify-center items-center gap-3 pt-6 border-t border-border-brand/40 text-[11px] text-text-secondary">
+              <a 
+                href="/privacy/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="hover:text-accent-brand hover:underline transition-colors"
+              >
+                Privacy Policy
+              </a>
+              <span className="text-border-brand">•</span>
+              <a 
+                href="/terms/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="hover:text-accent-brand hover:underline transition-colors"
+              >
+                Terms of Service
+              </a>
             </div>
           </div>
         </div>

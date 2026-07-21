@@ -59,7 +59,7 @@ export function requestDriveAuth(clientId: string): Promise<string> {
     try {
       const client = (window as any).google.accounts.oauth2.initTokenClient({
         client_id: clientId,
-        scope: 'https://www.googleapis.com/auth/drive',
+        scope: 'https://www.googleapis.com/auth/drive.file',
         callback: (response: any) => {
           if (response.error) {
             reject(new Error(response.error_description || response.error));
