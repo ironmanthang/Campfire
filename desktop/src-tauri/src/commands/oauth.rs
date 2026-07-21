@@ -70,11 +70,11 @@ pub async fn start_gdrive_auth(app: AppHandle, client_id: String) -> Result<Stri
           <head>\
             <title>Campfire Auth Success</title>\
             <style>\
-              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; text-align: center; padding-top: 60px; background-color: #15141b; color: #e6e6e8; }\
-              .container { max-width: 480px; margin: 0 auto; background: #1e1d24; border: 1px solid #2d2b38; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }\
-              h1 { color: #58a6ff; font-weight: 700; font-size: 24px; margin-bottom: 16px; }\
-              p { color: #9b9a9e; font-size: 15px; line-height: 1.6; margin-bottom: 24px; }\
-              .badge { display: inline-block; padding: 6px 12px; font-weight: bold; background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.2); color: #58a6ff; border-radius: 8px; font-size: 13px; }\
+              body { font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; text-align: center; padding-top: 60px; background-color: #141210; color: #E6E1DC; }\
+              .container { max-width: 480px; margin: 0 auto; background: #1C1917; border: 1px solid #282420; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }\
+              h1 { color: #D4A373; font-weight: 700; font-size: 24px; margin-bottom: 16px; }\
+              p { color: #968F85; font-size: 15px; line-height: 1.6; margin-bottom: 24px; }\
+              .badge { display: inline-block; padding: 6px 12px; font-weight: bold; background: rgba(212,163,115,0.1); border: 1px solid rgba(212,163,115,0.25); color: #D4A373; border-radius: 8px; font-size: 13px; }\
             </style>\
           </head>\
           <body>\

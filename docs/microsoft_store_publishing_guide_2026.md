@@ -18,7 +18,7 @@
 3. [Pre-flight checklist](#3-pre-flight-checklist)
 4. [Pre-public testing: 4 stages](#4-pre-public-testing-4-stages)
 5. [Private audience: tester onboarding](#5-private-audience-tester-onboarding)
-6. [Submission package: building the MSIX](#6-submission-package-building-the-msix)
+6. [Submission package: building the MSI](#6-submission-package-building-the-msi-for-the-store)
 7. [Submission walkthrough](#7-submission-walkthrough)
 8. [Going public](#8-going-public)
 9. [Tauri-specific gotchas](#9-tauri-specific-gotchas)
@@ -26,6 +26,7 @@
 11. [OAuth security for distributed binaries](#11-oauth-security-for-distributed-binaries)
 12. [Pre-submission checklist (Store cert 2026)](#12-pre-submission-checklist-store-cert-2026)
 13. [Troubleshooting](#13-troubleshooting)
+14. [Self-check cheatsheet (commands you can re-run)](#14-self-check-cheatsheet-commands-you-can-re-run)
 
 ---
 
@@ -132,15 +133,17 @@ desktop/src-tauri/build.rs                            (NEW: read .env, emit carg
 
 ### 3.2 Content Security Policy (CSP)
 
-Your `tauri.conf.json` has `"csp": null`. Replace with an explicit CSP before submitting:
+Your `tauri.conf.json` should have an explicit CSP. The current value (as of the §3 gate) is:
 
 ```json
 "security": {
-  "csp": "default-src 'self'; img-src 'self' data: https:; connect-src 'self' https://www.googleapis.com https://oauth2.googleapis.com https://generativelanguage.googleapis.com https://www.mojeek.com https://api.mojeek.com; style-src 'self' 'unsafe-inline'; script-src 'self'"
+  "csp": "default-src 'self'; img-src 'self' data: https:; connect-src 'self' https://www.googleapis.com https://oauth2.googleapis.com https://generativelanguage.googleapis.com https://www.mojeek.com https://api.mojeek.com ipc: http://ipc.localhost; style-src 'self' 'unsafe-inline'; script-src 'self'"
 }
 ```
 
-Adjust the `connect-src` list to match every endpoint your app actually calls. The certifier flags missing CSPs in 2026.
+Notes:
+- `ipc: http://ipc.localhost` are required for Tauri's own IPC; omitting them breaks the app in release builds.
+- The certifier flags missing CSPs in 2026. Adjust the `connect-src` list to match every endpoint your app actually calls (Mojeek, Google, Gemini, etc.).
 
 ### 3.3 Tauri capabilities (audit)
 
@@ -164,7 +167,7 @@ If you've added Tauri's auto-updater plugin for sideloaded builds, **disable it 
 
 ### 3.5 App identifier
 
-Your identifier is `com.pastyou.app` ([desktop/src-tauri/tauri.conf.json](desktop/src-tauri/tauri.conf.json)). **Once submitted, this cannot be changed without a new listing.** Make sure you're happy with it. Note: this is the *package identity*, not the *display name* "Campfire".
+Your identifier is `com.campfire.app` ([desktop/src-tauri/tauri.conf.json](desktop/src-tauri/tauri.conf.json)). **Once submitted, this cannot be changed without a new listing.** Note that the identifier ends in `.app`, which the Tauri 2 build emits a warning about (it conflicts with the macOS `.app` bundle extension). That warning is macOS-only and is **not** a Windows/Store blocker, but if you plan to ship to macOS too, consider changing the identifier to `com.campfire.journal` (or similar) before your first submission.
 
 ### 3.6 i18n and type checks
 
@@ -184,7 +187,7 @@ All three must pass. Certification will reject an app that crashes on launch due
 ```
 [1] Dev mode (fast feedback)
         ↓
-[2] Local MSIX build + side-load (no Store)
+[2] Local MSI/NSIS build + side-load (no Store)
         ↓
 [3] Partner Center "Private audience" with your tester MSAs
         ↓
@@ -217,9 +220,11 @@ Walk through every view wired in [desktop/src/App.tsx:286-302](desktop/src/App.t
 - Mouse back/forward buttons → navigate
 - Donate banner → "Maybe later" (session), "Don't ask" (localStorage), "Support" → About → "me" tab
 
-### Stage 2 — Local MSIX build + side-load
+### Stage 2 — Local build + side-load (MSI / NSIS)
 
 This is the critical pre-Store gate. No Partner Center involvement, no cert wait, instant install.
+
+> **Important 2026 fact**: Tauri 2 only generates **EXE and MSI** installers. The Microsoft Store's MSIX app type is a Tauri-1-era workflow; for Tauri 2 you register the product as an **"EXE or MSI app"** in Partner Center and upload the `.msi` directly. See [the official Tauri 2 Microsoft Store guide](https://v2.tauri.app/distribute/microsoft-store/) (last updated 2026-06-15) and §6 below.
 
 ```powershell
 cd d:\program\Campfire\desktop
@@ -229,23 +234,41 @@ pnpm release
 Output lands in:
 ```
 desktop\src-tauri\target\release\bundle\
-  ├── msi\          (Windows Installer .msi)
-  ├── nsis\         (NSIS .exe installer)
-  └── msix\         (MSIX package — what Store needs)
+  ├── msi\          (Windows Installer .msi — what the Store wants)
+  └── nsis\         (NSIS .exe installer — alternative for direct distribution)
 ```
 
-Sideload:
+**Sideload for a first-run smoke test** (Windows 10 1607+ / Windows 11):
 
+> ⚠️ **MSI requires Administrator.** Tauri 2's default WiX config produces a **per-machine** MSI (`INSTALLDIR=%LOCALAPPDATA%\Programs\Campfire` but registered under `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall`, not `HKCU`). On a non-admin shell you'll get `Error 1925: You do not have sufficient privileges to complete this installation for all users of the machine.` and `msiexec` exits with `1603`. Tauri 2 does **not** expose a `bundle.windows.wix.installScope` field — there is no per-user MSI option in the documented config (verified against the [Tauri 2 config reference](https://v2.tauri.app/reference/config/), last updated 2026-06-15). So for local sideload testing without elevation, **use the NSIS EXE**.
+
+**NSIS EXE (per-user, no admin needed — recommended for Stage 2):**
 ```powershell
-# Enable Developer Mode: Settings → Privacy & security → For developers → Developer Mode = On
-Add-AppxPackage -Path ".\src-tauri\target\release\bundle\msix\Campfire_0.1.0_x64.msix"
+# silent (matches what the Store uses for ingestion when uploading an .exe)
+.\src-tauri\target\release\bundle\nsis\Campfire_0.1.0_x64-setup.exe /S
+
+# GUI (shows the install wizard)
+.\src-tauri\target\release\bundle\nsis\Campfire_0.1.0_x64-setup.exe
 ```
+Default install path: `%LOCALAPPDATA%\Campfire\` (just the EXE + uninstaller — Tauri 2's NSIS template is minimal because the frontend is embedded in `tauri-app.exe` and WebView2 is statically linked on Windows). Uninstall is registered under `HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall`. Smoke test that the binary starts:
+```powershell
+& "$env:LOCALAPPDATA\Campfire\tauri-app.exe"   # window title should read "Campfire"
+# then Stop-Process -Name tauri-app
+```
+
+**MSI (per-machine, needs Administrator — only for Store submission verification):**
+```powershell
+# Run from an elevated PowerShell, or via:
+Start-Process msiexec.exe -ArgumentList @('/i', '.\src-tauri\target\release\bundle\msi\Campfire_0.1.0_x64_en-US.msi', '/quiet', '/norestart', '/l*v', "$env:TEMP\campfire_install.log") -Verb RunAs -Wait
+```
+MSI install path: `%LOCALAPPDATA%\Programs\Campfire\` (registered under `HKLM`). Don't waste time debugging this as non-admin — the per-user failure is the expected behavior, not a bug.
 
 **What this stage catches**:
-- Tauri 2 MSIX packaging quirks
-- Icon resolution issues (check that all sizes in `tauri.conf.json:24-31` exist)
+- MSI packaging quirks (Tauri 2 will install to `%LOCALAPPDATA%\Programs\Campfire` by default; verify with `Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*' | Where-Object { $_.DisplayName -eq 'Campfire' }`)
+- Icon resolution issues (check that all sizes in `tauri.conf.json:24-31` exist — they do: 32x32, 128x128, 128x128@2x, plus the Windows-Store-specific Square30/44/71/89/107/142/150/284/310 logos in `desktop/src-tauri/icons/`)
 - First-run flow on a clean machine (empty `journal_dir` triggers onboarding)
-- App uninstall: `Get-AppxPackage -Name "Campfire" | Remove-AppxPackage`
+- The new CSP from §3.2 is only enforced in release builds — confirm Mojeek / Google / Gemini / IPC calls aren't blocked. If you see a CSP error in the WebView dev console (Ctrl+Shift+I), extend the `connect-src` list in `tauri.conf.json` and re-run `pnpm release`.
+- App uninstall: `msiexec /x '.\src-tauri\target\release\bundle\msi\Campfire_0.1.0_x64_en-US.msi' /quiet` (or `Get-Package -Name "Campfire" | Uninstall-Package`)
 
 ### Stage 3 — Partner Center Private audience
 
@@ -323,47 +346,63 @@ After your testers install, validate:
 
 ---
 
-## 6. Submission package: building the MSIX
+## 6. Submission package: building the MSI for the Store
 
-### 6.1 What Tauri produces
+### 6.1 What Tauri 2 produces (and what the Store accepts)
 
-Tauri 2's `tauri build` produces:
-- A local-installable `.msix` (good for sideloading, **not** for Store upload)
-- The Store wants a `.msixbundle` or `.msixupload` (multi-architecture + signed)
+Tauri 2's `tauri build` produces only:
+- A Windows Installer **`.msi`** (WiX) — the Store accepts this when you register the product as an **"EXE or MSI app"** in Partner Center
+- A **`.exe` NSIS installer** — alternative for direct (non-Store) distribution
 
-### 6.2 Build for Store
+> The Store does **not** require MSIX for Win32 / Tauri apps. The MSIX-based ingestion path is for packaged UWP / WinUI / native-store apps. Tauri 2 explicitly does not support MSIX — see the [official Tauri 2 Microsoft Store guide](https://v2.tauri.app/distribute/microsoft-store/) (2026-06-15): *"Currently Tauri only generates EXE and MSI installers, so you must create a Microsoft Store application that only links to the unpacked application."*
 
-For a single-architecture build:
+### 6.2 Build the MSI for Store submission
+
+> **WebView2 install mode** — the Store requires the Windows installer to use the **offline WebView2 installer** (so the user's machine doesn't need an internet connection during install). Create a separate Tauri config that overrides `bundle.windows.webviewInstallMode`, then merge it for Store builds:
+
+Create [desktop/src-tauri/tauri.microsoftstore.conf.json](desktop/src-tauri/tauri.microsoftstore.conf.json):
+
+```json
+{
+  "bundle": {
+    "publisher": "Your Publisher Name",
+    "windows": {
+      "webviewInstallMode": {
+        "type": "offlineInstaller"
+      }
+    }
+  }
+}
+```
+
+> **Publisher name cannot match the product name.** "Campfire" is the product name, so pick something different (e.g. your name, a company, or "Campfire Project"). This field is required for the Store even if you skip the override config — Tauri will derive it from the second part of `com.campfire.app` (which would be "campfire" and would conflict).
+
+Then build the offline-installer MSI:
 
 ```powershell
 cd d:\program\Campfire\desktop
-pnpm tauri build -- --target x86_64-pc-windows-msvc
+pnpm tauri build -- --no-bundle
+pnpm tauri bundle -- --config src-tauri/tauri.microsoftstore.conf.json
 ```
 
-For both x64 and ARM64 (recommended for max reach):
+> **Single architecture is fine for v1.** The Store accepts a single-arch `.msi`. Tauri 2 does not produce a `.msixbundle` — you cannot multi-architecture-bundle an MSI in the same way as MSIX. If you want both x64 and ARM64, build twice and upload both `.msi` files as separate packages; Partner Center will serve the right one to each device.
 
-```powershell
-# First time only: install the target
-rustup target add x86_64-pc-windows-msvc
-rustup target add aarch64-pc-windows-msvc
-
-# Build both
-pnpm tauri build -- --target x86_64-pc-windows-msvc
-pnpm tauri build -- --target aarch64-pc-windows-msvc
-
-# Bundle into a .msixbundle (Tauri 2 does this automatically when you specify --target and have both built)
+The output goes to:
+```
+src-tauri\target\release\bundle\msi\Campfire_0.1.0_x64_en-US.msi
 ```
 
-The output goes to `src-tauri/target/<triple>/release/bundle/msix/`. Look for the `.msixbundle` (multi-arch) or `.msix` (single-arch) file.
+### 6.3 Signing
 
-> **Note on signing**: Tauri 2 can sign the bundle for you if you provide a code-signing cert in `tauri.conf.json`'s `bundle.windows.signingIdentity` or `bundle.windows.certificateThumbprint`. For a public Store app, you don't need to bring your own cert — Microsoft signs it during the Store ingestion process.
+> For a public Store app, you don't need to bring your own code-signing cert — Microsoft signs the binary during Store ingestion. But Windows SmartScreen will show an "unknown publisher" warning on first launch of an unsigned MSI, which is bad UX for sideloaded copies (your §4 Stage 2 testers will see it). If you want a smooth first-launch experience, sign with a self-signed cert or an OV cert from a CA (e.g. Sectigo, DigiCert) and add to `tauri.conf.json > bundle.windows.certificateThumbprint` or `signCommand`.
 
-### 6.3 Upload to Partner Center
+### 6.4 Upload to Partner Center
 
 In your submission's **Packages** step:
-- Drag the `.msixbundle` (or `.msix`) directly onto the upload zone.
+- Drag the `.msi` directly onto the upload zone.
 - No zipping required.
-- Partner Center validates the bundle structure, then assigns the architecture mappings.
+- Partner Center validates the package structure, then assigns the architecture mappings.
+- Provide the **silent install arguments** in the installer parameters: `msiexec /i <file> /quiet` → enter `/quiet` as the argument. (For the NSIS EXE, the argument is `/S` — uppercase S — see [Microsoft's silent-install docs](https://learn.microsoft.com/en-us/windows/uwp/publish/msiexe/provide-package-details).)
 
 ---
 
@@ -387,7 +426,7 @@ Required for certification:
 - **Product name** (max 200 chars)
 - **Short description** (max 260 chars)
 - **Full description** (max 10,000 chars)
-- **App icon**: 300×300 PNG (also bundle icons in MSIX)
+- **App icon**: 300×300 PNG (also bundle icons in the MSI)
 - **Screenshot 1** (1366×768 or 1920×1080 PNG/JPG) — at least 1, up to 10
 - **Promotional art** (optional but recommended): 1200×630, 2400×1200
 - **Category** (e.g. **Productivity**)
@@ -497,7 +536,7 @@ Once you publish an app named "Campfire" (or whatever name you choose), that nam
 - `icons/icon.ico` (Windows)
 
 For Store submission you additionally need at least:
-- 44×44, 150×150, 284×284, 310×310 PNGs (in the Store listing, separate from MSIX icons)
+- 44×44, 150×150, 284×284, 310×310 PNGs (in the Store listing, separate from the MSI-bundled icons)
 
 ### 9.8 WebView2 runtime
 
@@ -505,7 +544,7 @@ Tauri 2 uses the system WebView2. Windows 11 ships with it; Windows 10 users may
 
 ### 9.9 Native dependencies
 
-Your `Cargo.toml` uses `tauri`, `tauri-plugin-opener`, `tauri-plugin-dialog`, `tauri-plugin-fs`, `reqwest`, `filetime`. None of these are flagged by the Store, but verify the compiled MSIX is fully self-contained — no external DLL dependencies that aren't in system32.
+Your `Cargo.toml` uses `tauri`, `tauri-plugin-opener`, `tauri-plugin-dialog`, `tauri-plugin-fs`, `reqwest`, `filetime`. None of these are flagged by the Store, but verify the compiled MSI is fully self-contained — no external DLL dependencies that aren't in system32.
 
 ### 9.10 Obfuscated JS
 
@@ -548,7 +587,7 @@ In Google Cloud Console → your Web client:
 
 ### 10.4 Adding the PWA to the Microsoft Store later (optional)
 
-You can wrap your PWA in a TWA (Trusted Web Activity) for Play Store, and similarly submit it as a PWA to the Microsoft Store via the **PWA app type** in Partner Center. If you ever do this, use the [PWA visibility options](https://learn.microsoft.com/en-us/windows/apps/publish/publish-your-app/pwa/visibility-options) page instead of the MSIX one.
+You can wrap your PWA in a TWA (Trusted Web Activity) for Play Store, and similarly submit it as a PWA to the Microsoft Store via the **PWA app type** in Partner Center. If you ever do this, use the [PWA visibility options](https://learn.microsoft.com/en-us/windows/apps/publish/publish-your-app/pwa/visibility-options) page instead.
 
 ### 10.5 PWA install instructions for users
 
@@ -580,7 +619,7 @@ The Store certifier (and Google's automated scanners) actively look for known cr
 
 ### 11.3 What to do today
 
-1. Remove `google_drive_client_secret` from the desktop app entirely (§3.1).
+1. **Do not remove `VITE_GOOGLE_CLIENT_SECRET`** — Google's "Desktop app" OAuth client requires the secret in the token-exchange call (despite the misleading name). Verified directly against `https://oauth2.googleapis.com/token` error responses in 2026-07. The build-time bake pattern (§3.1) is the secure way: `desktop/src-tauri/build.rs` reads `desktop/.env` and emits `cargo:rustc-env VITE_GOOGLE_CLIENT_SECRET=...` so the secret lands only in the compiled `tauri-app.exe`. The frontend must never read `VITE_GOOGLE_CLIENT_SECRET` — only the Rust token-exchange command does, via `env!()`.
 2. Move any stored access tokens out of `localStorage` and into the Tauri secure store.
 3. Audit `mobile/src/services/googleDrive.ts` — your mobile app currently stores `accessToken` in `localStorage` (line 13-14). For a PWA this is somewhat unavoidable, but you should:
    - Keep the token expiry short (you already do: 1 hour)
@@ -618,7 +657,7 @@ Use this on every submission. The Store certifier is strict and you don't want a
 ### 12.2 App identity & metadata
 
 - [ ] App name reserved and unique
-- [ ] App icon at 300×300 PNG (Store listing) + full icon set in MSIX
+- [ ] App icon at 300×300 PNG (Store listing) + full icon set in the MSI
 - [ ] At least 1 screenshot (1366×768 or 1920×1080), 3+ recommended
 - [ ] Category + subcategory selected
 - [ ] Age rating questionnaire completed
@@ -637,8 +676,8 @@ Use this on every submission. The Store certifier is strict and you don't want a
 - [ ] Donate banner triggers at count ≥10 OR streak ≥30
 - [ ] Donate banner "Maybe later" + "Don't ask" persist correctly
 - [ ] All modals (About, Feedback, Help, Error, Sync, Import) open and close
-- [ ] Side-load MSIX installs cleanly
-- [ ] Side-load MSIX uninstalls cleanly
+- [ ] Side-load MSI installs cleanly
+- [ ] Side-load MSI uninstalls cleanly
 
 ### 12.4 Privacy policy
 
@@ -736,7 +775,7 @@ In the Store listing's **Properties** section, declare:
 
 ### "Certification failed: app crashes on launch"
 
-→ The certifier runs your MSIX in a clean Windows VM. Most common cause: a missing `localStorage` check, a `await` on something that doesn't exist on first run, or a feature flag assuming user data exists. Test your **side-loaded** MSIX on a clean Windows VM (or just a freshly-created local user account) before submitting.
+→ The certifier runs your MSI in a clean Windows VM. Most common cause: a missing `localStorage` check, a `await` on something that doesn't exist on first run, or a feature flag assuming user data exists. Test your **side-loaded** MSI on a clean Windows VM (or just a freshly-created local user account) before submitting.
 
 ### "I accidentally published to Public. Can I go back to Private?"
 
@@ -764,19 +803,22 @@ pnpm typecheck
 pnpm i18n:check
 pnpm test
 
-# Stage 2 — local MSIX
+# Stage 2 — local MSI
 pnpm release
-Add-AppxPackage -Path ".\src-tauri\target\release\bundle\msix\Campfire_0.1.0_x64.msix"
+msiexec /i ".\src-tauri\target\release\bundle\msi\Campfire_0.1.0_x64_en-US.msi" /quiet
 
 # Stage 2 — uninstall
-Get-AppxPackage -Name "Campfire" | Remove-AppxPackage
+msiexec /x '.\src-tauri\target\release\bundle\msi\Campfire_0.1.0_x64_en-US.msi' /quiet
+# (or: Get-Package -Name "Campfire" | Uninstall-Package)
 
-# Stage 3 — Store-ready bundle (x64)
-pnpm tauri build -- --target x86_64-pc-windows-msvc
+# Stage 3 — Store-ready MSI (x64, with offline WebView2)
+pnpm tauri build -- --no-bundle
+pnpm tauri bundle -- --config src-tauri/tauri.microsoftstore.conf.json
 
-# Stage 3 — Store-ready bundle (ARM64)
+# Stage 3 — Store-ready MSI (ARM64)
 rustup target add aarch64-pc-windows-msvc
-pnpm tauri build -- --target aarch64-pc-windows-msvc
+pnpm tauri build -- --target aarch64-pc-windows-msvc -- --no-bundle
+pnpm tauri bundle -- --config src-tauri/tauri.microsoftstore.conf.json
 
 # Companion PWA deploy
 cd d:\program\Campfire\mobile
@@ -790,8 +832,9 @@ pnpm build
 |------|---------|
 | **MSA** | Microsoft Account (the personal account you use to sign in to Windows, Outlook, Xbox, etc.) |
 | **Partner Center** | Microsoft's web dashboard for app publishers |
-| **MSIX** | Windows app package format (modern replacement for MSI) |
-| **MSIX bundle** (`.msixbundle`) | Multi-architecture MSIX (x64 + ARM64 in one file) |
+| **MSI** | Windows Installer (`.msi`) — what Tauri 2 produces and what the Microsoft Store accepts for Win32 apps (register as "EXE or MSI app") |
+| **NSIS** | Nullsoft Scriptable Install System — produces the `.exe` installer Tauri 2 also generates, for direct (non-Store) distribution |
+| **MSIX** | Windows app package format — Tauri 2 does **not** produce these; relevant for UWP / WinUI / native Store apps only |
 | **Private audience** | Store visibility mode where only Known User Group members can install |
 | **Known user group** | A list of MSA emails allowed to install a private-audience app |
 | **PWA** | Progressive Web App — installable website that works offline |
@@ -807,13 +850,151 @@ pnpm build
 
 - Free registration for individuals: https://learn.microsoft.com/en-us/windows/apps/publish/whats-new-individual-developer
 - Open developer account (full): https://learn.microsoft.com/en-us/windows/apps/publish/partner-center/open-a-developer-account
-- MSIX visibility options: https://learn.microsoft.com/en-us/windows/apps/publish/publish-your-app/msix/visibility-options
+- MSIX visibility options (only if you ever switch to an MSIX-based Store app): https://learn.microsoft.com/en-us/windows/apps/publish/publish-your-app/msix/visibility-options
 - PWA visibility options: https://learn.microsoft.com/en-us/windows/apps/publish/publish-your-app/pwa/visibility-options
 - Beta testing & targeted distribution: https://learn.microsoft.com/en-us/windows/apps/publish/beta-testing-and-targeted-distribution
 - Pricing and availability: https://learn.microsoft.com/en-us/windows/apps/publish/publish-your-app/price-and-availability
 - App submissions overview: https://learn.microsoft.com/en-us/windows/apps/publish/app-submissions
 - Microsoft Store policies: https://learn.microsoft.com/en-us/windows/apps/publish/store-policies
-- Tauri 2 MSIX guide: https://v2.tauri.app/distribute/sign/windows/
+- Tauri 2 Microsoft Store guide (MSI-based): https://v2.tauri.app/distribute/microsoft-store/
+
+---
+
+## 14. Self-check cheatsheet (commands you can re-run)
+
+Use this section to re-verify the app on any future build. Every command is a copy-paste from `d:\program\Campfire`. Run them in order. If any step fails, **stop and fix it before proceeding to the next one** — they're ordered from cheapest to most expensive.
+
+### 14.1 Pre-flight gates (no build, ~30 s)
+
+Run from the repo root `d:\program\Campfire`:
+
+```powershell
+# TypeScript typecheck (frontend)
+pnpm typecheck
+
+# i18n completeness — every key referenced in code must exist in every locale
+pnpm i18n:check
+
+# Unit tests (Vitest, both workspaces)
+pnpm test
+
+# Rust syntax / type check (no link, no codegen — fast)
+cd desktop\src-tauri
+cargo check
+cd ..\..
+```
+
+All four must exit `0` with no warnings beyond the known `com.campfire.app` identifier warning (Tauri 2's macOS bundle-extension check, not a Windows issue — see §9.7).
+
+### 14.2 Dev mode (manual, ~5 min)
+
+```powershell
+cd desktop
+pnpm tauri dev
+```
+
+Walk through every view listed in [§4 Stage 1](#stage-1--dev-mode). Use `Ctrl+Shift+I` to open the WebView dev tools and confirm:
+- No CSP errors in the console (the `connect-src` in §3.2 should cover everything you call)
+- No 404s on bundled assets (Tauri 2 inlines them into `tauri-app.exe` in release, so dev uses the Vite server — a dev 404 is usually a missing import, not a bundle bug)
+- Ollama status poll updates the sidebar in real time
+
+When done, `Ctrl+C` to kill the watcher, then:
+```powershell
+Get-Process -Name tauri-app,esbuild -ErrorAction SilentlyContinue | Stop-Process -Force
+```
+
+### 14.3 Release build (MSI + NSIS, ~3 min on warm cache)
+
+```powershell
+cd desktop
+pnpm release
+```
+
+Verify both artifacts exist:
+```powershell
+Test-Path .\src-tauri\target\release\bundle\msi\Campfire_0.1.0_x64_en-US.msi   # expect True
+Test-Path .\src-tauri\target\release\bundle\nsis\Campfire_0.1.0_x64-setup.exe  # expect True
+Get-ChildItem .\src-tauri\target\release\bundle\*\*.msi,\.\src-tauri\target\release\bundle\*\*.exe |
+    Select-Object FullName, @{N='SizeMB';E={[math]::Round($_.Length/1MB,2)}} |
+    Format-Table -AutoSize
+# Expected sizes: MSI ~5 MB, NSIS ~4 MB
+```
+
+### 14.4 Sideload smoke test (NSIS, no admin, ~15 s)
+
+```powershell
+# Install
+Start-Process -FilePath .\src-tauri\target\release\bundle\nsis\Campfire_0.1.0_x64-setup.exe -ArgumentList @('/S') -Wait
+
+# Confirm the install location and registry entry
+$install = Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*' |
+    Where-Object { $_.DisplayName -eq 'Campfire' } | Select-Object -First 1
+$install | Select-Object DisplayName, DisplayVersion, Publisher, InstallLocation | Format-List
+Get-ChildItem $install.InstallLocation.Trim('"') | Format-Table -AutoSize
+# Expect: 2 files (tauri-app.exe + uninstall.exe) at $env:LOCALAPPDATA\Campfire
+```
+
+Launch the installed binary:
+```powershell
+$proc = Start-Process -FilePath (Join-Path $install.InstallLocation.Trim('"') 'tauri-app.exe') -PassThru
+Start-Sleep -Seconds 6
+$proc | Select-Object Id, @{N='Title';E={$_.MainWindowTitle}}, @{N='Running';E={-not $_.HasExited}}
+Stop-Process -Id $proc.Id -Force
+```
+`Title` should be `Campfire` and `Running` should be `True`. If `Title` is empty, the WebView failed to load (CSP / asset 404 / WebView2 missing) — see [§9.8](#98-webview2-runtime) and the dev console.
+
+Uninstall (leaves the system clean):
+```powershell
+& (Join-Path $install.InstallLocation.Trim('"') 'uninstall.exe') /S
+Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*' |
+    Where-Object { $_.DisplayName -eq 'Campfire' } | Format-List
+# Expect: nothing (the registry entry is gone)
+```
+
+### 14.5 Store MSI build (offline WebView2, ~3 min)
+
+```powershell
+cd desktop
+pnpm tauri build -- --no-bundle
+pnpm tauri bundle -- --config src-tauri/tauri.microsoftstore.conf.json
+```
+Verify the Store-specific MSI:
+```powershell
+Get-ChildItem .\src-tauri\target\release\bundle\msi\Campfire_0.1.0_x64_en-US.msi |
+    Select-Object FullName, @{N='SizeMB';E={[math]::Round($_.Length/1MB,2)}} |
+    Format-Table -AutoSize
+# Size should be ~130 MB (it's the offline WebView2 + 14 MB EXE bundled)
+```
+The Store uploads this file directly. See [§6.4](#64-upload-to-partner-center) for the upload step.
+
+### 14.6 MSI install (admin-only, optional pre-Store check)
+
+The Store does this for you, so this is only for paranoid local verification. Run from an **elevated** PowerShell:
+
+```powershell
+Start-Process msiexec.exe -ArgumentList @(
+    '/i',  '.\src-tauri\target\release\bundle\msi\Campfire_0.1.0_x64_en-US.msi',
+    '/quiet', '/norestart', '/l*v', "$env:TEMP\campfire_install.log"
+) -Verb RunAs -Wait
+Get-Content "$env:TEMP\campfire_install.log" -Tail 20
+# Expect: "Installation completed successfully" or similar
+# If you see Error 1925 / 1603, you forgot the elevation.
+```
+
+### 14.7 Sanity-recap
+
+After all of the above, the app is **ready for §5 Private audience** submission to Partner Center if:
+
+| Check | Result |
+|-------|--------|
+| §14.1 typecheck, i18n, test, cargo check | all `0` |
+| §14.2 dev mode walk-through | no console errors |
+| §14.3 release build artifacts | MSI + NSIS both exist |
+| §14.4 NSIS sideload + launch | window title = `Campfire`, no exit |
+| §14.5 Store MSI build | ~130 MB file exists |
+| §12 pre-submission checklist | all items checked |
+
+If any of these is false, the §3 / §4 work isn't done yet — go back and fix it before you spend the 24-72 h on cert.
 
 ---
 

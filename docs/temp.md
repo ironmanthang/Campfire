@@ -1,4 +1,3 @@
-
 # request feature
 
 when open the mobile app??i want it to show the logo of the app D:\program\Campfire\logo.png. right now it just show the tauri logo.
@@ -46,5 +45,5 @@ add a whole new centralize section about the donate "heart setting" in the confi
 # errors
 
 
-
+"🎉🎉 You've written 10 journal entries in Campfire! If this app brings value to your day, consider supporting its development." the icon appear twice.
 
