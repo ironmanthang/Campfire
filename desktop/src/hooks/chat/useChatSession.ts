@@ -139,8 +139,6 @@ export function useChatSession({ visible }: { visible: boolean }) {
   const handleStopChat = () => {
     if (chatAbortControllerRef.current) {
       chatAbortControllerRef.current.abort();
-      chatAbortControllerRef.current = null;
-      setIsStreamingChat(false);
     }
   };
 
@@ -163,6 +161,9 @@ export function useChatSession({ visible }: { visible: boolean }) {
           return;
         } else if (chatSubmissionMode === "interrupt") {
           handleStopChat();
+          setMessageQueue((prev) => [{ text, attachments: [...draftAttachments] }, ...prev]);
+          clearAttachments();
+          return;
         }
       }
 

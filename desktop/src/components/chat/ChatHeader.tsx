@@ -1,8 +1,8 @@
 import { RefreshCw, Info } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { SidebarToggleButton } from "../SidebarToggleButton";
+import { SidebarToggleButton } from "../layout/SidebarToggleButton";
 import { DateRangePicker } from "../common/DateRangePicker";
-import { ModelSelector } from "../ModelSelector";
+import { ModelSelector } from "../ai/ModelSelector";
 import { TokenMeter } from "./TokenMeter";
 import { useAppStore } from "../../store/useAppStore";
 import { useOllamaStore } from "../../store/useOllamaStore";

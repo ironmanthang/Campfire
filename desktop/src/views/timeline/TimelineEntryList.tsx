@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { JournalEntryMetadata } from "../../types";
-import { TimelineEntryCard } from "../../components/TimelineEntryCard";
+import { TimelineEntryCard } from "../../components/timeline/TimelineEntryCard";
 import { DragHandles } from "../../components/common/DragHandles";
 
 export type TimelineElement =

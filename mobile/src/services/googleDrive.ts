@@ -247,3 +247,18 @@ export async function deleteFile(fileId: string): Promise<void> {
   }
 }
 
+// Get authenticated user info
+export async function getGoogleUserInfo(): Promise<{ emailAddress: string; displayName: string } | null> {
+  try {
+    const response = await driveFetch('https://www.googleapis.com/drive/v3/about?fields=user');
+    if (response.ok) {
+      const data = await response.json();
+      return data.user || null;
+    }
+  } catch (err) {
+    console.error('Failed to fetch Google user info:', err);
+  }
+  return null;
+}
+
+

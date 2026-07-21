@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   getStoredAuthState, 
   requestDriveAuth, 
-  clearAuthState 
+  clearAuthState,
+  getGoogleUserInfo
 } from '../services/googleDrive';
 import { X, LogIn, LogOut, Sun, Moon, AlertCircle, Download } from 'lucide-react';
 import { listLocalEntries } from '../services/db';
@@ -34,6 +35,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [authLoading, setAuthLoading] = useState(false);
   const [autoSync, setAutoSync] = useState(true);
   const [logs, setLogs] = useState<string[]>([]);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -55,7 +57,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   useEffect(() => {
     const auth = getStoredAuthState();
-    setIsLoggedIn(!!auth.accessToken && Date.now() < auth.expiresAt);
+    const connected = !!auth.accessToken && Date.now() < auth.expiresAt;
+    setIsLoggedIn(connected);
+
+    if (connected) {
+      getGoogleUserInfo().then((info) => {
+        if (info?.emailAddress) {
+          setUserEmail(info.emailAddress);
+        }
+      }).catch(console.error);
+    } else {
+      setUserEmail(null);
+    }
     
     const storedAutoSync = localStorage.getItem('past_you_auto_sync');
     setAutoSync(storedAutoSync !== 'false');
@@ -82,6 +95,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       }
       await requestDriveAuth(clientId.trim());
       setIsLoggedIn(true);
+      getGoogleUserInfo().then((info) => {
+        if (info?.emailAddress) {
+          setUserEmail(info.emailAddress);
+        }
+      }).catch(console.error);
     } catch (err: any) {
       setAuthError(err.message || 'Login failed');
     } finally {
@@ -92,6 +110,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const handleLogout = () => {
     clearAuthState();
     setIsLoggedIn(false);
+    setUserEmail(null);
   };
 
   const handleClearLogs = () => {
@@ -198,7 +217,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <div className="space-y-4">
             <div>
               <h3 className="font-semibold text-text-primary">Google Drive Sync</h3>
-              <p className="text-xs text-text-secondary">Sync your diaries securely to your Google Drive folder.</p>
+              <p className="text-xs text-text-secondary">
+                {isLoggedIn 
+                  ? (userEmail ? `Connected as ${userEmail}.` : "Sync your diaries securely to your Google Drive folder.")
+                  : "Connect your Google Account to enable the automatic sync feature."}
+              </p>
             </div>
             {/* Auto-Sync Toggle */}
             {isLoggedIn && (
@@ -219,7 +242,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             {/* Auth status */}
             <div className="p-4 rounded-xl bg-bg-app border border-border-brand flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-text-primary">Google Account Sync</span>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-text-primary">Google Account Sync</span>
+                  {isLoggedIn && userEmail && (
+                    <span className="text-[11px] text-text-secondary mt-0.5">{userEmail}</span>
+                  )}
+                </div>
                 <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold ${isLoggedIn ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20'}`}>
                   {isLoggedIn ? 'Connected' : 'Disconnected'}
                 </span>

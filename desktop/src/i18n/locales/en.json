@@ -133,7 +133,32 @@
     "webSearchApiKey": "Search API Key",
     "webSearchApiKeyPlaceholder": "Enter your API key",
     "webSearchGoogleCx": "Google CSE Engine ID (CX)",
-    "webSearchGoogleCxPlaceholder": "Enter engine ID (CX)"
+    "webSearchGoogleCxPlaceholder": "Enter engine ID (CX)",
+    "pwaTitle": "Mobile App Setup (PWA)",
+    "pwaBadge": "PWA",
+    "pwaDesc": "Access your journal on the go by setting up the Campfire mobile Progressive Web App (PWA). Your entries can automatically sync between desktop and mobile via Google Drive.",
+    "pwaUrlLabel": "Mobile App URL",
+    "pwaUrlDesc": "The hosted URL of your mobile PWA. If you deployed to Cloudflare Pages following the setup guide, this will be your page's live address.",
+    "pwaUrlPlaceholder": "e.g., https://campfire-71w.pages.dev/",
+    "pwaCopyLink": "Copy Link",
+    "pwaLinkCopied": "Link copied to clipboard!",
+    "pwaQrCodeLabel": "Scan to Open",
+    "pwaQrCodeDesc": "Scan this QR code with your phone's camera to open the application instantly.",
+    "pwaInstallInstructions": "Installation Guide (Make it Linkless/Standalone)",
+    "pwaLinklessTitle": "What is 'Linkless' (Standalone) mode?",
+    "pwaLinklessDesc": "Adding the page to your Home Screen installs it as a Progressive Web App (PWA). It launches in full screen without the browser address bar, navigation buttons, or tabs, behaving exactly like a native app!",
+    "pwaIosInstructionsTitle": "Instructions for iPhone & iPad:",
+    "pwaIosStep1": "Open Safari and navigate to your PWA link (or scan the QR code).",
+    "pwaIosStep2": "Tap the Share button (the arrow-in-box icon) in the bottom navigation toolbar.",
+    "pwaIosStep3": "Scroll down the sharing sheet and select Add to Home Screen.",
+    "pwaIosStep4": "Tap Add in the top-right corner to confirm.",
+    "pwaIosStep5": "Open the new Campfire icon on your Home Screen. It will load instantly in fullscreen standalone mode without browser bars!",
+    "pwaAndroidInstructionsTitle": "Instructions for Android Devices:",
+    "pwaAndroidStep1": "Open Chrome and navigate to your PWA link (or scan the QR code).",
+    "pwaAndroidStep2": "Tap the Menu button (three vertical dots ⋮) in the top-right corner.",
+    "pwaAndroidStep3": "Select Add to Home screen or Install app.",
+    "pwaAndroidStep4": "Confirm by tapping Add or Install in the system prompt.",
+    "pwaAndroidStep5": "Open Campfire from your Home Screen. It will launch as a standalone, distraction-free app!"
   },
   "config": {
     "failedToLoad": "Failed to load configuration",
@@ -637,7 +662,8 @@
     "countMessage": "🎉 You've written {{count}} journal entries in Campfire! If this app brings value to your day, consider supporting its development.",
     "streakMessage": "🎉 You've reached a {{streak}}-day writing streak in Campfire! If this app brings value to your day, consider supporting its development.",
     "supportBtn": "Support Campfire",
-    "maybeLaterBtn": "Maybe Later"
+    "maybeLaterBtn": "Maybe Later",
+    "dontAskBtn": "Don't Ask Again"
   },
   "feedbackModal": {
     "title": "Report Bug & Feedback",

@@ -1,4 +1,4 @@
-import { SidebarToggleButton } from "../SidebarToggleButton";
+import { SidebarToggleButton } from "../layout/SidebarToggleButton";
 
 interface SelectionToolbarProps {
   sidebarCollapsed: boolean;

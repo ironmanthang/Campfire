@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { Loader2, X, CheckCircle2 } from "lucide-react";
 import { Sidebar } from "./components/sidebar";
-import { AboutModal } from "./components/AboutModal";
-import { FeedbackModal } from "./components/FeedbackModal";
-import { ErrorModal } from "./components/ErrorModal";
+import { AboutModal } from "./components/modals/general/AboutModal";
+import { FeedbackModal } from "./components/modals/general/FeedbackModal";
+import { ErrorModal } from "./components/modals/general/ErrorModal";
 import { HelpModal } from "./components/common";
 import { ToolExecutorTestPanel } from "./services/toolExecutorPanel";
-import { SyncResultModal } from "./components/SyncResultModal";
+import { SyncResultModal } from "./components/modals/data_management/SyncResultModal";
 import { SettingsView } from "./views/SettingsView";
 import { JournalEditorView } from "./views/journal/JournalEditorView";
 import { TimelineView } from "./views/timeline";
@@ -17,9 +17,9 @@ import i18n from "i18next";
 import { useTranslation } from "react-i18next";
 import { useAppStore } from "./store/useAppStore";
 import { useOllamaStore } from "./store/useOllamaStore";
-import { ImportReportModal } from "./components/ImportReportModal";
+import { ImportReportModal } from "./components/modals/data_management/ImportReportModal";
 import { invoke } from "@tauri-apps/api/core";
-import { calculateStreak } from "./lib/streakUtils";
+import { calculateStreak } from "@campfire/core";
 
 function App() {
   const t = useTranslation().t;
@@ -76,9 +76,10 @@ function App() {
     if (!config.journal_dir) return;
 
     const checkStats = async () => {
-      const dismissed = localStorage.getItem("donate-reminder-dismissed") === "true";
+      const neverAsk = localStorage.getItem("donate-reminder-never-ask") === "true";
+      const maybeLater = sessionStorage.getItem("donate-reminder-maybe-later") === "true";
       const hasDonated = localStorage.getItem("has_donated") === "true";
-      if (dismissed || hasDonated) {
+      if (neverAsk || maybeLater || hasDonated) {
         setShowDonateBanner(false);
         return;
       }
@@ -241,7 +242,7 @@ function App() {
                   : t("donateBanner.streakMessage", { streak: 30 })}
               </p>
             </div>
-            <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+            <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto flex-wrap">
               <button
                 onClick={() => {
                   setAboutInitialTab("me");
@@ -253,12 +254,21 @@ function App() {
               </button>
               <button
                 onClick={() => {
-                  localStorage.setItem("donate-reminder-dismissed", "true");
+                  sessionStorage.setItem("donate-reminder-maybe-later", "true");
                   setShowDonateBanner(false);
                 }}
                 className="px-3 py-1.5 rounded-lg bg-bg-surface border border-border-brand hover:border-accent-brand text-xs font-bold text-text-primary transition-all cursor-pointer"
               >
                 {t("donateBanner.maybeLaterBtn")}
+              </button>
+              <button
+                onClick={() => {
+                  localStorage.setItem("donate-reminder-never-ask", "true");
+                  setShowDonateBanner(false);
+                }}
+                className="px-3 py-1.5 rounded-lg bg-bg-surface border border-border-brand hover:border-accent-brand text-xs font-bold text-text-primary transition-all cursor-pointer"
+              >
+                {t("donateBanner.dontAskBtn", { defaultValue: "Don't Ask Again" })}
               </button>
             </div>
           </div>

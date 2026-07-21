@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useResizer } from "../../hooks/useResizer";
 import { useEntrySelection } from "../../hooks/useEntrySelection";
-import { DeleteConfirmModal } from "../../components/DeleteConfirmModal";
+import { DeleteConfirmModal } from "../../components/modals/data_management/DeleteConfirmModal";
 import { SearchResult, EmbeddingCacheData, JournalEntryMetadata } from "../../types";
 import {
   createEmptyCache,

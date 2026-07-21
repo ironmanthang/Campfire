@@ -6,7 +6,7 @@ import { JournalEntryMetadata } from "../../types";
 import { getLocalYYYYMMDD } from "../../lib/dateUtils";
 import { useResizer } from "../../hooks/useResizer";
 import { useEntrySelection } from "../../hooks/useEntrySelection";
-import { DeleteConfirmModal } from "../../components/DeleteConfirmModal";
+import { DeleteConfirmModal } from "../../components/modals/data_management/DeleteConfirmModal";
 import { usePersistedState } from "../../hooks/usePersistedState";
 import { useAppStore } from "../../store/useAppStore";
 import { useSearchStore } from "../../store/useSearchStore";

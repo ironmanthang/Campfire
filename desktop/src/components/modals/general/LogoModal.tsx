@@ -1,7 +1,7 @@
 import { X, Upload, RotateCcw } from "lucide-react";
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { useAppStore } from "../store/useAppStore";
+import { useAppStore } from "../../../store/useAppStore";
 import { open } from "@tauri-apps/plugin-dialog";
 import { invoke } from "@tauri-apps/api/core";
 

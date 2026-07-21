@@ -9,10 +9,10 @@ import {
 } from "lucide-react";
 import { OllamaMessage, streamAIResponse } from "../services/ollama";
 import { getLocalYYYYMMDD } from "../lib/dateUtils";
-import { ModelSelector } from "../components/ModelSelector";
+import { ModelSelector } from "../components/ai/ModelSelector";
 import { useResizer } from "../hooks/useResizer";
 import { useTranslation } from "react-i18next";
-import { SidebarToggleButton } from "../components/SidebarToggleButton";
+import { SidebarToggleButton } from "../components/layout/SidebarToggleButton";
 import { usePersistedState } from "../hooks/usePersistedState";
 import { DateRangePicker } from "../components/common/DateRangePicker";
 import { DragHandles } from "../components/common/DragHandles";

@@ -17,7 +17,7 @@ By transitioning your project to **In Production** and obtaining **Google OAuth 
 ## 🔒 Step 1: Secure Code Scopes
 We have successfully reduced the OAuth scopes requested by both the **PWA** and **Tauri Desktop** clients from the broad `drive` scope to the compliance-friendly `drive.file` scope:
 - **Scope Used**: `https://www.googleapis.com/auth/drive.file`
-- **Why this matters**: This scope only grants Campfire access to files/folders it created itself. Because it is classified by Google as a **Sensitive** scope rather than a **Restricted** scope, verification is **100% free** and **does not require** an expensive, complex annual third-party CASA security assessment.
+- **Why this matters**: This scope only grants Campfire access to files/folders it created itself. Because it is classified by Google as a **Non-Sensitive** scope rather than a **Restricted** scope, verification is **100% free** and **does not require** an expensive, complex annual third-party CASA security assessment.
 
 ---
 
@@ -42,7 +42,7 @@ We have successfully reduced the OAuth scopes requested by both the **PWA** and 
 2. Go to the **Data access** (Scopes) tab:
    * Click **Add or remove scopes**.
    * Add the scope: `.../auth/drive.file` (Google Drive API - View and manage Google Drive files and folders that you have opened or created with this app).
-   * Verify it appears under the "Your sensitive scopes" list.
+   * Verify it appears under the "Your non-sensitive scopes" list.
 
 ---
 

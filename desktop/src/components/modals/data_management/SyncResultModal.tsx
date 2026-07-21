@@ -1,7 +1,7 @@
 import { X, CheckCircle, BookOpen } from "lucide-react";
 import { useRef } from "react";
-import { formatToDDMMYY } from "../lib/dateUtils";
-import { useAppStore } from "../store/useAppStore";
+import { formatToDDMMYY } from "../../../lib/dateUtils";
+import { useAppStore } from "../../../store/useAppStore";
 
 interface SyncResultModalProps {
   updatedDates: string[];

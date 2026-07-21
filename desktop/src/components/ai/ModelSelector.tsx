@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Pin, ChevronDown, Search } from "lucide-react";
-import { OllamaModelInfo } from "../services/ollama";
+import { OllamaModelInfo } from "../../services/ollama";
 
 interface ModelSelectorProps {
   selectedModel: string;

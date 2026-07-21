@@ -2,10 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { X } from "lucide-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { BANK_ID, ACCOUNT_NO, ACCOUNT_NAME } from "../lib/constants";
-import { AboutAppTab } from "./about/AboutAppTab";
-import { AboutMeTab } from "./about/AboutMeTab";
-import { HonorSystemDialog } from "./about/HonorSystemDialog";
+import { BANK_ID, ACCOUNT_NO, ACCOUNT_NAME } from "../../../lib/constants";
+import { AboutAppTab } from "../../about/AboutAppTab";
+import { AboutMeTab } from "../../about/AboutMeTab";
+import { HonorSystemDialog } from "../../about/HonorSystemDialog";
 
 interface AboutModalProps {
   isOpen: boolean;
@@ -32,6 +32,7 @@ export function AboutModal({ isOpen, onClose, initialTab = "app" }: AboutModalPr
       setActiveTab(initialTab);
       setDonationTab(i18n.language === "vi" ? "vietqr" : "kofi");
       setShowHonorPrompt(false);
+      setIsQrExpanded(false);
     }
   }, [isOpen, initialTab, i18n.language]);
 
@@ -41,6 +42,7 @@ export function AboutModal({ isOpen, onClose, initialTab = "app" }: AboutModalPr
       if (e.key === "Escape") {
         if (isQrExpanded) {
           setIsQrExpanded(false);
+          setShowHonorPrompt(true);
         } else {
           onClose();
         }
@@ -190,6 +192,12 @@ export function AboutModal({ isOpen, onClose, initialTab = "app" }: AboutModalPr
       {/* Lightbox QR Code Expand Modal */}
       {isQrExpanded && (
         <div
+          onPointerDown={(e) => {
+            e.stopPropagation();
+          }}
+          onPointerUp={(e) => {
+            e.stopPropagation();
+          }}
           onClick={(e) => {
             e.stopPropagation();
             handleCloseQr();

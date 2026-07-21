@@ -2,8 +2,8 @@ import { AlertTriangle, CheckCircle, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useRef } from "react";
 import type { ReactNode } from "react";
-import { formatToDDMMYY } from "../lib/dateUtils";
-import type { ImportReport } from "../store/domains/uiSlice";
+import { formatToDDMMYY } from "../../../lib/dateUtils";
+import type { ImportReport } from "../../../store/domains/uiSlice";
 
 interface ImportReportModalProps {
   report: ImportReport;

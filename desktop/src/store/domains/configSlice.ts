@@ -48,7 +48,7 @@ export const createConfigSlice: StateCreator<
     journal_dir: "",
     theme: "dark",
     autosave_interval: 1,
-    config_section_order: ["identity", "ollama", "web_search", "legacy"],
+    config_section_order: ["identity", "ollama", "pwa", "web_search", "legacy"],
     language: "en",
     web_search_enabled: false,
     web_search_provider: "brave_free",
@@ -62,6 +62,7 @@ export const createConfigSlice: StateCreator<
     custom_subtitle: "",
     system_instruction_mode: "default",
     custom_system_instruction: "",
+    pwa_url: "https://campfire-71w.pages.dev/",
   },
   loadingConfig: true,
 

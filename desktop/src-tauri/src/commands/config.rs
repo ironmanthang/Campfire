@@ -25,12 +25,14 @@ pub struct AppConfig {
     pub custom_subtitle: String,
     pub system_instruction_mode: String,
     pub custom_system_instruction: String,
+    pub pwa_url: String,
 }
 
 fn default_section_order() -> Vec<String> {
     vec![
         "identity".to_string(),
         "ollama".to_string(),
+        "pwa".to_string(),
         "web_search".to_string(),
         "legacy".to_string(),
     ]
@@ -62,6 +64,7 @@ impl Default for AppConfig {
             custom_subtitle: String::new(),
             system_instruction_mode: "default".to_string(),
             custom_system_instruction: String::new(),
+            pwa_url: "https://campfire-71w.pages.dev/".to_string(),
         }
     }
 }

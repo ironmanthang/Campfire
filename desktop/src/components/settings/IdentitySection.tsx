@@ -4,7 +4,8 @@ import { SUPPORTED_LANGUAGES } from "../../i18n/languages";
 import { useTranslation } from "react-i18next";
 import { useAppStore } from "../../store/useAppStore";
 import { invoke } from "@tauri-apps/api/core";
-import { RestoreConfirmModal } from "../RestoreConfirmModal";
+import { RestoreConfirmModal } from "../modals/data_management/RestoreConfirmModal";
+import { getGoogleUserInfo } from "../../services/googleDrive";
 
 export function IdentitySection() {
   const { t } = useTranslation();
@@ -26,11 +27,24 @@ export function IdentitySection() {
   const [restoringBackup, setRestoringBackup] = useState<number | null>(null);
   const [backingUp, setBackingUp] = useState(false);
   const [confirmRestoreTs, setConfirmRestoreTs] = useState<number | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
   const [showDonateHeart, setShowDonateHeart] = useState(
     localStorage.getItem("show_donate_heart") !== "false"
   );
   const [showLockAlert, setShowLockAlert] = useState(false);
+
+  useEffect(() => {
+    if (isDriveConnected) {
+      getGoogleUserInfo().then((info) => {
+        if (info?.emailAddress) {
+          setUserEmail(info.emailAddress);
+        }
+      }).catch(console.error);
+    } else {
+      setUserEmail(null);
+    }
+  }, [isDriveConnected]);
 
   const handleToggleHeart = (checked: boolean) => {
     if (checked) {
@@ -209,7 +223,9 @@ export function IdentitySection() {
           </span>
         </div>
         <p className="text-xs text-text-secondary">
-          Sync your journal entries securely to Google Drive.
+          {isDriveConnected 
+            ? (userEmail ? `Connected as ${userEmail}.` : "Sync your journal entries securely to Google Drive.")
+            : "Connect your Google Account to enable the automatic sync feature."}
         </p>
 
         {!isDriveConnected ? (

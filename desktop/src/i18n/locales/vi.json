@@ -133,7 +133,32 @@
     "webSearchApiKey": "API Key",
     "webSearchApiKeyPlaceholder": "Nhập API Key của bạn",
     "webSearchGoogleCx": "Google CSE Engine ID (CX)",
-    "webSearchGoogleCxPlaceholder": "Nhập Google Custom Search ID (CX)"
+    "webSearchGoogleCxPlaceholder": "Nhập Google Custom Search ID (CX)",
+    "pwaTitle": "Cài đặt ứng dụng di động (PWA)",
+    "pwaBadge": "PWA",
+    "pwaDesc": "Truy cập nhật ký của bạn mọi lúc mọi nơi bằng cách thiết lập ứng dụng di động Campfire PWA. Các bài viết của bạn có thể tự động đồng bộ hóa giữa máy tính và điện thoại thông qua Google Drive.",
+    "pwaUrlLabel": "Đường dẫn ứng dụng di động",
+    "pwaUrlDesc": "Đường dẫn được liên kết của ứng dụng di động Campfire PWA. Nếu bạn đã triển khai lên Cloudflare Pages theo hướng dẫn, đây sẽ là địa chỉ trực tiếp của trang của bạn.",
+    "pwaUrlPlaceholder": "Ví dụ: https://campfire-71w.pages.dev/",
+    "pwaCopyLink": "Sao chép liên kết",
+    "pwaLinkCopied": "Đã sao chép!",
+    "pwaQrCodeLabel": "Quét để mở",
+    "pwaQrCodeDesc": "Quét mã QR này bằng máy ảnh điện thoại của bạn để mở ứng dụng ngay lập tức.",
+    "pwaInstallInstructions": "Hướng dẫn cài đặt (Chạy độc lập không chứa thanh công cụ)",
+    "pwaLinklessTitle": "Chế độ chạy độc lập (Không chứa thanh công cụ) là gì?",
+    "pwaLinklessDesc": "Thêm trang này vào Màn hình chính giúp cài đặt nó dưới dạng Ứng dụng web tiến trình (PWA). Ứng dụng sẽ chạy ở chế độ toàn màn hình mà không có thanh địa chỉ trình duyệt, nút điều hướng hoặc tab, giúp mang lại trải nghiệm y hệt như ứng dụng gốc!",
+    "pwaIosInstructionsTitle": "Hướng dẫn cho iPhone & iPad:",
+    "pwaIosStep1": "Mở Safari và truy cập đường dẫn PWA của bạn (hoặc quét mã QR).",
+    "pwaIosStep2": "Nhấn nút Chia sẻ (biểu tượng mũi tên trong hộp) ở thanh công cụ phía dưới.",
+    "pwaIosStep3": "Cuộn xuống dưới và chọn Thêm vào MH chính.",
+    "pwaIosStep4": "Nhấn Thêm ở góc trên bên phải để xác nhận.",
+    "pwaIosStep5": "Mở biểu tượng Campfire mới trên Màn hình chính của bạn. Ứng dụng sẽ hoạt động toàn màn hình không có thanh trình duyệt!",
+    "pwaAndroidInstructionsTitle": "Hướng dẫn cho thiết bị Android:",
+    "pwaAndroidStep1": "Mở Chrome và truy cập đường dẫn PWA của bạn (hoặc quét mã QR).",
+    "pwaAndroidStep2": "Nhấn nút Menu (ba dấu chấm dọc ⋮) ở góc trên bên phải.",
+    "pwaAndroidStep3": "Chọn Thêm vào màn hình chính hoặc Cài đặt ứng dụng.",
+    "pwaAndroidStep4": "Xác nhận bằng cách nhấn Thêm hoặc Cài đặt trong hộp thoại hệ thống.",
+    "pwaAndroidStep5": "Mở Campfire từ Màn hình chính. Ứng dụng sẽ khởi chạy dưới dạng độc lập, không có thanh trình duyệt phiền toái!"
   },
   "config": {
     "failedToLoad": "Lỗi tải cấu hình",
@@ -637,7 +662,8 @@
     "countMessage": "🎉 Bạn đã viết được {{count}} trang nhật ký trên Campfire! Nếu ứng dụng mang lại giá trị cho bạn, hãy cân nhắc ủng hộ tác giả nhé.",
     "streakMessage": "🎉 Bạn đã đạt chuỗi {{streak}} ngày viết liên tục trên Campfire! Nếu ứng dụng mang lại giá trị cho bạn, hãy cân nhắc ủng hộ tác giả nhé.",
     "supportBtn": "Ủng hộ dự án",
-    "maybeLaterBtn": "Để sau"
+    "maybeLaterBtn": "Để sau",
+    "dontAskBtn": "Không hỏi lại"
   },
   "feedbackModal": {
     "title": "Báo lỗi & Góp ý",

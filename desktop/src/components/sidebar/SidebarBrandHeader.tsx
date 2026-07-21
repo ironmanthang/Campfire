@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronLeft } from "lucide-react";
 import { useAppStore } from "../../store/useAppStore";
-import { LogoModal } from "../LogoModal";
+import { LogoModal } from "../modals/general/LogoModal";
 
 interface SidebarBrandHeaderProps {
   isCollapsed: boolean;

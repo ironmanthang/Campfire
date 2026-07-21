@@ -1,6 +1,6 @@
 import { AlertCircle } from "lucide-react";
 import { useRef } from "react";
-import { formatToDDMMYY } from "../lib/dateUtils";
+import { formatToDDMMYY } from "../../../lib/dateUtils";
 import { useTranslation } from "react-i18next";
 
 interface DeleteConfirmModalProps {

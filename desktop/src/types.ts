@@ -18,6 +18,7 @@ export interface AppConfig {
   custom_subtitle: string;
   system_instruction_mode: 'default' | 'append' | 'override';
   custom_system_instruction: string;
+  pwa_url: string;
 }
 
 export interface JournalEntryMetadata {

@@ -1,5 +1,5 @@
 import { BookOpen } from "lucide-react";
-import { SidebarToggleButton } from "../../components/SidebarToggleButton";
+import { SidebarToggleButton } from "../../components/layout/SidebarToggleButton";
 import { DateRangePicker } from "../../components/common/DateRangePicker";
 import { SelectionToolbar } from "../../components/common/SelectionToolbar";
 

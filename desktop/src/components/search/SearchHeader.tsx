@@ -1,7 +1,7 @@
 import { Search as SearchIcon, Sparkles, Loader2, Info, BookOpen } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { SidebarToggleButton } from "../SidebarToggleButton";
-import { ModelSelector } from "../ModelSelector";
+import { SidebarToggleButton } from "../layout/SidebarToggleButton";
+import { ModelSelector } from "../ai/ModelSelector";
 import { DateRangePicker } from "../common/DateRangePicker";
 import { SelectionToolbar } from "../common/SelectionToolbar";
 import { TagCloudPanel } from "./TagCloudPanel";

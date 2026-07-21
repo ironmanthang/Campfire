@@ -1,6 +1,6 @@
 import { BookOpen, Trash2 } from "lucide-react";
-import { JournalEntryMetadata, ViewType } from "../types";
-import { formatToDDMMYY } from "../lib/dateUtils";
+import { JournalEntryMetadata, ViewType } from "../../types";
+import { formatToDDMMYY } from "../../lib/dateUtils";
 import { useTranslation } from "react-i18next";
 
 interface TimelineEntryCardProps {

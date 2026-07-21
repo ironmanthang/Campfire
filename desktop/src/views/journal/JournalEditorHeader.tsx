@@ -11,7 +11,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { DatePicker } from "../../components/common/DatePicker";
-import { SidebarToggleButton } from "../../components/SidebarToggleButton";
+import { SidebarToggleButton } from "../../components/layout/SidebarToggleButton";
 import { useTranslation } from "react-i18next";
 
 interface JournalEditorHeaderProps {

@@ -1,18 +1,19 @@
 import { useState, useEffect } from "react";
 import { useResizer } from "../hooks/useResizer";
 import { useTranslation } from "react-i18next";
-import { SidebarToggleButton } from "../components/SidebarToggleButton";
+import { SidebarToggleButton } from "../components/layout/SidebarToggleButton";
 import { DragHandles } from "../components/common";
 import {
   SectionWrapper,
   IdentitySection,
   OllamaSection,
+  PwaSection,
   LegacyExportSection
 } from "../components/settings";
 import { useAppStore } from "../store/useAppStore";
 import { useOllamaStore } from "../store/useOllamaStore";
 
-const AVAILABLE_SECTIONS = ["identity", "ollama", "legacy"];
+const AVAILABLE_SECTIONS = ["identity", "ollama", "pwa", "legacy"];
 
 export function SettingsView() {
   const { t } = useTranslation();
@@ -86,7 +87,11 @@ export function SettingsView() {
         content = <OllamaSection />;
         break;
 
-
+      case "pwa":
+        title = t("settingsView.pwaTitle", { defaultValue: "Mobile App Setup (PWA)" });
+        badge = t("settingsView.pwaBadge", { defaultValue: "PWA" });
+        content = <PwaSection />;
+        break;
 
       case "legacy":
         if (!config.journal_dir) return null;
