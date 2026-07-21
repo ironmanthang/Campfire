@@ -12,7 +12,7 @@ export class JournalDatabase extends Dexie {
   entries!: Table<LocalJournalEntry>;
 
   constructor() {
-    super('PastYouDatabase');
+    super('CampfireDatabase');
     this.version(1).stores({
       entries: 'date, lastModified, synced'
     });

@@ -139,7 +139,7 @@
     "pwaDesc": "Truy cập nhật ký của bạn mọi lúc mọi nơi bằng cách thiết lập ứng dụng di động Campfire PWA. Các bài viết của bạn có thể tự động đồng bộ hóa giữa máy tính và điện thoại thông qua Google Drive.",
     "pwaUrlLabel": "Đường dẫn ứng dụng di động",
     "pwaUrlDesc": "Đường dẫn được liên kết của ứng dụng di động Campfire PWA. Nếu bạn đã triển khai lên Cloudflare Pages theo hướng dẫn, đây sẽ là địa chỉ trực tiếp của trang của bạn.",
-    "pwaUrlPlaceholder": "Ví dụ: https://campfire-71w.pages.dev/",
+    "pwaUrlPlaceholder": "Ví dụ: https://app-campfire.pages.dev/",
     "pwaCopyLink": "Sao chép liên kết",
     "pwaLinkCopied": "Đã sao chép!",
     "pwaQrCodeLabel": "Quét để mở",

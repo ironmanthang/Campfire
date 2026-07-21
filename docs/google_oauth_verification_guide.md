@@ -28,10 +28,10 @@ We have successfully reduced the OAuth scopes requested by both the **PWA** and 
    * **App name**: `Campfire`
    * **User support email**: Your support email address.
    * **App logo**: Upload your branding image (e.g., `my_logo_small.png`).
-   * **Application home page**: `https://campfire-71w.pages.dev` (or your custom domain).
-   * **Application privacy policy link**: `https://campfire-71w.pages.dev/privacy/` (Matches the static page deployed in PWA).
-   * **Application terms of service link**: `https://campfire-71w.pages.dev/terms/` (Matches the static page deployed in PWA).
-   * **Authorized domains**: Add your specific subdomain (e.g., `campfire-71w.pages.dev`) rather than the root `pages.dev` (as Google blocks registering public suffixes directly).
+   * **Application home page**: `https://app-campfire.pages.dev` (or your custom domain).
+   * **Application privacy policy link**: `https://app-campfire.pages.dev/privacy/` (Matches the static page deployed in PWA).
+   * **Application terms of service link**: `https://app-campfire.pages.dev/terms/` (Matches the static page deployed in PWA).
+   * **Authorized domains**: Add your specific subdomain (e.g., `app-campfire.pages.dev`) rather than the root `pages.dev` (as Google blocks registering public suffixes directly).
 
 ---
 
@@ -53,7 +53,7 @@ Once your consent screen status is set to "In Production":
    > "Campfire is an offline-first diary and journal application. We use the `drive.file` permission to let users sync their journal entries securely to their personal Google Drive folder (`CampfireJournal`). The app only reads and writes files created by itself, maintaining user privacy."
 3. Google requires a **demo video** to check that your sync implementation behaves exactly as described:
    * Record a short (1-2 minute) screencast showing:
-     * Open your live PWA link (`https://campfire-71w.pages.dev`) in a browser window.
+     * Open your live PWA link (`https://app-campfire.pages.dev`) in a browser window.
      * Click **Settings** and then click **Sign in with Google**.
      * The Google Login consent screen must appear. **IMPORTANT**: Highlight or point out the address bar URL, which shows your Google Cloud Project's Client ID (e.g., `client_id=xxxxxx.apps.googleusercontent.com`), showing that it matches the console.
      * Log in and show the consent prompt for the `drive.file` scope.

@@ -106,16 +106,18 @@ Before you start the testing pipeline, fix these in your codebase. They will blo
 
 ### 3.1 OAuth client secret in shipped binaries (CRITICAL)
 
-Your current desktop app accepts a `google_drive_client_secret` from user input ([desktop/src/components/settings/IdentitySection.tsx:234-235](desktop/src/components/settings/IdentitySection.tsx#L234-L235), [desktop/src/types.ts:13-14](desktop/src/types.ts#L13-L14), [desktop/src/store/domains/syncSlice.ts:142-143](desktop/src/store/domains/syncSlice.ts#L142-L143)). **Remove this entirely** before publishing.
+Your current desktop app accepts a `google_drive_client_secret` from user input ([desktop/src/components/settings/IdentitySection.tsx:234-235](desktop/src/components/settings/IdentitySection.tsx#L234-L235), [desktop/src/types.ts:13-14](desktop/src/types.ts#L13-L14), [desktop/src/store/domains/syncSlice.ts:142-143](desktop/src/store/domains/syncSlice.ts#L142-L143)). **Remove the user-input UI and stored config field** before publishing — never ask end users to paste a developer secret.
 
-For a desktop app distributed via the Store:
+**Reality check (2026-07)**: Google's standard OAuth token-exchange endpoint **does require `client_secret`** even for "Desktop app" OAuth client types. The Desktop-app type is intended for *installed* applications, not for secret-less public clients. The only secret-less flow is the PKCE `authorization_code` flow, which is a different beast (you'd need to add PKCE + a verifier store to the Rust side). For a single-developer, single-OAuth-client app the simpler and correct approach is: **bake the developer's own `client_secret` into the binary at build time** and remove all user-facing secret input.
 
-- Use OAuth Client type = **"Desktop app"** in Google Cloud Console (not "Web application").
-- A Desktop app client **does not use a client secret** in the standard OAuth flow — the Google Identity Services library handles token exchange without one.
-- Your **own** Client ID may be baked into the bundle via `VITE_GOOGLE_CLIENT_ID` (Client IDs are meant to be public).
-- **Never** ship a `VITE_GOOGLE_CLIENT_SECRET` in the bundle, and never accept one from user input.
+Concretely:
 
-**Files to modify** (removing `google_drive_client_secret` references):
+- Use OAuth Client type = **"Desktop app"** in Google Cloud Console.
+- Your **own** Client ID and Client Secret are baked into the bundle via `VITE_GOOGLE_CLIENT_ID` and `VITE_GOOGLE_CLIENT_SECRET` in `desktop/.env` (Client IDs are public; the secret is the developer's own, not a user secret).
+- **`build.rs`** in `desktop/src-tauri/` reads `desktop/.env` at compile time and emits both values to rustc. The Rust `start_gdrive_auth` command reads them via `env!(...)` and uses them in the token-exchange POST.
+- **Never** ship a user-input secret field. **Never** accept a secret from a settings UI.
+
+**Files to modify** (removing `google_drive_client_secret` user-input and config):
 
 ```
 desktop/src/types.ts                                  (line 14)
@@ -123,6 +125,9 @@ desktop/src/hooks/useConfig.ts                        (line 23)
 desktop/src/store/domains/configSlice.ts              (line 58)
 desktop/src/store/domains/syncSlice.ts                (lines 142-143)
 desktop/src/components/settings/IdentitySection.tsx   (line 235)
+desktop/src-tauri/src/commands/oauth.rs               (signature: drop client_secret param, use env!())
+desktop/src-tauri/src/commands/config.rs              (AppConfig field)
+desktop/src-tauri/build.rs                            (NEW: read .env, emit cargo:rustc-env)
 ```
 
 ### 3.2 Content Security Policy (CSP)

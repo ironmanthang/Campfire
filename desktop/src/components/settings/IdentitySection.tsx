@@ -232,8 +232,7 @@ export function IdentitySection() {
           <button
             onClick={() => {
               const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
-              const clientSecret = import.meta.env.VITE_GOOGLE_CLIENT_SECRET || "";
-              startDriveAuth(clientId, clientSecret);
+              startDriveAuth(clientId);
             }}
             className="w-full py-2.5 bg-accent-brand text-bg-app hover:bg-accent-brand-hover rounded-xl text-xs font-semibold transition-colors text-center cursor-pointer font-medium"
           >

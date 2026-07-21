@@ -5,12 +5,14 @@ import { useAppStore } from "../../store/useAppStore";
 
 export function PwaSection() {
   const { t } = useTranslation();
-  const { config, showNotification } = useAppStore();
+  const { showNotification } = useAppStore();
   const [copied, setCopied] = useState(false);
   const [qrLoaded, setQrLoaded] = useState(false);
   const [activeTab, setActiveTab] = useState<"ios" | "android">("ios");
 
-  const pwaUrl = config.pwa_url || "https://campfire-71w.pages.dev/";
+  // The PWA URL is intentionally read-only and locked to the canonical deployment address.
+  const CANONICAL_PWA_URL = "https://app-campfire.pages.dev/";
+  const pwaUrl = CANONICAL_PWA_URL;
 
   const handleCopy = async () => {
     try {

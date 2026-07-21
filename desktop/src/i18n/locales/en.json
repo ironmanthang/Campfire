@@ -139,7 +139,7 @@
     "pwaDesc": "Access your journal on the go by setting up the Campfire mobile Progressive Web App (PWA). Your entries can automatically sync between desktop and mobile via Google Drive.",
     "pwaUrlLabel": "Mobile App URL",
     "pwaUrlDesc": "The hosted URL of your mobile PWA. If you deployed to Cloudflare Pages following the setup guide, this will be your page's live address.",
-    "pwaUrlPlaceholder": "e.g., https://campfire-71w.pages.dev/",
+    "pwaUrlPlaceholder": "e.g., https://app-campfire.pages.dev/",
     "pwaCopyLink": "Copy Link",
     "pwaLinkCopied": "Link copied to clipboard!",
     "pwaQrCodeLabel": "Scan to Open",

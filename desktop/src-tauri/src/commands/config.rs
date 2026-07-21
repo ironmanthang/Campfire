@@ -18,7 +18,10 @@ pub struct AppConfig {
     pub web_search_api_key: String,
     pub web_search_google_cx: String,
     pub google_drive_client_id: String,
-    pub google_drive_client_secret: String,
+    // Legacy field kept for forward-compatible deserialization of older config files.
+    // Desktop-app OAuth clients do not use a client secret; we never read it.
+    #[serde(default, rename = "google_drive_client_secret")]
+    _google_drive_client_secret: String,
     pub google_drive_auto_sync: bool,
     pub custom_logo: String,
     pub custom_title: String,
@@ -57,14 +60,14 @@ impl Default for AppConfig {
             web_search_api_key: String::new(),
             web_search_google_cx: String::new(),
             google_drive_client_id: String::new(),
-            google_drive_client_secret: String::new(),
+            _google_drive_client_secret: String::new(),
             google_drive_auto_sync: false,
             custom_logo: String::new(),
             custom_title: String::new(),
             custom_subtitle: String::new(),
             system_instruction_mode: "default".to_string(),
             custom_system_instruction: String::new(),
-            pwa_url: "https://campfire-71w.pages.dev/".to_string(),
+            pwa_url: "https://app-campfire.pages.dev/".to_string(),
         }
     }
 }
@@ -82,7 +85,7 @@ pub fn load_config(app: AppHandle) -> Result<AppConfig, String> {
     if !path.exists() {
         return Ok(AppConfig::default());
     }
-    let content = fs::read_to_string(path).map_err(|e| e.to_string())?;
+    let content = fs::read_to_string(&path).map_err(|e| e.to_string())?;
     let mut config: AppConfig = serde_json::from_str(&content).unwrap_or_else(|e| {
         eprintln!("Warning: Failed to parse config.json ({}). Falling back to defaults.", e);
         AppConfig::default()

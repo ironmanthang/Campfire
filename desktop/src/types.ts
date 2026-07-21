@@ -11,7 +11,6 @@ export interface AppConfig {
   web_search_api_key: string;
   web_search_google_cx: string;
   google_drive_client_id: string;
-  google_drive_client_secret: string;
   google_drive_auto_sync: boolean;
   custom_logo: string;
   custom_title: string;

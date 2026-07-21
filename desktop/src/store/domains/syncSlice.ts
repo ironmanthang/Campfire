@@ -17,7 +17,7 @@ export interface SyncSlice {
 
   checkDriveStatus: () => Promise<void>;
   handleSync: (isManual?: boolean, isStartupSync?: boolean) => Promise<void>;
-  startDriveAuth: (clientId: string, clientSecret: string) => Promise<void>;
+  startDriveAuth: (clientId: string) => Promise<void>;
   disconnectDrive: () => Promise<void>;
   listJournalBackups: (dirPath: string) => Promise<number[]>;
   restoreJournalBackup: (dirPath: string, timestamp: number) => Promise<void>;
@@ -130,17 +130,15 @@ export const createSyncSlice: StateCreator<
     }
   },
 
-  startDriveAuth: async (clientId, clientSecret) => {
+  startDriveAuth: async (clientId) => {
     if (!clientId.trim()) { get().showNotification("Please enter a Client ID", "error"); return; }
-    if (!clientSecret.trim()) { get().showNotification("Please enter a Client Secret", "error"); return; }
     set({ syncProgress: { status: "authenticating", message: "Please complete login in your browser...", filesProcessed: 0, totalFiles: 0 } });
     try {
-      await invoke("start_gdrive_auth", { clientId, clientSecret });
+      await invoke("start_gdrive_auth", { clientId });
       set({ isDriveConnected: true });
       set({ syncProgress: { status: "completed", message: "Connected successfully!", filesProcessed: 0, totalFiles: 0 } });
       get().showNotification("Google Drive connected successfully!", "success");
       await get().updateConfigField("google_drive_client_id", clientId);
-      await get().updateConfigField("google_drive_client_secret", clientSecret);
       if (get().config.google_drive_auto_sync) get().handleSync().catch(console.error);
     } catch (err: any) {
       console.error(err);

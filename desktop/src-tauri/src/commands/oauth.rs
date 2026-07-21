@@ -13,13 +13,19 @@ struct SavedCredentials {
     refresh_token: String,
 }
 
+/// Google OAuth client secret, baked in at build time from `desktop/.env`
+/// (`VITE_GOOGLE_CLIENT_SECRET` is also read by the Vite frontend).
+/// For a self-published desktop app, this is the developer's own OAuth
+/// client secret — not a user-supplied one. See docs/microsoft_store_publishing_guide_2026.md §3.1.
+const GOOGLE_CLIENT_SECRET: &str = env!("VITE_GOOGLE_CLIENT_SECRET");
+
 #[tauri::command]
-pub async fn start_gdrive_auth(app: AppHandle, client_id: String, client_secret: String) -> Result<String, String> {
+pub async fn start_gdrive_auth(app: AppHandle, client_id: String) -> Result<String, String> {
     if client_id.trim().is_empty() {
         return Err("Client ID cannot be empty".to_string());
     }
-    if client_secret.trim().is_empty() {
-        return Err("Client Secret cannot be empty".to_string());
+    if GOOGLE_CLIENT_SECRET.trim().is_empty() {
+        return Err("VITE_GOOGLE_CLIENT_SECRET is not set in the build environment. Add it to desktop/.env.".to_string());
     }
 
     // Bind to 127.0.0.1:0 for an ephemeral dynamic loopback port
@@ -85,13 +91,15 @@ pub async fn start_gdrive_auth(app: AppHandle, client_id: String, client_secret:
 
     let auth_code = code.ok_or_else(|| "Failed to capture Google auth code from browser redirect".to_string())?;
 
-    // Exchange auth code for access & refresh tokens
+    // Exchange auth code for access & refresh tokens.
+    // The client_secret belongs to the developer's own OAuth client (not a user
+    // secret) and is baked into the binary at build time.
     let client = reqwest::Client::new();
     let response = client.post("https://oauth2.googleapis.com/token")
         .form(&[
             ("code", auth_code.as_str()),
             ("client_id", client_id.as_str()),
-            ("client_secret", client_secret.as_str()),
+            ("client_secret", GOOGLE_CLIENT_SECRET),
             ("redirect_uri", redirect_uri.as_str()),
             ("grant_type", "authorization_code"),
         ])
@@ -122,7 +130,7 @@ pub async fn start_gdrive_auth(app: AppHandle, client_id: String, client_secret:
 
     let saved = SavedCredentials {
         client_id: client_id.clone(),
-        client_secret: client_secret.clone(),
+        client_secret: GOOGLE_CLIENT_SECRET.to_string(),
         refresh_token,
     };
 
