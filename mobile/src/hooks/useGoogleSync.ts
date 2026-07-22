@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getStoredAuthState, requestDriveAuth } from '../services/googleDrive';
 import { runSync, type SyncProgress } from '../services/sync';
 import { getLocalEntry } from '../services/db';
@@ -18,6 +19,7 @@ export function useGoogleSync({
   forceReloadEditor,
   onOpenSettings
 }: UseGoogleSyncOptions) {
+  const { t } = useTranslation();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [syncProgress, setSyncProgress] = useState<SyncProgress>({
     status: 'idle',
@@ -50,17 +52,17 @@ export function useGoogleSync({
       // Need login/auth first
       const clientId = auth.clientId || import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
       if (clientId) {
-        setSyncProgress({ status: 'authenticating', message: 'Authenticating with Google...', filesProcessed: 0, totalFiles: 0 });
+        setSyncProgress({ status: 'authenticating', message: t("sync.authenticating"), filesProcessed: 0, totalFiles: 0 });
         try {
           await requestDriveAuth(clientId);
           setIsLoggedIn(true);
         } catch (err: any) {
-          setSyncProgress({ status: 'error', message: err.message || 'Authentication failed', filesProcessed: 0, totalFiles: 0 });
+          setSyncProgress({ status: 'error', message: err.message || t("sync.authFailed"), filesProcessed: 0, totalFiles: 0 });
           return;
         }
       } else {
         if (onOpenSettings) onOpenSettings();
-        setSyncProgress({ status: 'error', message: 'Google OAuth Client ID is not configured.', filesProcessed: 0, totalFiles: 0 });
+        setSyncProgress({ status: 'error', message: t("sync.clientIdMissing"), filesProcessed: 0, totalFiles: 0 });
         return;
       }
     }
@@ -87,7 +89,7 @@ export function useGoogleSync({
       } else if (modifiedDates && modifiedDates.length > 0) {
         setSyncResultDates(modifiedDates);
       } else {
-        setToastMessage("Sync completed! Up to date.");
+        setToastMessage(t("sync.completedToast"));
         setTimeout(() => setToastMessage(null), 3000);
       }
     } catch (err: any) {

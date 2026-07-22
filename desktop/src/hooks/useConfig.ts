@@ -13,7 +13,7 @@ export function useConfig(showNotification: (text: string, type: "success" | "er
     journal_dir: "",
     theme: "dark",
     autosave_interval: 1,
-    config_section_order: ["identity", "ollama", "pwa", "web_search", "legacy"],
+    config_section_order: ["heart", "identity", "ollama", "pwa", "web_search", "legacy"],
     language: "en",
     web_search_enabled: false,
     web_search_provider: "brave_free",
@@ -26,7 +26,13 @@ export function useConfig(showNotification: (text: string, type: "success" | "er
     custom_subtitle: "",
     system_instruction_mode: "default",
     custom_system_instruction: "",
-    pwa_url: "https://app-campfire.pages.dev/"
+    pwa_url: "https://app-campfire.pages.dev/",
+    show_donate_heart: true,
+    heart_click_falls: false,
+    heart_fall_speed: 5,
+    heart_size: 24,
+    heart_position: null,
+    heart_gate_dismissed: false,
   });
 
   useEffect(() => {

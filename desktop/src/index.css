@@ -201,6 +201,47 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   transform: scale(1.25);
 }
 
+/* Draggable / floating heart cursor affordance */
+.draggable-heart {
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+.draggable-heart:active {
+  cursor: grabbing;
+}
+
+/* Falling hearts animation (driven by inline per-heart style for duration/drift) */
+@keyframes falling-heart {
+  0% {
+    transform: translate3d(0, -40px, 0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--fall-drift, 0px), 110vh, 0) rotate(var(--fall-rotation, 0deg));
+    opacity: 0;
+  }
+}
+
+.falling-heart {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  color: #ef4444;
+  fill: #ef4444;
+  filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.55));
+  animation: falling-heart linear forwards;
+  will-change: transform, opacity;
+}
+
 /* Chat Waiting Dots Animation */
 @keyframes dot-flash {
   0% { opacity: 0.2; }

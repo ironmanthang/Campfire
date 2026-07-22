@@ -18,6 +18,14 @@ export interface AppConfig {
   system_instruction_mode: 'default' | 'append' | 'override';
   custom_system_instruction: string;
   pwa_url: string;
+
+  // Donation heart settings
+  show_donate_heart: boolean;
+  heart_click_falls: boolean;
+  heart_fall_speed: number; // 1-10
+  heart_size: number; // px
+  heart_position: { x: number; y: number } | null;
+  heart_gate_dismissed: boolean;
 }
 
 export interface JournalEntryMetadata {

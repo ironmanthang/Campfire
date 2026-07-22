@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Header } from './components/Header';
 import { JournalList } from './components/JournalList';
 import { JournalEditor } from './components/JournalEditor';
@@ -16,12 +17,22 @@ import { useGoogleSync } from './hooks/useGoogleSync';
 import { calculateStreak } from '@campfire/core';
 
 function App() {
+  const { t, i18n } = useTranslation();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isDonateOpen, setIsDonateOpen] = useState(false);
   const [customLogo, setCustomLogo] = useState<string | null>(() => localStorage.getItem('past_you_custom_logo'));
-  
+
   const [showDonateBanner, setShowDonateBanner] = useState(false);
   const [bannerReason, setBannerReason] = useState<'count' | 'streak' | null>(null);
+
+  // Ensure the persisted language is applied even if localStorage was read
+  // before the i18n module initialized.
+  useEffect(() => {
+    const stored = localStorage.getItem('campfire_mobile_language');
+    if (stored && stored !== i18n.language) {
+      i18n.changeLanguage(stored);
+    }
+  }, [i18n]);
 
   // Refs to break circular hook dependencies
   const activeDateRef = useRef<string | null>(null);
@@ -129,8 +140,8 @@ function App() {
             <span className="text-base mt-0.5">🎉</span>
             <p className="text-xs font-semibold leading-relaxed text-text-primary">
               {bannerReason === "count"
-                ? "You've written 10 journal entries in Campfire! If this app brings value to your day, consider supporting its development."
-                : "You've reached a 30-day writing streak in Campfire! If this app brings value to your day, consider supporting its development."}
+                ? t("donateBanner.count")
+                : t("donateBanner.streak")}
             </p>
           </div>
           <div className="flex items-center gap-2 flex-wrap justify-end">
@@ -140,7 +151,7 @@ function App() {
               }}
               className="px-3 py-1.5 rounded-xl bg-accent-brand text-bg-app font-bold text-[10px] shadow hover:bg-accent-brand/90 transition-all cursor-pointer"
             >
-              Support Campfire
+              {t("donateBanner.supportButton")}
             </button>
             <button
               onClick={() => {
@@ -149,7 +160,7 @@ function App() {
               }}
               className="px-3 py-1.5 rounded-xl bg-bg-surface border border-border-brand hover:border-accent-brand text-[10px] font-bold text-text-primary transition-all cursor-pointer"
             >
-              Maybe Later
+              {t("donateBanner.maybeLater")}
             </button>
             <button
               onClick={() => {
@@ -158,7 +169,7 @@ function App() {
               }}
               className="px-3 py-1.5 rounded-xl bg-bg-surface border border-border-brand hover:border-accent-brand text-[10px] font-bold text-text-primary transition-all cursor-pointer"
             >
-              Don't Ask Again
+              {t("donateBanner.dontAskAgain")}
             </button>
           </div>
         </div>

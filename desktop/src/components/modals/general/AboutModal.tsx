@@ -1,23 +1,15 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { X } from "lucide-react";
-import { openUrl } from "@tauri-apps/plugin-opener";
-import { BANK_ID, ACCOUNT_NO, ACCOUNT_NAME } from "../../../lib/constants";
 import { AboutAppTab } from "../../about/AboutAppTab";
-import { AboutMeTab } from "../../about/AboutMeTab";
 
 interface AboutModalProps {
   isOpen: boolean;
   onClose: () => void;
-  initialTab?: "app" | "me";
 }
 
-export function AboutModal({ isOpen, onClose, initialTab = "app" }: AboutModalProps) {
-  const { t, i18n } = useTranslation();
-  const [activeTab, setActiveTab] = useState<"app" | "me">("app");
-  const [donationTab, setDonationTab] = useState<"vietqr" | "kofi">("vietqr");
-  const [isQrExpanded, setIsQrExpanded] = useState(false);
-  const [customMessage, setCustomMessage] = useState("");
+export function AboutModal({ isOpen, onClose }: AboutModalProps) {
+  const { t } = useTranslation();
 
   const modalRef = useRef<HTMLDivElement | null>(null);
   const pointerStartedInsideRef = useRef(false);
@@ -25,23 +17,11 @@ export function AboutModal({ isOpen, onClose, initialTab = "app" }: AboutModalPr
   const activePointerIdRef = useRef<number | null>(null);
   const startPosRef = useRef<{ x: number; y: number } | null>(null);
 
-  useEffect(() => {
-    if (isOpen) {
-      setActiveTab(initialTab);
-      setDonationTab(i18n.language === "vi" ? "vietqr" : "kofi");
-      setIsQrExpanded(false);
-    }
-  }, [isOpen, initialTab, i18n.language]);
-
   // Close on Escape key press
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        if (isQrExpanded) {
-          setIsQrExpanded(false);
-        } else {
-          onClose();
-        }
+        onClose();
       }
     };
 
@@ -51,40 +31,9 @@ export function AboutModal({ isOpen, onClose, initialTab = "app" }: AboutModalPr
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen, onClose, isQrExpanded]);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
-
-  const handleKofiClick = async () => {
-    try {
-      await openUrl("https://ko-fi.com/thang504");
-    } catch (err) {
-      console.error("Failed to open Ko-fi link:", err);
-    }
-  };
-
-  const handleCloseQr = () => {
-    setIsQrExpanded(false);
-  };
-
-  // Helper to remove accents and special characters for banking text
-  const getCleanTransferMessage = (msg: string) => {
-    return msg
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/đ/g, "d")
-      .replace(/Đ/g, "D")
-      .replace(/[^a-zA-Z0-9 ]/g, "")
-      .trim()
-      .substring(0, 25);
-  };
-
-  const cleanMsg = getCleanTransferMessage(customMessage);
-  const addInfoText = cleanMsg ? `Donate Campfire ${cleanMsg}` : "Donate Campfire";
-
-  // Build dynamic URL for VietQR API
-  const encodedAccountName = encodeURIComponent(ACCOUNT_NAME);
-  const qrCodeUrl = `https://img.vietqr.io/image/${BANK_ID}-${ACCOUNT_NO}-compact.png?addInfo=${encodeURIComponent(addInfoText)}&accountName=${encodedAccountName}`;
 
   return (
     <div
@@ -126,29 +75,12 @@ export function AboutModal({ isOpen, onClose, initialTab = "app" }: AboutModalPr
         onClick={(e) => e.stopPropagation()}
         className="bg-bg-surface border border-border-brand rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[85vh] overflow-hidden"
       >
-        {/* Tab Buttons & Close button */}
+        {/* Header */}
         <div className="flex border-b border-border-brand/30 bg-bg-app/10 items-center justify-between relative pr-12">
-          <div className="flex flex-1">
-            <button
-              onClick={() => setActiveTab("app")}
-              className={`flex-1 py-3 text-sm font-semibold border-b-2 transition-all ${
-                activeTab === "app"
-                  ? "border-accent-brand text-accent-brand bg-bg-surface/20"
-                  : "border-transparent text-text-secondary hover:text-text-primary hover:bg-bg-app/20"
-              }`}
-            >
+          <div className="flex flex-1 items-center px-4 py-3">
+            <h2 className="text-sm font-semibold text-accent-brand">
               {t("aboutModal.tabAboutApp")}
-            </button>
-            <button
-              onClick={() => setActiveTab("me")}
-              className={`flex-1 py-3 text-sm font-semibold border-b-2 transition-all ${
-                activeTab === "me"
-                  ? "border-accent-brand text-accent-brand bg-bg-surface/20"
-                  : "border-transparent text-text-secondary hover:text-text-primary hover:bg-bg-app/20"
-              }`}
-            >
-              {t("aboutModal.tabAboutMe")}
-            </button>
+            </h2>
           </div>
 
           <button
@@ -161,80 +93,10 @@ export function AboutModal({ isOpen, onClose, initialTab = "app" }: AboutModalPr
 
         {/* Modal Body / Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin">
-          {activeTab === "app" ? (
-            <AboutAppTab />
-          ) : (
-            <AboutMeTab
-              donationTab={donationTab}
-              setDonationTab={setDonationTab}
-              customMessage={customMessage}
-              setCustomMessage={setCustomMessage}
-              onVietQrDonate={() => setIsQrExpanded(true)}
-              onKofiDonate={handleKofiClick}
-            />
-          )}
+          <AboutAppTab />
         </div>
       </div>
-
-      {/* Lightbox QR Code Expand Modal */}
-      {isQrExpanded && (
-        <div
-          onPointerDown={(e) => {
-            e.stopPropagation();
-          }}
-          onPointerUp={(e) => {
-            e.stopPropagation();
-          }}
-          onClick={(e) => {
-            e.stopPropagation();
-            handleCloseQr();
-          }}
-          className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-black/90 backdrop-blur-md p-6 animate-fade-in cursor-zoom-out"
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white p-6 rounded-3xl shadow-2xl flex flex-col items-center max-w-md w-full animate-scale-in"
-          >
-            <div className="w-full flex justify-end mb-2">
-              <button
-                onClick={handleCloseQr}
-                className="p-1.5 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            
-            <div className="relative p-3 bg-white rounded-2xl border border-gray-100">
-              <img
-                src={qrCodeUrl}
-                alt="VietQR Donation Code Large"
-                className="h-[360px] w-[360px] md:h-[400px] md:w-[400px] object-contain rounded-xl select-none"
-                draggable={false}
-              />
-            </div>
-            
-            <div className="text-center mt-5 mb-2 space-y-2">
-              <p className="text-sm font-bold text-gray-800">
-                {t("aboutModal.scanToPay")}
-              </p>
-              <div className="flex flex-col gap-1.5 items-center">
-                <p className="text-[11px] font-mono text-gray-600 bg-gray-100 px-4 py-1.5 rounded-full inline-block">
-                  {t("aboutModal.bankInfo", { bank: BANK_ID, account: ACCOUNT_NO, owner: ACCOUNT_NAME })}
-                </p>
-                <p className="text-[10px] font-mono text-gray-500 bg-gray-50 border border-gray-100 px-3 py-1 rounded-md inline-block max-w-[90%] break-all">
-                  {t("aboutModal.transferContentLabel", { content: addInfoText })}
-                </p>
-              </div>
-            </div>
-          </div>
-          
-          <span className="text-white/60 text-xs mt-4 animate-pulse">
-            {t("aboutModal.clickToClose")}
-          </span>
-        </div>
-      )}
-
-
     </div>
   );
 }
+

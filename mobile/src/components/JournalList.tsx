@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { type LocalJournalEntry } from '../services/db';
 import { Plus, Search, Calendar, FileText, SlidersHorizontal } from 'lucide-react';
 
@@ -8,11 +9,12 @@ interface JournalListProps {
   onCreateToday: () => void;
 }
 
-export const JournalList: React.FC<JournalListProps> = ({ 
-  entries, 
-  onSelectEntry, 
-  onCreateToday 
+export const JournalList: React.FC<JournalListProps> = ({
+  entries,
+  onSelectEntry,
+  onCreateToday
 }) => {
+  const { t, i18n } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [dateRange, setDateRange] = useState<'all' | '30d' | '3m' | 'year'>(() => {
@@ -42,7 +44,7 @@ export const JournalList: React.FC<JournalListProps> = ({
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return dateStr;
-    return d.toLocaleDateString('en-US', {
+    return d.toLocaleDateString(i18n.language === 'vi' ? 'vi-VN' : 'en-US', {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
@@ -74,7 +76,7 @@ export const JournalList: React.FC<JournalListProps> = ({
     if (clean.length > 90) {
       return clean.substring(0, 90) + '...';
     }
-    return clean || 'Empty entry';
+    return clean || t("journalList.emptyPreview");
   };
 
   const getWordCount = (content: string) => {
@@ -140,22 +142,22 @@ export const JournalList: React.FC<JournalListProps> = ({
       <div className="px-4 py-3 bg-bg-surface border-b border-border-brand shrink-0 flex items-center gap-2 select-none">
         <div className="relative flex-1 flex items-center">
           <Search size={16} className="absolute left-3 text-text-secondary" />
-          <input 
-            type="text" 
-            placeholder="Search diaries or tags (#work)..." 
+          <input
+            type="text"
+            placeholder={t("journalList.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-4 py-2 text-sm rounded-xl border border-border-brand bg-bg-input text-text-primary outline-none focus:border-accent-brand transition-all"
           />
         </div>
-        <button 
+        <button
           onClick={() => setIsFilterOpen(true)}
           className={`p-2 rounded-xl border transition-all active:scale-95 shrink-0 cursor-pointer ${
             dateRange !== 'all' || sortOrder !== 'newest'
-              ? 'border-accent-brand bg-accent-brand/10 text-accent-brand font-bold' 
+              ? 'border-accent-brand bg-accent-brand/10 text-accent-brand font-bold'
               : 'border-border-brand bg-bg-input text-text-secondary hover:text-text-primary'
           }`}
-          title="Filter Entries"
+          title={t("journalList.filterTooltip")}
         >
           <SlidersHorizontal size={18} />
         </button>
@@ -183,12 +185,12 @@ export const JournalList: React.FC<JournalListProps> = ({
                   {/* Sync status dot */}
                   <div className="flex items-center gap-1.5 shrink-0">
                     <span className="text-[10px] text-text-secondary flex items-center gap-0.5">
-                      <FileText size={10} /> {words} {words === 1 ? 'word' : 'words'}
+                      <FileText size={10} /> {words === 1 ? t("journalList.wordCount", { count: words }) : t("journalList.wordCountPlural", { count: words })}
                     </span>
                     {!entry.synced ? (
-                      <span className="w-2 h-2 rounded-full bg-yellow-500" title="Unsynced edits" />
+                      <span className="w-2 h-2 rounded-full bg-yellow-500" title={t("journalList.unsyncedTooltip")} />
                     ) : (
-                      <span className="w-2 h-2 rounded-full bg-green-500/80" title="Synced" />
+                      <span className="w-2 h-2 rounded-full bg-green-500/80" title={t("journalList.syncedTooltip")} />
                     )}
                   </div>
                 </div>
@@ -216,8 +218,8 @@ export const JournalList: React.FC<JournalListProps> = ({
         ) : (
           <div className="flex flex-col items-center justify-center py-12 text-center text-text-secondary">
             <FileText size={48} className="text-border-brand mb-3" />
-            <p className="text-sm font-medium">No journal entries found</p>
-            {(searchQuery || dateRange !== 'all') && <p className="text-xs mt-1">Try clearing your filters or search query</p>}
+            <p className="text-sm font-medium">{t("journalList.emptyTitle")}</p>
+            {(searchQuery || dateRange !== 'all') && <p className="text-xs mt-1">{t("journalList.emptyHint")}</p>}
           </div>
         )}
       </div>
@@ -242,27 +244,27 @@ export const JournalList: React.FC<JournalListProps> = ({
           >
             {/* Modal Header */}
             <div className="flex justify-between items-center pb-2 border-b border-border-brand">
-              <span className="font-bold text-text-primary text-base">Filter Entries</span>
-              <button 
+              <span className="font-bold text-text-primary text-base">{t("journalList.filterTitle")}</span>
+              <button
                 onClick={() => {
                   setDateRange('all');
                   setSortOrder('newest');
                 }}
                 className="text-xs font-semibold text-accent-brand hover:underline cursor-pointer"
               >
-                Reset All
+                {t("journalList.filterReset")}
               </button>
             </div>
 
             {/* Date Range Selection */}
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">Date Range</label>
+              <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">{t("journalList.filterDateRangeLabel")}</label>
               <div className="grid grid-cols-4 gap-2">
                 {[
-                  { value: 'all', label: 'All' },
-                  { value: '30d', label: '30d' },
-                  { value: '3m', label: '3m' },
-                  { value: 'year', label: 'This Yr' }
+                  { value: 'all', label: t("journalList.filterDateAll") },
+                  { value: '30d', label: t("journalList.filterDate30d") },
+                  { value: '3m', label: t("journalList.filterDate3m") },
+                  { value: 'year', label: t("journalList.filterDateYear") }
                 ].map((opt) => (
                   <button
                     key={opt.value}
@@ -281,11 +283,11 @@ export const JournalList: React.FC<JournalListProps> = ({
 
             {/* Sort Order Selection */}
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">Sort Order</label>
+              <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">{t("journalList.filterSortLabel")}</label>
               <div className="grid grid-cols-2 gap-2">
                 {[
-                  { value: 'newest', label: 'Newest First' },
-                  { value: 'oldest', label: 'Oldest First' }
+                  { value: 'newest', label: t("journalList.filterSortNewest") },
+                  { value: 'oldest', label: t("journalList.filterSortOldest") }
                 ].map((opt) => (
                   <button
                     key={opt.value}
@@ -307,7 +309,7 @@ export const JournalList: React.FC<JournalListProps> = ({
               onClick={() => setIsFilterOpen(false)}
               className="w-full py-3 rounded-2xl bg-accent-brand hover:bg-accent-brand-hover text-bg-app text-sm font-bold shadow-md shadow-accent-brand/20 transition-all active:scale-[0.98] cursor-pointer"
             >
-              Apply Filters
+              {t("journalList.filterApply")}
             </button>
           </div>
         </div>

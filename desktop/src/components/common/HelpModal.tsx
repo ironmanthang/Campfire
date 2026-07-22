@@ -28,6 +28,65 @@ interface HelpModalProps {
   onClose: () => void;
 }
 
+type HelpModalPersistedState = {
+  activeTab: string;
+  openCategories: Record<string, boolean>;
+};
+
+const HELP_MODAL_STORAGE_KEY = "campfire_help_modal_state";
+
+function getDefaultOpenCategories(): Record<string, boolean> {
+  return {
+    "auto-save": true,
+    "auto-sync": true,
+  };
+}
+
+function readHelpModalPersistedState(): HelpModalPersistedState {
+  if (typeof window === "undefined") {
+    return {
+      activeTab: "journal",
+      openCategories: getDefaultOpenCategories(),
+    };
+  }
+
+  try {
+    const raw = window.localStorage.getItem(HELP_MODAL_STORAGE_KEY);
+    if (!raw) {
+      return {
+        activeTab: "journal",
+        openCategories: getDefaultOpenCategories(),
+      };
+    }
+
+    const parsed = JSON.parse(raw) as Partial<HelpModalPersistedState>;
+    return {
+      activeTab: typeof parsed.activeTab === "string" ? parsed.activeTab : "journal",
+      openCategories: {
+        ...getDefaultOpenCategories(),
+        ...(parsed.openCategories && typeof parsed.openCategories === "object"
+          ? parsed.openCategories
+          : {}),
+      },
+    };
+  } catch {
+    return {
+      activeTab: "journal",
+      openCategories: getDefaultOpenCategories(),
+    };
+  }
+}
+
+function writeHelpModalPersistedState(state: HelpModalPersistedState) {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.localStorage.setItem(HELP_MODAL_STORAGE_KEY, JSON.stringify(state));
+  } catch (err) {
+    console.error("Failed to persist help modal state:", err);
+  }
+}
+
 const GUIDE_MARKDOWN = `# Campfire User Guide
 
 Welcome to Campfire. Here is a guide to the hidden tips, shortcuts, and capabilities across all sections of the app:
@@ -111,13 +170,11 @@ Welcome to Campfire. Here is a guide to the hidden tips, shortcuts, and capabili
 - **Conflict Skipping**: While a file contains conflict markers, sync will refuse to touch it on either side until you remove the markers.`;
 
 export function HelpModal({ isOpen, onClose }: HelpModalProps) {
+  const persistedState = readHelpModalPersistedState();
 
-  const [activeTab, setActiveTab] = useState<string>("journal");
+  const [activeTab, setActiveTab] = useState<string>(persistedState.activeTab);
   const [copied, setCopied] = useState<boolean>(false);
-  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({
-    "auto-save": true,
-    "auto-sync": true,
-  });
+  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>(persistedState.openCategories);
 
   const modalRef = useRef<HTMLDivElement | null>(null);
   const pointerStartedInsideRef = useRef(false);
@@ -139,6 +196,10 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen, onClose]);
+
+  useEffect(() => {
+    writeHelpModalPersistedState({ activeTab, openCategories });
+  }, [activeTab, openCategories]);
 
   if (!isOpen) return null;
 

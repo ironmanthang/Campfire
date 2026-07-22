@@ -2,8 +2,12 @@ import { useState, useEffect } from "react";
 import { Loader2, X, CheckCircle2 } from "lucide-react";
 import { Sidebar } from "./components/sidebar";
 import { AboutModal } from "./components/modals/general/AboutModal";
+import { SupportModal } from "./components/modals/general/SupportModal";
 import { FeedbackModal } from "./components/modals/general/FeedbackModal";
 import { ErrorModal } from "./components/modals/general/ErrorModal";
+import { HeartGateModal } from "./components/modals/general/HeartGateModal";
+import { DraggableHeart } from "./components/heart/DraggableHeart";
+import { FallingHearts } from "./components/heart/FallingHearts";
 import { HelpModal } from "./components/common";
 import { ToolExecutorTestPanel } from "./services/toolExecutorPanel";
 import { SyncResultModal } from "./components/modals/data_management/SyncResultModal";
@@ -24,7 +28,7 @@ import { calculateStreak } from "@campfire/core";
 function App() {
   const t = useTranslation().t;
   const [isAboutOpen, setIsAboutOpen] = useState(false);
-  const [aboutInitialTab, setAboutInitialTab] = useState<"app" | "me">("app");
+  const [isSupportOpen, setIsSupportOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [showDevPanel, setShowDevPanel] = useState(false);
@@ -60,7 +64,10 @@ function App() {
     importReport,
     setImportReport,
     triggerJournalRefresh,
-    journalRefreshKey
+    journalRefreshKey,
+    heartGateOpen,
+    setHeartGateOpen,
+    updateConfigField,
   } = useAppStore();
 
   const {
@@ -78,8 +85,7 @@ function App() {
     const checkStats = async () => {
       const neverAsk = localStorage.getItem("donate-reminder-never-ask") === "true";
       const maybeLater = sessionStorage.getItem("donate-reminder-maybe-later") === "true";
-      const hasDonated = localStorage.getItem("has_donated") === "true";
-      if (neverAsk || maybeLater || hasDonated) {
+      if (neverAsk || maybeLater) {
         setShowDonateBanner(false);
         return;
       }
@@ -221,10 +227,7 @@ function App() {
     <div className="flex h-screen w-screen overflow-hidden bg-bg-app text-text-primary">
       {/* Sidebar Navigation */}
       <Sidebar
-        onOpenAbout={(tab = "app") => {
-          setAboutInitialTab(tab);
-          setIsAboutOpen(true);
-        }}
+        onOpenAbout={() => setIsAboutOpen(true)}
         onOpenFeedback={() => setIsFeedbackOpen(true)}
         onOpenHelp={() => setIsHelpOpen(true)}
       />
@@ -244,10 +247,7 @@ function App() {
             </div>
             <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto flex-wrap">
               <button
-                onClick={() => {
-                  setAboutInitialTab("me");
-                  setIsAboutOpen(true);
-                }}
+                onClick={() => setIsSupportOpen(true)}
                 className="px-3.5 py-1.5 rounded-lg bg-accent-brand text-bg-app font-bold text-xs shadow hover:bg-accent-brand/90 transition-all cursor-pointer"
               >
                 {t("donateBanner.supportBtn")}
@@ -326,13 +326,33 @@ function App() {
       </main>
 
       {/* Global About Modal */}
-      <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} initialTab={aboutInitialTab} />
+      <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
+
+      {/* Global Support Modal */}
+      <SupportModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)} />
 
       {/* Global Feedback Modal */}
       <FeedbackModal isOpen={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
 
       {/* Global Help Modal */}
       <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
+
+      {/* Global Heart Gate Modal (shown when enabling click-to-fall for the first time) */}
+      <HeartGateModal
+        isOpen={heartGateOpen}
+        onCancel={() => setHeartGateOpen(false)}
+        onConfirm={async () => {
+          await updateConfigField("heart_gate_dismissed", true);
+          await updateConfigField("heart_click_falls", true);
+          setHeartGateOpen(false);
+        }}
+      />
+
+        {/* Floating draggable donation heart (renders only when show_donate_heart is true) */}
+      <DraggableHeart onClick={() => setIsSupportOpen(true)} />
+
+      {/* Falling hearts particle overlay */}
+      <FallingHearts />
 
       {/* Sync result modal */}
       {syncResultDates !== null && (

@@ -38,45 +38,6 @@ export function KofiPanel({ onDonateClick }: KofiPanelProps) {
         </span>
       </div>
 
-      {/* USD Tiers table */}
-      <div className="mt-2">
-        <h5 className="text-xs font-bold text-text-primary mb-2">
-          {t("aboutModal.presetTiersTitle")}
-        </h5>
-        <div className="overflow-x-auto">
-          <table className="w-full text-[10px] border-collapse text-left">
-            <thead>
-              <tr className="border-b border-border-brand/25 text-text-secondary">
-                <th className="py-1.5 pr-2 font-bold">{t("aboutModal.tierTableMetaphor")}</th>
-                <th className="py-1.5 px-2 font-bold">{t("aboutModal.tierTableAmount")}</th>
-                <th className="py-1.5 pl-2 font-bold">{t("aboutModal.tierTableDescription")}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border-brand/10 text-text-secondary">
-              <tr>
-                <td className="py-2 pr-2 font-semibold text-text-primary">{t("aboutModal.usdTier1Name")}</td>
-                <td className="py-2 px-2 font-mono whitespace-nowrap">{t("aboutModal.usdTier1Amount")}</td>
-                <td className="py-2 pl-2 leading-relaxed">{t("aboutModal.usdTier1Desc")}</td>
-              </tr>
-              <tr>
-                <td className="py-2 pr-2 font-semibold text-text-primary">{t("aboutModal.usdTier2Name")}</td>
-                <td className="py-2 px-2 font-mono whitespace-nowrap">{t("aboutModal.usdTier2Amount")}</td>
-                <td className="py-2 pl-2 leading-relaxed">{t("aboutModal.usdTier2Desc")}</td>
-              </tr>
-              <tr>
-                <td className="py-2 pr-2 font-semibold text-text-primary">{t("aboutModal.usdTier3Name")}</td>
-                <td className="py-2 px-2 font-mono whitespace-nowrap">{t("aboutModal.usdTier3Amount")}</td>
-                <td className="py-2 pl-2 leading-relaxed">{t("aboutModal.usdTier3Desc")}</td>
-              </tr>
-              <tr>
-                <td className="py-2 pr-2 font-semibold text-text-primary">{t("aboutModal.usdTierCustomName")}</td>
-                <td className="py-2 px-2 font-mono whitespace-nowrap">{t("aboutModal.usdTierCustomAmount")}</td>
-                <td className="py-2 pl-2 leading-relaxed">{t("aboutModal.usdTierCustomDesc")}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
     </div>
   );
 }

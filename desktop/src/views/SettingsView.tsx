@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { useResizer } from "../hooks/useResizer";
+import { usePersistedState } from "../hooks/usePersistedState";
 import { useTranslation } from "react-i18next";
 import { SidebarToggleButton } from "../components/layout/SidebarToggleButton";
 import { DragHandles } from "../components/common";
 import {
   SectionWrapper,
+  HeartSection,
   IdentitySection,
   OllamaSection,
   PwaSection,
@@ -13,12 +15,15 @@ import {
 import { useAppStore } from "../store/useAppStore";
 import { useOllamaStore } from "../store/useOllamaStore";
 
-const AVAILABLE_SECTIONS = ["identity", "ollama", "pwa", "legacy"];
+const AVAILABLE_SECTIONS = ["heart", "identity", "ollama", "pwa", "legacy"];
 
 export function SettingsView() {
   const { t } = useTranslation();
   const [sections, setSections] = useState<string[]>([]);
-  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
+  const [collapsedSections, setCollapsedSections] = usePersistedState<Record<string, boolean>>(
+    "settings_collapsed_sections",
+    {}
+  );
 
   const {
     config,
@@ -73,6 +78,12 @@ export function SettingsView() {
     let content: React.ReactNode = null;
 
     switch (key) {
+      case "heart":
+        title = t("settingsView.heartTitle", { defaultValue: "Heart Settings" });
+        badge = t("settingsView.heartBadge", { defaultValue: "Heart" });
+        content = <HeartSection />;
+        break;
+
       case "identity":
         title = t("settingsView.identityTitle");
         badge = t("settingsView.identityBadge");

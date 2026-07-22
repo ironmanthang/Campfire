@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Heart, ExternalLink } from 'lucide-react';
 
 interface DonateModalProps {
@@ -7,6 +8,7 @@ interface DonateModalProps {
 }
 
 export const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => {
+  const { t } = useTranslation();
   const [donationTab, setDonationTab] = useState<'vietqr' | 'kofi'>('kofi');
 
   if (!isOpen) return null;
@@ -22,7 +24,7 @@ export const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => 
         <div className="flex items-center justify-between p-4 border-b border-border-brand bg-bg-app/10">
           <h2 className="text-lg font-bold tracking-tight text-text-primary m-0 flex items-center gap-2">
             <Heart size={18} className="text-red-500 fill-red-500/20" />
-            <span>Support Campfire</span>
+            <span>{t("donate.modalTitle")}</span>
           </h2>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-bg-app transition-colors text-text-secondary">
             <X size={20} />
@@ -32,7 +34,7 @@ export const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => 
         {/* Body */}
         <div className="p-5 flex-1 overflow-y-auto space-y-6">
           <p className="text-xs text-text-secondary leading-relaxed">
-            I plan to keep Campfire completely free, offline, and independent. If the app brings value to your day, please consider supporting development!
+            {t("donate.modalBody")}
           </p>
 
           {/* Donation Tabs Switcher */}
@@ -46,7 +48,7 @@ export const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => 
                     : 'border-transparent text-text-secondary hover:text-text-primary'
                 }`}
               >
-                VietQR (VND)
+                {t("donate.tabVietQr")}
               </button>
               <button
                 onClick={() => setDonationTab('kofi')}
@@ -56,48 +58,48 @@ export const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => 
                     : 'border-transparent text-text-secondary hover:text-text-primary'
                 }`}
               >
-                Ko-fi (USD)
+                {t("donate.tabKofi")}
               </button>
             </div>
 
             {donationTab === 'vietqr' ? (
               <div className="space-y-4 text-center">
                 <p className="text-xs text-text-secondary text-left leading-relaxed">
-                  Scan the QR code below using any Vietnamese banking app to support:
+                  {t("donate.vietQrBody")}
                 </p>
                 <div className="inline-block p-2 bg-white rounded-xl border border-border-brand/20">
                   <img
                     src="https://img.vietqr.io/image/vietcombank-9949420500-compact.png?addInfo=Donate%20Campfire&accountName=NGUYEN%20NHU%20THANG"
-                    alt="VietQR Donation Code"
+                    alt={t("donate.vietQrImageAlt")}
                     className="w-48 h-48 mx-auto object-contain rounded"
                   />
                 </div>
                 <div className="text-[10px] text-left text-text-secondary space-y-1 bg-bg-app/40 p-3 rounded-lg border border-border-brand/10 font-mono">
-                  <div><strong>Bank:</strong> Vietcombank</div>
-                  <div><strong>Account:</strong> 9949420500</div>
-                  <div><strong>Owner:</strong> NGUYEN NHU THANG</div>
-                  <div><strong>Content:</strong> Donate Campfire</div>
+                  <div><strong>{t("donate.vietQrBank")}:</strong> Vietcombank</div>
+                  <div><strong>{t("donate.vietQrAccount")}:</strong> 9949420500</div>
+                  <div><strong>{t("donate.vietQrOwner")}:</strong> NGUYEN NHU THANG</div>
+                  <div><strong>{t("donate.vietQrContent")}:</strong> Donate Campfire</div>
                 </div>
 
               </div>
             ) : (
               <div className="space-y-4">
                 <p className="text-xs text-text-secondary leading-relaxed">
-                  For international supporters. Payments are processed securely via Ko-fi & PayPal, supporting Apple Pay, Google Pay, cards, and PayPal.
+                  {t("donate.kofiBody")}
                 </p>
                 <button
                   onClick={handleKofiClick}
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-accent-brand hover:bg-accent-brand/90 text-bg-app font-bold text-sm shadow-md transition-all active:scale-95"
                 >
-                  <span>Support my poor soul on Ko-fi 🥀:</span>
+                  <span>{t("donate.kofiButton")}</span>
                   <ExternalLink size={16} />
                 </button>
 
                 {/* Trust Badges */}
                 <div className="flex flex-col items-center justify-center gap-1">
                   <div className="flex items-center gap-1.5 opacity-80">
-                    <span className="text-[9px] text-text-secondary font-semibold uppercase tracking-wider">Supports:</span>
-                    <span className="text-[9px] text-text-secondary font-medium">Apple Pay, Google Pay, Visa, Mastercard, PayPal</span>
+                    <span className="text-[9px] text-text-secondary font-semibold uppercase tracking-wider">{t("donate.kofiSupports")}:</span>
+                    <span className="text-[9px] text-text-secondary font-medium">{t("donate.kofiSupportsList")}</span>
                   </div>
                 </div>
               </div>

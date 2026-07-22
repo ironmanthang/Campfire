@@ -62,40 +62,6 @@ export function VietQrPanel({
         </button>
       </div>
 
-      {/* VND Tiers table */}
-      <div className="mt-4 border-t border-border-brand/20 pt-4">
-        <h5 className="text-xs font-bold text-text-primary mb-2">
-          {t("aboutModal.presetTiersTitle")}
-        </h5>
-        <div className="overflow-x-auto">
-          <table className="w-full text-[10px] border-collapse text-left">
-            <thead>
-              <tr className="border-b border-border-brand/25 text-text-secondary">
-                <th className="py-1.5 pr-2 font-bold">{t("aboutModal.tierTableMetaphor")}</th>
-                <th className="py-1.5 px-2 font-bold">{t("aboutModal.tierTableAmount")}</th>
-                <th className="py-1.5 pl-2 font-bold">{t("aboutModal.tierTableDescription")}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border-brand/10 text-text-secondary">
-              <tr>
-                <td className="py-2 pr-2 font-semibold text-text-primary">{t("aboutModal.vndTier1Name")}</td>
-                <td className="py-2 px-2 font-mono whitespace-nowrap">{t("aboutModal.vndTier1Amount")}</td>
-                <td className="py-2 pl-2 leading-relaxed">{t("aboutModal.vndTier1Desc")}</td>
-              </tr>
-              <tr>
-                <td className="py-2 pr-2 font-semibold text-text-primary">{t("aboutModal.vndTier2Name")}</td>
-                <td className="py-2 px-2 font-mono whitespace-nowrap">{t("aboutModal.vndTier2Amount")}</td>
-                <td className="py-2 pl-2 leading-relaxed">{t("aboutModal.vndTier2Desc")}</td>
-              </tr>
-              <tr>
-                <td className="py-2 pr-2 font-semibold text-text-primary">{t("aboutModal.vndTier3Name")}</td>
-                <td className="py-2 px-2 font-mono whitespace-nowrap">{t("aboutModal.vndTier3Amount")}</td>
-                <td className="py-2 pl-2 leading-relaxed">{t("aboutModal.vndTier3Desc")}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
     </div>
   );
 }

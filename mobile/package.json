@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build && pnpm exec javascript-obfuscator dist/assets --output dist/assets --compact true --control-flow-flattening true --string-array true --string-array-encoding base64",
+    "i18n:check": "node scripts/i18n-check.js",
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "vitest run --passWithNoTests",
@@ -15,9 +16,11 @@
   "dependencies": {
     "@campfire/core": "workspace:*",
     "dexie": "^4.4.4",
+    "i18next": "^26.3.6",
     "lucide-react": "^1.24.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
+    "react-i18next": "^17.0.9",
     "react-markdown": "^10.1.0",
     "workbox-window": "^7.4.1"
   },

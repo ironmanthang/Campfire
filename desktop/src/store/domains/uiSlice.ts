@@ -15,6 +15,16 @@ export interface ImportReport {
   errors: { date: string | null; message: string }[];
 }
 
+export interface FallingHeart {
+  id: number;
+  x: number; // start horizontal position in px (viewport-relative)
+  size: number; // px
+  speed: number; // 1-10, used to pick a CSS animation duration
+  durationMs: number; // resolved ms for this heart
+  driftX: number; // px horizontal drift over the fall
+  rotation: number; // deg end rotation
+}
+
 export interface UiSlice {
   // Notifications
   statusMessage: NotificationMessage | null;
@@ -34,6 +44,15 @@ export interface UiSlice {
   // Layout
   sidebarCollapsed: boolean;
   toggleSidebar: () => void;
+
+  // Falling hearts (transient, not persisted)
+  hearts: FallingHeart[];
+  fireHearts: (count: number) => void;
+  removeHeart: (id: number) => void;
+
+  // Heart gate modal
+  heartGateOpen: boolean;
+  setHeartGateOpen: (open: boolean) => void;
 }
 
 export const createUiSlice: StateCreator<
@@ -80,4 +99,37 @@ export const createUiSlice: StateCreator<
     localStorage.setItem("sidebar-collapsed", String(collapsed));
     set({ sidebarCollapsed: collapsed });
   },
+
+  hearts: [],
+  fireHearts: (count) => {
+    const speedSetting = get().config?.heart_fall_speed ?? 5;
+    const sizeSetting = get().config?.heart_size ?? 24;
+    const max = 50;
+    const current = get().hearts;
+    const room = Math.max(0, max - current.length);
+    const toAdd = Math.min(count, room);
+    if (toAdd <= 0) return;
+    const newHearts: FallingHeart[] = [];
+    for (let i = 0; i < toAdd; i++) {
+      // Speed 1 (slow) -> ~6s, Speed 10 (fast) -> ~1.2s
+      const durationMs = Math.round(6000 - (speedSetting - 1) * (4800 / 9));
+      const vw = typeof window !== "undefined" ? window.innerWidth : 1024;
+      newHearts.push({
+        id: Date.now() + i + Math.floor(Math.random() * 1000),
+        x: Math.random() * Math.max(0, vw - sizeSetting),
+        size: sizeSetting,
+        speed: speedSetting,
+        durationMs,
+        driftX: (Math.random() - 0.5) * 80,
+        rotation: (Math.random() - 0.5) * 120,
+      });
+    }
+    set({ hearts: [...current, ...newHearts] });
+  },
+  removeHeart: (id) => {
+    set((state) => ({ hearts: state.hearts.filter((h) => h.id !== id) }));
+  },
+
+  heartGateOpen: false,
+  setHeartGateOpen: (open) => set({ heartGateOpen: open }),
 });

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  getStoredAuthState, 
-  requestDriveAuth, 
+import {
+  getStoredAuthState,
+  requestDriveAuth,
   clearAuthState,
   getGoogleUserInfo
 } from '../services/googleDrive';
+import { useTranslation } from 'react-i18next';
 import { X, LogIn, LogOut, Sun, Moon, AlertCircle, Download } from 'lucide-react';
 import { listLocalEntries } from '../services/db';
 import {
@@ -13,6 +14,9 @@ import {
   downloadBlob,
   defaultExportFilename,
 } from '../lib/exportJournal';
+import { SUPPORTED_LANGUAGES } from '../i18n/languages';
+import { LANGUAGE_STORAGE_KEY } from '../i18n';
+import i18n from '../i18n';
 
 interface SettingsModalProps {
   onClose: () => void;
@@ -22,13 +26,14 @@ interface SettingsModalProps {
   onLogoChange: (logo: string | null) => void;
 }
 
-export const SettingsModal: React.FC<SettingsModalProps> = ({ 
-  onClose, 
-  onThemeToggle, 
+export const SettingsModal: React.FC<SettingsModalProps> = ({
+  onClose,
+  onThemeToggle,
   theme,
   customLogo,
   onLogoChange
 }) => {
+  const { t } = useTranslation();
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -36,6 +41,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [autoSync, setAutoSync] = useState(true);
   const [logs, setLogs] = useState<string[]>([]);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [language, setLanguage] = useState<string>(
+    localStorage.getItem(LANGUAGE_STORAGE_KEY) || i18n.language || 'en'
+  );
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -118,13 +126,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     setLogs([]);
   };
 
+  const handleLanguageChange = (val: string) => {
+    setLanguage(val);
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, val);
+    i18n.changeLanguage(val);
+  };
+
   const handleExportJson = async () => {
     try {
       const allEntries = await listLocalEntries();
       downloadBlob(exportAsJson(allEntries), defaultExportFilename('json'));
     } catch (err) {
       console.error(err);
-      alert("Failed to export entries as JSON");
+      alert(t("settings.exportJsonFailed"));
     }
   };
 
@@ -134,7 +148,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       downloadBlob(exportAsMarkdown(allEntries), defaultExportFilename('md'));
     } catch (err) {
       console.error(err);
-      alert("Failed to export entries as Markdown");
+      alert(t("settings.exportMarkdownFailed"));
     }
   };
 
@@ -143,7 +157,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       <div className="w-full max-w-md bg-bg-surface border border-border-brand rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border-brand">
-          <h2 className="text-xl font-bold tracking-tight text-text-primary m-0">Settings</h2>
+          <h2 className="text-xl font-bold tracking-tight text-text-primary m-0">{t("settings.title")}</h2>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-bg-app transition-colors text-text-secondary">
             <X size={20} />
           </button>
@@ -154,22 +168,22 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* Theme setting */}
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-semibold text-text-primary">Theme Mode</h3>
-              <p className="text-xs text-text-secondary">Toggle between warm light and charcoal dark theme</p>
+              <h3 className="font-semibold text-text-primary">{t("settings.themeTitle")}</h3>
+              <p className="text-xs text-text-secondary">{t("settings.themeDesc")}</p>
             </div>
-            <button 
+            <button
               onClick={onThemeToggle}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-bg-app border border-border-brand hover:border-accent-brand text-text-primary transition-all duration-200"
             >
               {theme === 'dark' ? (
                 <>
                   <Moon size={16} className="text-accent-brand" />
-                  <span>Dark</span>
+                  <span>{t("settings.themeDark")}</span>
                 </>
               ) : (
                 <>
                   <Sun size={16} className="text-accent-brand" />
-                  <span>Light</span>
+                  <span>{t("settings.themeLight")}</span>
                 </>
               )}
             </button>
@@ -177,26 +191,45 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
           <hr className="border-border-brand" />
 
+          {/* Language setting */}
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold">{t("settings.languageLabel")}</label>
+            <p className="text-xs text-text-secondary">{t("settings.languageDesc")}</p>
+            <select
+              value={language}
+              onChange={(e) => handleLanguageChange(e.target.value)}
+              className="w-full px-3.5 py-2 rounded-xl border border-border-brand bg-bg-app text-text-primary text-sm focus:outline-none focus:border-accent-brand transition-colors"
+            >
+              {SUPPORTED_LANGUAGES.map((lang) => (
+                <option key={lang.code} value={lang.code}>
+                  {lang.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <hr className="border-border-brand" />
+
           {/* Custom Logo setting */}
           <div className="space-y-3">
             <div>
-              <h3 className="font-semibold text-text-primary">App Logo</h3>
-              <p className="text-xs text-text-secondary">Customize the in-app header logo. Supports standard image formats.</p>
+              <h3 className="font-semibold text-text-primary">{t("settings.logoTitle")}</h3>
+              <p className="text-xs text-text-secondary">{t("settings.logoDesc")}</p>
             </div>
             <div className="flex items-center gap-4">
-              <img 
-                src={customLogo || "/logo.png"} 
-                alt="Logo preview" 
+              <img
+                src={customLogo || "/logo.png"}
+                alt={t("settings.logoPreviewAlt")}
                 className="w-12 h-12 rounded-xl object-cover border border-border-brand bg-bg-app/40 shrink-0"
               />
               <div className="flex gap-2 flex-1">
                 <label className="flex-1 flex items-center justify-center py-2 px-3 text-xs font-semibold bg-accent-brand hover:bg-accent-brand-hover text-bg-app rounded-xl transition-all cursor-pointer text-center select-none active:scale-95">
-                  <span>Upload Image</span>
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    onChange={handleLogoUpload} 
-                    className="hidden" 
+                  <span>{t("settings.logoUpload")}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    className="hidden"
                   />
                 </label>
                 {customLogo && (
@@ -204,7 +237,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     onClick={handleResetLogo}
                     className="py-2 px-3 text-xs font-semibold bg-bg-app border border-border-brand hover:border-red-500 hover:text-red-500 text-text-primary rounded-xl transition-all cursor-pointer select-none active:scale-95"
                   >
-                    Reset
+                    {t("settings.logoReset")}
                   </button>
                 )}
               </div>
@@ -216,19 +249,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* Google Drive Configuration */}
           <div className="space-y-4">
             <div>
-              <h3 className="font-semibold text-text-primary">Google Drive Sync</h3>
+              <h3 className="font-semibold text-text-primary">{t("settings.googleSyncTitle")}</h3>
               <p className="text-xs text-text-secondary">
-                {isLoggedIn 
-                  ? (userEmail ? `Connected as ${userEmail}.` : "Sync your diaries securely to your Google Drive folder.")
-                  : "Connect your Google Account to enable the automatic sync feature."}
+                {isLoggedIn
+                  ? (userEmail ? t("settings.googleSyncDescConnected", { email: userEmail }) : t("settings.googleSyncDescConnectedShort"))
+                  : t("settings.googleSyncDescDisconnected")}
               </p>
             </div>
             {/* Auto-Sync Toggle */}
             {isLoggedIn && (
               <div className="flex items-center justify-between py-2 border-t border-border-brand/40">
                 <div>
-                  <h4 className="text-sm font-semibold text-text-primary">Enable Auto-Sync</h4>
-                  <p className="text-[11px] text-text-secondary">Sync entries automatically on startup and when closing the editor.</p>
+                  <h4 className="text-sm font-semibold text-text-primary">{t("settings.autoSyncTitle")}</h4>
+                  <p className="text-[11px] text-text-secondary">{t("settings.autoSyncDesc")}</p>
                 </div>
                 <input
                   type="checkbox"
@@ -243,13 +276,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <div className="p-4 rounded-xl bg-bg-app border border-border-brand flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium text-text-primary">Google Account Sync</span>
+                  <span className="text-sm font-medium text-text-primary">{t("settings.googleAccountTitle")}</span>
                   {isLoggedIn && userEmail && (
                     <span className="text-[11px] text-text-secondary mt-0.5">{userEmail}</span>
                   )}
                 </div>
                 <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold ${isLoggedIn ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20'}`}>
-                  {isLoggedIn ? 'Connected' : 'Disconnected'}
+                  {isLoggedIn ? t("settings.googleStatusConnected") : t("settings.googleStatusDisconnected")}
                 </span>
               </div>
 
@@ -261,21 +294,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               )}
 
               {isLoggedIn ? (
-                <button 
+                <button
                   onClick={handleLogout}
                   className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/15 border border-red-500/25 text-red-500 font-semibold text-sm transition-all"
                 >
                   <LogOut size={16} />
-                  <span>Disconnect Account</span>
+                  <span>{t("settings.disconnectButton")}</span>
                 </button>
               ) : (
-                <button 
+                <button
                   onClick={handleLogin}
                   disabled={authLoading}
                   className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-accent-brand hover:bg-accent-brand-hover text-bg-app font-semibold text-sm transition-all disabled:opacity-50"
                 >
                   <LogIn size={16} />
-                  <span>{authLoading ? 'Signing in...' : 'Sign in with Google'}</span>
+                  <span>{authLoading ? t("settings.signInLoading") : t("settings.signInButton")}</span>
                 </button>
               )}
             </div>
@@ -285,8 +318,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             {/* Export data section */}
             <div className="space-y-3">
               <div>
-                <h3 className="font-semibold text-text-primary text-sm">Export Journal</h3>
-                <p className="text-xs text-text-secondary">Export your journals as offline files. No vendor lock-in.</p>
+                <h3 className="font-semibold text-text-primary text-sm">{t("settings.exportTitle")}</h3>
+                <p className="text-xs text-text-secondary">{t("settings.exportDesc")}</p>
               </div>
               <div className="flex gap-2">
                 <button
@@ -294,14 +327,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold bg-bg-app border border-border-brand hover:border-accent-brand text-text-primary rounded-xl transition-all cursor-pointer"
                 >
                   <Download size={14} />
-                  <span>Export JSON</span>
+                  <span>{t("settings.exportJson")}</span>
                 </button>
                 <button
                   onClick={handleExportMarkdown}
                   className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold bg-bg-app border border-border-brand hover:border-accent-brand text-text-primary rounded-xl transition-all cursor-pointer"
                 >
                   <Download size={14} />
-                  <span>Export Markdown</span>
+                  <span>{t("settings.exportMarkdown")}</span>
                 </button>
               </div>
             </div>
@@ -309,10 +342,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             {/* Debug logs section */}
             <div className="space-y-2 border-t border-border-brand/40 pt-4">
               <div className="flex items-center justify-between">
-                <h4 className="text-xs font-semibold text-text-primary uppercase tracking-wider">Sync Debug Logs</h4>
+                <h4 className="text-xs font-semibold text-text-primary uppercase tracking-wider">{t("settings.debugLogsTitle")}</h4>
                 {logs.length > 0 && (
                   <button onClick={handleClearLogs} className="text-[10px] text-red-500 hover:underline">
-                    Clear Logs
+                    {t("settings.debugClearLogs")}
                   </button>
                 )}
               </div>
@@ -320,29 +353,29 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 {logs.length > 0 ? (
                   logs.slice().reverse().join('\n')
                 ) : (
-                  <span className="italic text-text-secondary">No sync cycles recorded yet.</span>
+                  <span className="italic text-text-secondary">{t("settings.debugEmpty")}</span>
                 )}
               </div>
             </div>
 
             {/* Privacy & Terms Links */}
             <div className="flex justify-center items-center gap-3 pt-6 border-t border-border-brand/40 text-[11px] text-text-secondary">
-              <a 
-                href="/privacy/" 
-                target="_blank" 
-                rel="noopener noreferrer" 
+              <a
+                href="/privacy/"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="hover:text-accent-brand hover:underline transition-colors"
               >
-                Privacy Policy
+                {t("settings.privacyLink")}
               </a>
               <span className="text-border-brand">•</span>
-              <a 
-                href="/terms/" 
-                target="_blank" 
-                rel="noopener noreferrer" 
+              <a
+                href="/terms/"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="hover:text-accent-brand hover:underline transition-colors"
               >
-                Terms of Service
+                {t("settings.termsLink")}
               </a>
             </div>
           </div>

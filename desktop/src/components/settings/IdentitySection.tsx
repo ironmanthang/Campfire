@@ -9,9 +9,9 @@ import { getGoogleUserInfo } from "../../services/googleDrive";
 
 export function IdentitySection() {
   const { t } = useTranslation();
-  const { 
-    config, 
-    updateConfigField, 
+  const {
+    config,
+    updateConfigField,
     selectDirectory,
     isDriveConnected,
     syncProgress,
@@ -29,11 +29,6 @@ export function IdentitySection() {
   const [confirmRestoreTs, setConfirmRestoreTs] = useState<number | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
-  const [showDonateHeart, setShowDonateHeart] = useState(
-    localStorage.getItem("show_donate_heart") !== "false"
-  );
-  const [showLockAlert, setShowLockAlert] = useState(false);
-
   useEffect(() => {
     if (isDriveConnected) {
       getGoogleUserInfo().then((info) => {
@@ -45,32 +40,6 @@ export function IdentitySection() {
       setUserEmail(null);
     }
   }, [isDriveConnected]);
-
-  const handleToggleHeart = (checked: boolean) => {
-    if (checked) {
-      localStorage.setItem("show_donate_heart", "true");
-      setShowDonateHeart(true);
-      window.dispatchEvent(new Event("donate-heart-changed"));
-    } else {
-      const hasDonated = localStorage.getItem("has_donated") === "true";
-      if (hasDonated) {
-        localStorage.setItem("show_donate_heart", "false");
-        setShowDonateHeart(false);
-        window.dispatchEvent(new Event("donate-heart-changed"));
-      } else {
-        setShowLockAlert(true);
-      }
-    }
-  };
-
-  const handleDeclareDonated = () => {
-    localStorage.setItem("has_donated", "true");
-    localStorage.setItem("show_donate_heart", "false");
-    setShowDonateHeart(false);
-    setShowLockAlert(false);
-    window.dispatchEvent(new Event("donate-heart-changed"));
-    window.dispatchEvent(new Event("donate-banner-refresh"));
-  };
 
   const fetchBackups = async () => {
     if (config.journal_dir) {
@@ -192,24 +161,6 @@ export function IdentitySection() {
             </option>
           ))}
         </select>
-      </div>
-
-      {/* Show Donation Heart setting */}
-      <div className="flex items-center justify-between p-3.5 bg-bg-surface/30 border border-border-brand/40 rounded-xl">
-        <div className="space-y-0.5">
-          <label className="block text-xs font-semibold text-text-primary">
-            {t("settingsView.showDonateHeartLabel", { defaultValue: "Show Donation Heart" })}
-          </label>
-          <p className="text-[10px] text-text-secondary">
-            {t("settingsView.showDonateHeartDesc", { defaultValue: "Display the animated heart icon in the sidebar footer." })}
-          </p>
-        </div>
-        <input
-          type="checkbox"
-          checked={showDonateHeart}
-          onChange={(e) => handleToggleHeart(e.target.checked)}
-          className="w-4 h-4 rounded border-border-brand bg-bg-input text-accent-brand focus:ring-accent-brand cursor-pointer"
-        />
       </div>
 
       {/* Google Drive Sync Section */}
@@ -347,33 +298,6 @@ export function IdentitySection() {
           onCancel={() => setConfirmRestoreTs(null)}
           onConfirm={executeRestore}
         />
-      )}
-
-      {showLockAlert && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="bg-bg-surface border border-border-brand rounded-2xl w-full max-w-sm p-6 shadow-2xl flex flex-col items-center text-center space-y-4">
-            <h3 className="text-md font-bold text-text-primary">
-              {t("aboutModal.lockAlertTitle")}
-            </h3>
-            <p className="text-xs text-text-secondary leading-relaxed">
-              {t("aboutModal.lockAlertBody")}
-            </p>
-            <div className="w-full flex flex-col gap-2 pt-2">
-              <button
-                onClick={handleDeclareDonated}
-                className="w-full py-2.5 rounded-xl bg-accent-brand hover:bg-accent-brand/90 text-bg-app font-bold text-xs shadow-md transition-all cursor-pointer"
-              >
-                {t("aboutModal.lockAlertConfirm")}
-              </button>
-              <button
-                onClick={() => setShowLockAlert(false)}
-                className="w-full py-2.5 rounded-xl bg-bg-surface border border-border-brand hover:border-accent-brand text-text-primary text-xs font-bold transition-all cursor-pointer"
-              >
-                {t("aboutModal.lockAlertCancel")}
-              </button>
-            </div>
-          </div>
-        </div>
       )}
     </div>
   );

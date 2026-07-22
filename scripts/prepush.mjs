@@ -4,6 +4,7 @@ const checks = [
   ['pnpm', ['--filter', '*', 'test']],
   ['pnpm', ['--filter', '*', 'typecheck']],
   ['pnpm', ['--filter', '*', 'build']],
+  ['pnpm', ['--filter', 'mobile', 'i18n:check']],
 ];
 
 for (const [command, args] of checks) {

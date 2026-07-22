@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Calendar } from 'lucide-react';
 
 interface DatePickerProps {
@@ -7,10 +8,15 @@ interface DatePickerProps {
   className?: string;
 }
 
-const WEEKDAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-const MONTHS = [
+const WEEKDAYS_EN = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+const WEEKDAYS_VI = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+const MONTHS_EN = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December',
+];
+const MONTHS_VI = [
+  'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
+  'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12',
 ];
 
 function buildMonthGrid(viewYear: number, viewMonth: number) {
@@ -35,10 +41,15 @@ function toKey(d: Date): string {
 }
 
 export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, className = '' }) => {
+  const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const initial = value ? new Date(value) : new Date();
   const [viewYear, setViewYear] = useState(initial.getFullYear());
   const [viewMonth, setViewMonth] = useState(initial.getMonth());
+
+  const isVi = i18n.language === 'vi';
+  const WEEKDAYS = isVi ? WEEKDAYS_VI : WEEKDAYS_EN;
+  const MONTHS = isVi ? MONTHS_VI : MONTHS_EN;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef(0);
@@ -111,8 +122,8 @@ export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, classNa
 
   const formatDateDisplay = (dateStr: string) => {
     const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return 'Select Date';
-    return d.toLocaleDateString('en-US', {
+    if (isNaN(d.getTime())) return t("datePicker.selectDate");
+    return d.toLocaleDateString(i18n.language === 'vi' ? 'vi-VN' : 'en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric'
@@ -127,7 +138,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, classNa
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-bg-app border border-border-brand hover:border-accent-brand text-text-secondary hover:text-text-primary transition-all duration-200 cursor-pointer text-xs font-semibold select-none"
       >
         <Calendar size={13} className="text-accent-brand shrink-0" />
-        <span>{value ? formatDateDisplay(value) : 'Select Date'}</span>
+        <span>{value ? formatDateDisplay(value) : t("datePicker.selectDate")}</span>
       </button>
 
       {open && (
@@ -188,7 +199,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, classNa
 
           {/* Swipe Instructions */}
           <p className="text-[9px] text-text-secondary/50 text-center mt-2.5 italic">
-            Swipe left/right to change month
+            {t("datePicker.swipeHint")}
           </p>
 
           {/* Actions */}

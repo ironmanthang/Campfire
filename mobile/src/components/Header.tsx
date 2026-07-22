@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Settings, RefreshCw, AlertTriangle, Cloud, CloudOff, Heart } from 'lucide-react';
 import { type SyncProgress } from '../services/sync';
 
@@ -11,17 +12,19 @@ interface HeaderProps {
   customLogo: string | null;
 }
 
-export const Header: React.FC<HeaderProps> = ({ 
-  onSettingsOpen, 
-  onSync, 
+export const Header: React.FC<HeaderProps> = ({
+  onSettingsOpen,
+  onSync,
   onDonateOpen,
   syncProgress,
   isLoggedIn,
   customLogo
 }) => {
+  const { t } = useTranslation();
+
   const getSyncIcon = () => {
     if (!isLoggedIn) return <CloudOff className="text-text-secondary" size={18} />;
-    
+
     switch (syncProgress.status) {
       case 'syncing':
       case 'connecting':
@@ -36,14 +39,14 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   const getSyncTooltip = () => {
-    if (!isLoggedIn) return 'Setup Google Drive to sync';
+    if (!isLoggedIn) return t("header.syncSetupGoogle");
     if (syncProgress.status === 'idle') {
       const lastSync = localStorage.getItem('past_you_last_sync_time');
       if (lastSync) {
         const dateStr = new Date(parseInt(lastSync)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        return `Last synced: ${dateStr}`;
+        return t("header.lastSynced", { time: dateStr });
       }
-      return 'Sync with Google Drive';
+      return t("header.syncWithGoogle");
     }
     return syncProgress.message;
   };
@@ -53,15 +56,15 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center gap-2">
         <img
           src={customLogo || "/logo.png"}
-          alt="Campfire logo"
+          alt={t("header.logoAlt")}
           className="w-8 h-8 rounded-lg object-cover border border-border-brand/40"
         />
-        <span className="font-bold text-lg text-text-primary tracking-tight">Campfire</span>
+        <span className="font-bold text-lg text-text-primary tracking-tight">{t("common.campfire")}</span>
       </div>
 
       <div className="flex items-center gap-3">
         {/* Sync Indicator & Trigger */}
-        <button 
+        <button
           onClick={onSync}
           disabled={syncProgress.status === 'syncing' || syncProgress.status === 'connecting'}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-bg-app border border-border-brand hover:border-accent-brand transition-all duration-200 active:scale-95 disabled:opacity-80"
@@ -69,21 +72,21 @@ export const Header: React.FC<HeaderProps> = ({
         >
           {getSyncIcon()}
           <span className="text-xs font-semibold text-text-secondary hidden xs:inline">
-            {!isLoggedIn ? 'Offline' : syncProgress.status === 'syncing' ? 'Syncing' : 'Sync'}
+            {!isLoggedIn ? t("header.syncOffline") : syncProgress.status === 'syncing' ? t("header.syncSyncing") : t("header.syncButton")}
           </span>
         </button>
 
         {/* Donation Heart */}
-        <button 
+        <button
           onClick={onDonateOpen}
           className="p-2 rounded-xl bg-bg-app border border-border-brand hover:border-accent-brand text-red-500 hover:text-red-600 transition-all active:scale-95 animate-pulse"
-          title="Support me :D"
+          title={t("header.donateTooltip")}
         >
           <Heart size={18} className="fill-red-500/10" />
         </button>
 
         {/* Settings Trigger */}
-        <button 
+        <button
           onClick={onSettingsOpen}
           className="p-2 rounded-xl bg-bg-app border border-border-brand hover:border-accent-brand text-text-secondary hover:text-text-primary transition-all active:scale-95"
         >
