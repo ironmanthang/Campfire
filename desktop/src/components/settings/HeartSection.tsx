@@ -162,6 +162,10 @@ export function HeartSection() {
 
   const handleResetPosition = () => {
     updateConfigField("heart_position", null);
+    updateConfigField("heart_size", 24);
+    // Dispatch a custom event so DraggableHeart always force-snaps to the anchor,
+    // even if heart_position was already null (Zustand sees no change → no effect re-run).
+    window.dispatchEvent(new Event("heart-reset"));
   };
 
   return (

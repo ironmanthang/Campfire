@@ -17,9 +17,22 @@ const HEART_ICON_INSET = 6; // px slack so heart stays clickable near edges
 const SIDEBAR_WIDTH_PX = 256; // matches <aside className="w-64"> in Sidebar.tsx
 const SIDEBAR_FOOTER_BOTTOM_INSET_PX = 16; // matches `p-4` on the footer
 
+function getAnchorPosition(size: number): { x: number; y: number } | null {
+  if (typeof window === "undefined") return null;
+  const anchor = document.querySelector("[data-heart-anchor]");
+  if (!anchor) return null;
+  const rect = anchor.getBoundingClientRect();
+  if (rect.width === 0 && rect.height === 0) return null;
+  return {
+    x: rect.left + (rect.width - size) / 2,
+    y: rect.top + (rect.height - size) / 2,
+  };
+}
+
 function getDefaultPosition(size: number): { x: number; y: number } {
-  // Anchor: right side of the sidebar footer row (next to the
-  // Sun / Bug / Info / Help icons), bottom-aligned with that row.
+  const anchorPos = getAnchorPosition(size);
+  if (anchorPos) return anchorPos;
+
   if (typeof window === "undefined") return { x: 0, y: 0 };
   return {
     x: SIDEBAR_WIDTH_PX - SIDEBAR_FOOTER_BOTTOM_INSET_PX - size,
@@ -69,21 +82,16 @@ export function DraggableHeart({ onClick }: DraggableHeartProps) {
     moved: false,
   });
 
-  // Re-anchor the heart on viewport changes (window resize + Ctrl/zoom).
-  // When the heart is at its default position (no persisted override), we
-  // recompute the default so it stays glued to the right of the Feature
-  // Guide button in the sidebar footer. When the user has dragged it
-  // somewhere specific, we scale that position by the viewport ratio so
-  // it follows zoom in/out proportionally instead of jumping.
+  // Re-anchor the heart on viewport/layout changes (window resize, Ctrl/zoom, sidebar expansion).
   useEffect(() => {
     let lastW = window.innerWidth;
     let lastH = window.innerHeight;
 
-    const handleResize = () => {
+    const updatePos = () => {
       setPosition((p) => {
         const persisted = config.heart_position;
         if (persisted === null) {
-          // At default: re-anchor (e.g. window resize, zoom).
+          // At default: re-anchor dynamically using DOM element if available
           return clampPosition(getDefaultPosition(size), size);
         }
         // Persisted (user-dragged) position: scale by the viewport delta
@@ -105,16 +113,29 @@ export function DraggableHeart({ onClick }: DraggableHeartProps) {
       });
     };
 
-    window.addEventListener("resize", handleResize);
-    // Ctrl+zoom in WebView2 fires `visualViewport.resize` but not always
-    // `window.resize`, so listen to both.
+    updatePos();
+
+    window.addEventListener("resize", updatePos);
     if (window.visualViewport) {
-      window.visualViewport.addEventListener("resize", handleResize);
+      window.visualViewport.addEventListener("resize", updatePos);
     }
+
+    let observer: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      observer = new ResizeObserver(() => {
+        updatePos();
+      });
+      const anchor = document.querySelector("[data-heart-anchor]") || document.body;
+      observer.observe(anchor);
+    }
+
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", updatePos);
       if (window.visualViewport) {
-        window.visualViewport.removeEventListener("resize", handleResize);
+        window.visualViewport.removeEventListener("resize", updatePos);
+      }
+      if (observer) {
+        observer.disconnect();
       }
     };
   }, [size, config.heart_position]);
@@ -124,21 +145,27 @@ export function DraggableHeart({ onClick }: DraggableHeartProps) {
     setPosition((p) => clampPosition(p, size));
   }, [size]);
 
-  // React to external changes of `config.heart_position` (notably: the user
-  // clicked "Reset heart position and size" in Settings). When the persisted
-  // value transitions to `null`, snap back to the default anchor next to the
-  // Feature Guide button. Without this effect, the in-memory `position` state
-  // would stay stale at the last-dragged coordinates — so the reset would
-  // clear the config but the heart would not visually move.
+  // React to external changes of `config.heart_position`. When it transitions
+  // to a specific value (drag-persisted), apply it. When null, snap to anchor.
+  // Note: this effect does NOT fire when position was already null and reset is
+  // clicked — that case is handled by the 'heart-reset' event below.
   useEffect(() => {
     if (config.heart_position === null) {
       setPosition(clampPosition(getDefaultPosition(size), size));
     } else {
       setPosition(clampPosition(config.heart_position, size));
     }
-    // We intentionally depend only on `config.heart_position` and `size` —
-    // not on `getDefaultPosition` (stable) or the helper functions above.
   }, [config.heart_position, size]);
+
+  // Force-snap to the anchor whenever the Reset button is pressed, even when
+  // heart_position was already null (no state change → no useEffect re-run).
+  useEffect(() => {
+    const handleHeartReset = () => {
+      setPosition(clampPosition(getDefaultPosition(size), size));
+    };
+    window.addEventListener("heart-reset", handleHeartReset);
+    return () => window.removeEventListener("heart-reset", handleHeartReset);
+  }, [size]);
 
   const handlePointerDown = useCallback(
     (e: React.PointerEvent<HTMLButtonElement>) => {
