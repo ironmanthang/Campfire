@@ -29,6 +29,27 @@ pub struct AppConfig {
     pub system_instruction_mode: String,
     pub custom_system_instruction: String,
     pub pwa_url: String,
+
+    // Donation heart settings (kept here so they actually round-trip through
+    // load_config / save_config — previously these lived only on the TS side
+    // and were silently dropped on every reload because the Rust struct
+    // didn't know about them.)
+    pub show_donate_heart: bool,
+    pub heart_click_falls: bool,
+    pub heart_fall_speed: u32,
+    pub heart_size: u32,
+    pub heart_position: Option<HeartPosition>,
+    pub heart_gate_dismissed: bool,
+    pub heart_shortcut: String,
+    /// Optional `data:` URL (e.g. `data:image/png;base64,...`) for a custom
+    /// image used in place of the default red heart. Empty string = default.
+    pub heart_custom_image: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+pub struct HeartPosition {
+    pub x: f64,
+    pub y: f64,
 }
 
 fn default_section_order() -> Vec<String> {
@@ -68,6 +89,14 @@ impl Default for AppConfig {
             system_instruction_mode: "default".to_string(),
             custom_system_instruction: String::new(),
             pwa_url: "https://app-campfire.pages.dev/".to_string(),
+            show_donate_heart: true,
+            heart_click_falls: false,
+            heart_fall_speed: 5,
+            heart_size: 24,
+            heart_position: None,
+            heart_gate_dismissed: false,
+            heart_shortcut: String::new(),
+            heart_custom_image: String::new(),
         }
     }
 }

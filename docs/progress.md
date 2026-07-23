@@ -1,5 +1,3 @@
 # Pending Objectives
 
 # product backlog
-
-

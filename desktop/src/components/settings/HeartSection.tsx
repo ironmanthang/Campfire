@@ -1,33 +1,32 @@
+import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { RotateCcw, Heart } from "lucide-react";
+import { RotateCcw, Keyboard, Image as ImageIcon, X, Upload } from "lucide-react";
+import { open } from "@tauri-apps/plugin-dialog";
+import { invoke } from "@tauri-apps/api/core";
 import { useAppStore } from "../../store/useAppStore";
+import {
+  formatShortcutForDisplay,
+  normalizeShortcutFromEvent,
+} from "../heart/shortcut";
 
 function SliderRow({
   label,
-  description,
   min,
   max,
   step = 1,
   value,
-  formatValue,
   onChange,
 }: {
   label: string;
-  description: string;
   min: number;
   max: number;
   step?: number;
   value: number;
-  formatValue: (v: number) => string;
   onChange: (v: number) => void;
 }) {
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <label className="block text-sm font-semibold">{label}</label>
-        <span className="text-xs text-text-secondary font-mono">{formatValue(value)}</span>
-      </div>
-      <p className="text-xs text-text-secondary">{description}</p>
+    <div className="flex items-center gap-4 p-3.5 bg-bg-surface/30 border border-border-brand/40 rounded-xl">
+      <label className="text-xs font-semibold text-text-primary shrink-0 w-32">{label}</label>
       <input
         type="range"
         min={min}
@@ -35,7 +34,7 @@ function SliderRow({
         step={step}
         value={value}
         onChange={(e) => onChange(parseInt(e.target.value, 10))}
-        className="w-full accent-accent-brand cursor-pointer"
+        className="flex-1 accent-accent-brand cursor-pointer"
       />
     </div>
   );
@@ -43,21 +42,16 @@ function SliderRow({
 
 function ToggleRow({
   label,
-  description,
   checked,
   onChange,
 }: {
   label: string;
-  description: string;
   checked: boolean;
   onChange: (next: boolean) => void;
 }) {
   return (
     <div className="flex items-center justify-between p-3.5 bg-bg-surface/30 border border-border-brand/40 rounded-xl">
-      <div className="space-y-0.5 pr-3">
-        <label className="block text-xs font-semibold text-text-primary">{label}</label>
-        <p className="text-[10px] text-text-secondary">{description}</p>
-      </div>
+      <label className="text-xs font-semibold text-text-primary pr-3">{label}</label>
       <input
         type="checkbox"
         checked={checked}
@@ -70,7 +64,86 @@ function ToggleRow({
 
 export function HeartSection() {
   const { t } = useTranslation();
-  const { config, updateConfigField, setHeartGateOpen, fireHearts } = useAppStore();
+  const { config, updateConfigField, setHeartGateOpen, showNotification } = useAppStore();
+
+  // ---- Keyboard shortcut recording state ----
+  // Plain keys (e.g. "a") and combos (e.g. "shift+a", "f5") are both
+  // accepted. Bare modifier presses are ignored; Escape cancels.
+  const [recording, setRecording] = useState(false);
+
+  const handleStartRecord = useCallback(() => {
+    setRecording(true);
+  }, []);
+
+  const handleCancelRecord = useCallback(() => {
+    setRecording(false);
+  }, []);
+
+  const handleClearShortcut = useCallback(() => {
+    updateConfigField("heart_shortcut", "");
+  }, [updateConfigField]);
+
+  useEffect(() => {
+    if (!recording) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setRecording(false);
+        return;
+      }
+      const normalized = normalizeShortcutFromEvent(e);
+      if (normalized === null || normalized === "__escape__") return;
+      e.preventDefault();
+      updateConfigField("heart_shortcut", normalized);
+      setRecording(false);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [recording, updateConfigField]);
+
+  // ---- Custom image picker state ----
+  // Briefly flash a status message on success/failure.
+  const [imageBusy, setImageBusy] = useState(false);
+
+  const handlePickImage = useCallback(async () => {
+    if (imageBusy) return;
+    setImageBusy(true);
+    try {
+      const selected = await open({
+        multiple: false,
+        filters: [
+          {
+            name: "Images",
+            extensions: ["png", "jpg", "jpeg", "webp", "gif", "svg"],
+          },
+        ],
+        title:
+          t("settingsView.heartCustomImageUpload", { defaultValue: "Upload image" }),
+      });
+      if (selected && typeof selected === "string") {
+        // Use the same Tauri command as custom_logo: reads the file from
+        // disk and returns a base64 data URL. We keep it as a data: URL so
+        // it survives being stored in config.json (no need for any extra
+        // asset copying / persistence).
+        const dataUrl = await invoke<string>("read_image_as_base64", { path: selected });
+        updateConfigField("heart_custom_image", dataUrl);
+      }
+    } catch (err) {
+      console.error("Failed to load custom heart image:", err);
+      showNotification(
+        t("settingsView.heartCustomImageEmpty", {
+          defaultValue: "Using default red heart",
+        }),
+        "error"
+      );
+    } finally {
+      setImageBusy(false);
+    }
+  }, [imageBusy, t, updateConfigField, showNotification]);
+
+  const handleRemoveImage = useCallback(() => {
+    updateConfigField("heart_custom_image", "");
+  }, [updateConfigField]);
 
   const handleClickFallsChange = (next: boolean) => {
     if (next) {
@@ -92,24 +165,11 @@ export function HeartSection() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Section description */}
-      <div className="flex items-start gap-3 p-3.5 bg-red-500/5 border border-red-500/20 rounded-xl">
-        <Heart className="h-5 w-5 text-red-500 shrink-0 mt-0.5" fill="currentColor" />
-        <p className="text-xs text-text-secondary leading-relaxed">
-          {t("settingsView.heartDesc", {
-            defaultValue:
-              "Customize the floating donation heart: show or hide it, decide what happens when you click it, fine-tune the falling-hearts effect, and drag it anywhere on the screen.",
-          })}
-        </p>
-      </div>
+    <div className="space-y-3">
 
       {/* Visibility toggle */}
       <ToggleRow
         label={t("settingsView.heartShowLabel", { defaultValue: "Show donation heart" })}
-        description={t("settingsView.heartShowDesc", {
-          defaultValue: "Display the floating heart icon on the screen.",
-        })}
         checked={config.show_donate_heart}
         onChange={(v) => updateConfigField("show_donate_heart", v)}
       />
@@ -117,11 +177,7 @@ export function HeartSection() {
       {/* Click behavior toggle (gated) */}
       <ToggleRow
         label={t("settingsView.heartClickFallsLabel", {
-          defaultValue: "Make hearts fall on click",
-        })}
-        description={t("settingsView.heartClickFallsDesc", {
-          defaultValue:
-            "When ON, clicking the heart spawns falling hearts instead of opening the donate modal.",
+          defaultValue: "Make hearts fall on click instead of donate window",
         })}
         checked={config.heart_click_falls}
         onChange={handleClickFallsChange}
@@ -130,83 +186,146 @@ export function HeartSection() {
       {/* Speed slider */}
       <SliderRow
         label={t("settingsView.heartSpeedLabel", { defaultValue: "Falling heart speed" })}
-        description={t("settingsView.heartSpeedDesc", {
-          defaultValue: "How fast the hearts fall from the top of the screen.",
-        })}
         min={1}
         max={10}
         value={config.heart_fall_speed}
-        formatValue={(v) =>
-          t("settingsView.heartSpeedValue", { value: v, defaultValue: `${v} / 10` })
-        }
         onChange={(v) => updateConfigField("heart_fall_speed", v)}
       />
 
       {/* Size slider */}
       <SliderRow
         label={t("settingsView.heartSizeLabel", { defaultValue: "Heart size" })}
-        description={t("settingsView.heartSizeDesc", {
-          defaultValue: "Width and height of the floating heart icon, in pixels.",
-        })}
         min={16}
-        max={64}
+        max={200}
         value={config.heart_size}
-        formatValue={(v) =>
-          t("settingsView.heartSizeValue", { value: v, defaultValue: `${v} px` })
-        }
         onChange={(v) => updateConfigField("heart_size", v)}
       />
 
-      {/* Test fire button */}
-      <div className="flex items-center justify-between p-3.5 bg-bg-surface/30 border border-border-brand/40 rounded-xl">
-        <div className="space-y-0.5 pr-3">
-          <label className="block text-xs font-semibold text-text-primary">
-            {t("settingsView.heartTestLabel", { defaultValue: "Test the effect" })}
-          </label>
-          <p className="text-[10px] text-text-secondary">
-            {t("settingsView.heartTestDesc", {
-              defaultValue: "Spawn a few falling hearts right now to preview your speed and size.",
-            })}
-          </p>
+      {/* Keyboard shortcut row */}
+      <div className="flex items-center justify-between gap-3 p-3.5 bg-bg-surface/30 border border-border-brand/40 rounded-xl">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <Keyboard className="h-3.5 w-3.5 shrink-0 text-text-primary" />
+          <span className="text-xs font-semibold text-text-primary shrink-0">
+            {t("settingsView.heartShortcutLabel", { defaultValue: "Keyboard shortcut" })}
+          </span>
+          <span className="text-[0.625rem] text-text-secondary font-mono truncate">
+            {recording
+              ? t("settingsView.heartShortcutRecording", {
+                  defaultValue: "Press a key… (Esc to cancel)",
+                })
+              : config.heart_shortcut
+              ? formatShortcutForDisplay(config.heart_shortcut)
+              : t("settingsView.heartShortcutEmpty", { defaultValue: "Not set" })}
+          </span>
         </div>
-        <button
-          type="button"
-          onClick={() => fireHearts(8)}
-          className="px-3.5 py-1.5 rounded-lg bg-accent-brand text-bg-app hover:bg-accent-brand-hover text-xs font-semibold transition-colors cursor-pointer shrink-0"
-        >
-          {t("settingsView.heartTestButton", { defaultValue: "Fire 8 hearts" })}
-        </button>
+        <div className="flex items-center gap-1.5 shrink-0">
+          {recording ? (
+            <button
+              type="button"
+              onClick={handleCancelRecord}
+              className="px-2.5 py-1.5 rounded-lg border border-border-brand bg-bg-surface/30 hover:bg-bg-app text-text-primary text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1"
+            >
+              <X className="h-3 w-3" />
+              {t("settingsView.heartShortcutCancel", { defaultValue: "Cancel" })}
+            </button>
+          ) : config.heart_shortcut ? (
+            <>
+              <button
+                type="button"
+                onClick={handleStartRecord}
+                className="px-2.5 py-1.5 rounded-lg border border-border-brand bg-bg-surface/30 hover:bg-bg-app text-text-primary text-xs font-semibold transition-colors cursor-pointer"
+              >
+                {t("settingsView.heartShortcutRecord", { defaultValue: "Record" })}
+              </button>
+              <button
+                type="button"
+                onClick={handleClearShortcut}
+                className="px-2.5 py-1.5 rounded-lg border border-border-brand bg-bg-surface/30 hover:bg-bg-app text-text-primary text-xs font-semibold transition-colors cursor-pointer"
+              >
+                {t("settingsView.heartShortcutClear", { defaultValue: "Clear" })}
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={handleStartRecord}
+              className="px-2.5 py-1.5 rounded-lg bg-accent-brand text-bg-app hover:bg-accent-brand-hover text-xs font-semibold transition-colors cursor-pointer"
+            >
+              {t("settingsView.heartShortcutRecord", { defaultValue: "Record" })}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Custom heart image row */}
+      <div className="flex items-center justify-between gap-3 p-3.5 bg-bg-surface/30 border border-border-brand/40 rounded-xl">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <ImageIcon className="h-3.5 w-3.5 shrink-0 text-text-primary" />
+          <span className="text-xs font-semibold text-text-primary shrink-0">
+            {t("settingsView.heartCustomImageLabel", { defaultValue: "Custom heart image" })}
+          </span>
+          {config.heart_custom_image ? (
+            <div className="flex items-center gap-1.5 min-w-0">
+              <img
+                src={config.heart_custom_image}
+                alt=""
+                className="h-5 w-5 object-contain rounded border border-border-brand/40 bg-bg-app/40 shrink-0"
+              />
+              <span className="text-[0.625rem] text-text-secondary truncate">
+                {t("settingsView.heartCustomImageSet", { defaultValue: "Custom image set" })}
+              </span>
+            </div>
+          ) : (
+            <span className="text-[0.625rem] text-text-secondary italic truncate">
+              {t("settingsView.heartCustomImageEmpty", { defaultValue: "Using default red heart" })}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-1.5 shrink-0">
+          {config.heart_custom_image ? (
+            <>
+              <button
+                type="button"
+                onClick={handlePickImage}
+                disabled={imageBusy}
+                className="px-2.5 py-1.5 rounded-lg border border-border-brand bg-bg-surface/30 hover:bg-bg-app text-text-primary text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+              >
+                <Upload className="h-3 w-3" />
+                {t("settingsView.heartCustomImageChange", { defaultValue: "Change" })}
+              </button>
+              <button
+                type="button"
+                onClick={handleRemoveImage}
+                className="px-2.5 py-1.5 rounded-lg border border-border-brand bg-bg-surface/30 hover:bg-bg-app text-text-primary text-xs font-semibold transition-colors cursor-pointer"
+              >
+                {t("settingsView.heartCustomImageRemove", { defaultValue: "Remove" })}
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={handlePickImage}
+              disabled={imageBusy}
+              className="px-2.5 py-1.5 rounded-lg bg-accent-brand text-bg-app hover:bg-accent-brand-hover text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+            >
+              <Upload className="h-3 w-3" />
+              {t("settingsView.heartCustomImageUpload", { defaultValue: "Upload" })}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Reset position */}
       <div className="flex items-center justify-between p-3.5 bg-bg-surface/30 border border-border-brand/40 rounded-xl">
-        <div className="space-y-0.5 pr-3">
-          <label className="block text-xs font-semibold text-text-primary">
-            {t("settingsView.heartResetPositionLabel", {
-              defaultValue: "Reset heart position",
-            })}
-          </label>
-          <p className="text-[10px] text-text-secondary">
-            {t("settingsView.heartResetPositionDesc", {
-              defaultValue:
-                "Move the floating heart back to its default location (right side of the sidebar footer row).",
-            })}
-          </p>
-          {config.heart_position && (
-            <p className="text-[10px] text-text-secondary font-mono pt-1">
-              {t("settingsView.heartPositionFormat", {
-                x: Math.round(config.heart_position.x),
-                y: Math.round(config.heart_position.y),
-                defaultValue: `Current: x=${Math.round(config.heart_position.x)}, y=${Math.round(config.heart_position.y)}`,
-              })}
-            </p>
-          )}
-        </div>
+        <span className="text-xs font-semibold text-text-primary pr-3">
+          {t("settingsView.heartResetPositionLabel", {
+            defaultValue: "Reset heart position and size",
+          })}
+        </span>
         <button
           type="button"
           onClick={handleResetPosition}
-          disabled={config.heart_position === null}
-          className="px-3.5 py-1.5 rounded-lg border border-border-brand bg-bg-surface/30 hover:bg-bg-app text-text-primary text-xs font-semibold transition-colors cursor-pointer shrink-0 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
+          className="px-3.5 py-1.5 rounded-lg border border-border-brand bg-bg-surface/30 hover:bg-bg-app text-text-primary text-xs font-semibold transition-colors cursor-pointer shrink-0 flex items-center gap-1.5"
         >
           <RotateCcw className="h-3.5 w-3.5" />
           {t("settingsView.heartResetPositionButton", { defaultValue: "Reset" })}

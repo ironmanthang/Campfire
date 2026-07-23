@@ -15,7 +15,7 @@ import {
 import { useAppStore } from "../store/useAppStore";
 import { useOllamaStore } from "../store/useOllamaStore";
 
-const AVAILABLE_SECTIONS = ["heart", "identity", "ollama", "pwa", "legacy"];
+const AVAILABLE_SECTIONS = ["identity", "pwa", "ollama", "heart", "legacy"];
 
 export function SettingsView() {
   const { t } = useTranslation();
@@ -75,12 +75,17 @@ export function SettingsView() {
 
     let title = "";
     let badge = "";
+    let description: string | undefined;
     let content: React.ReactNode = null;
 
     switch (key) {
       case "heart":
         title = t("settingsView.heartTitle", { defaultValue: "Heart Settings" });
         badge = t("settingsView.heartBadge", { defaultValue: "Heart" });
+        description = t("settingsView.heartDesc", {
+          defaultValue:
+            "Customize the floating donation heart: show or hide it, decide what happens when you click it, fine-tune the falling-hearts effect, and drag it anywhere on the screen.",
+        });
         content = <HeartSection />;
         break;
 
@@ -124,6 +129,8 @@ export function SettingsView() {
         onToggle={() => toggleCollapse(key)}
         title={title}
         badge={badge}
+        description={description}
+        showDescriptionIcon={key === "heart"}
         isFirst={isFirst}
         isLast={isLast}
         onMoveUp={() => moveSection(index, "up")}

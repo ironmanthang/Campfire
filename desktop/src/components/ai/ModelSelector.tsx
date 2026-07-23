@@ -81,7 +81,7 @@ export function ModelSelector({
                 {/* Pinned Models */}
                 {pinned.length > 0 && (
                   <div className="space-y-0.5">
-                    <div className="px-2 py-1 text-[9px] font-bold text-text-secondary uppercase tracking-wider flex items-center gap-1">
+                    <div className="px-2 py-1 text-xs font-bold text-text-secondary uppercase tracking-wider flex items-center gap-1">
                       <span>📌 Pinned Models</span>
                     </div>
                     {pinned.map((m) => (
@@ -99,7 +99,7 @@ export function ModelSelector({
                       >
                         <div className="flex flex-col truncate pr-1">
                           <span className="truncate">{m.name}</span>
-                          <span className="text-[9px] text-text-secondary">
+                          <span className="text-xs text-text-secondary">
                             {(m.size / (1024 * 1024 * 1024)).toFixed(2)} GB
                           </span>
                         </div>
@@ -122,7 +122,7 @@ export function ModelSelector({
                 {/* Other Models */}
                 {unpinned.length > 0 && (
                   <div className="space-y-0.5 pt-1">
-                    <div className="px-2 py-1 text-[9px] font-bold text-text-secondary uppercase tracking-wider">
+                    <div className="px-2 py-1 text-xs font-bold text-text-secondary uppercase tracking-wider">
                       {pinned.length > 0 ? "Others" : "All Models"}
                     </div>
                     {unpinned.map((m) => (
@@ -140,7 +140,7 @@ export function ModelSelector({
                       >
                         <div className="flex flex-col truncate pr-1">
                           <span className="truncate">{m.name}</span>
-                          <span className="text-[9px] text-text-secondary">
+                          <span className="text-xs text-text-secondary">
                             {(m.size / (1024 * 1024 * 1024)).toFixed(2)} GB
                           </span>
                         </div>

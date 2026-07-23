@@ -76,7 +76,7 @@ export function SuggestedPrompt() {
         type="button"
         onClick={fillPrompt}
         onMouseDown={(e) => e.preventDefault()}
-        className="px-2.5 py-1 rounded-lg border border-border-brand/60 bg-bg-surface/40 text-text-primary text-[11px] font-semibold hover:border-accent-brand hover:bg-accent-brand/10 hover:text-accent-brand transition-all cursor-pointer flex items-center gap-1.5 max-w-[55ch] truncate"
+        className="px-2.5 py-1 rounded-lg border border-border-brand/60 bg-bg-surface/40 text-text-primary text-sm font-semibold hover:border-accent-brand hover:bg-accent-brand/10 hover:text-accent-brand transition-all cursor-pointer flex items-center gap-1.5 max-w-[55ch] truncate"
         title={currentText}
       >
         <Sparkles className="h-3 w-3 text-accent-brand/80 shrink-0" />

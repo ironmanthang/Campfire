@@ -21,6 +21,7 @@ import i18n from "i18next";
 import { useTranslation } from "react-i18next";
 import { useAppStore } from "./store/useAppStore";
 import { useOllamaStore } from "./store/useOllamaStore";
+import { matchesShortcut } from "./components/heart/shortcut";
 import { ImportReportModal } from "./components/modals/data_management/ImportReportModal";
 import { invoke } from "@tauri-apps/api/core";
 import { calculateStreak } from "@campfire/core";
@@ -68,11 +69,47 @@ function App() {
     heartGateOpen,
     setHeartGateOpen,
     updateConfigField,
+    startHeartRain,
   } = useAppStore();
 
   const {
     verifyOllamaConnection
   } = useOllamaStore();
+
+  // Global heart shortcut. When the configured combo is pressed anywhere in
+  // the app, fire the same action the floating heart's click would: open the
+  // support modal by default, or start a heart rain if the user enabled
+  // "Make hearts fall on click". Suppressed when the user is typing in an
+  // input, textarea, or contenteditable element so journal/chat text isn't
+  // hijacked.
+  const heartShortcut = config.heart_shortcut;
+  useEffect(() => {
+    if (!heartShortcut) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Skip when the user is typing into a text field.
+      const target = e.target as HTMLElement | null;
+      if (target) {
+        const tag = target.tagName;
+        if (
+          tag === "INPUT" ||
+          tag === "TEXTAREA" ||
+          tag === "SELECT" ||
+          target.isContentEditable
+        ) {
+          return;
+        }
+      }
+      if (!matchesShortcut(e, heartShortcut)) return;
+      e.preventDefault();
+      if (config.heart_click_falls) {
+        startHeartRain(5000);
+      } else {
+        setIsSupportOpen(true);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [heartShortcut, config.heart_click_falls, startHeartRain]);
 
   // Load config on mount
   useEffect(() => {

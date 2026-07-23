@@ -7,10 +7,6 @@ export function WebSearchSection() {
 
   return (
     <div className="space-y-6">
-      <p className="text-xs text-text-secondary leading-relaxed">
-        {t("settingsView.webSearchDesc")}
-      </p>
-
       {/* Enable Web Search Checkbox */}
       <div className="flex items-center gap-3">
         <label className="flex items-center gap-2 text-sm font-semibold cursor-pointer select-none">

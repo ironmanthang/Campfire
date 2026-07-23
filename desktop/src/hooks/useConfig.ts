@@ -33,6 +33,8 @@ export function useConfig(showNotification: (text: string, type: "success" | "er
     heart_size: 24,
     heart_position: null,
     heart_gate_dismissed: false,
+    heart_shortcut: "",
+    heart_custom_image: "",
   });
 
   useEffect(() => {

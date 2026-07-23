@@ -123,7 +123,7 @@ export function TimelineEntryCard({
           <span className="font-bold text-sm text-accent-brand font-mono">
             {formatToDDMMYY(entry.date)}
           </span>
-          <span className="text-[10px] text-text-secondary">
+          <span className="text-xs text-text-secondary">
             {t("timeline.wordCount", { count: entry.word_count })}
           </span>
         </div>
@@ -146,7 +146,7 @@ export function TimelineEntryCard({
                     e.stopPropagation();
                     handleTagClick(tag, navigateToView);
                   }}
-                  className={`px-1.5 py-0.5 rounded text-[9px] font-medium select-none transition-colors border cursor-pointer ${
+                  className={`px-1.5 py-0.5 rounded text-xs font-medium select-none transition-colors border cursor-pointer ${
                     isFilterActive
                       ? "bg-accent-brand text-bg-app border-accent-brand font-bold"
                       : "bg-accent-brand/10 text-accent-brand border-transparent hover:bg-accent-brand/20"

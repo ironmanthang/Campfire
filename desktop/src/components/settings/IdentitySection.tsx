@@ -106,9 +106,6 @@ export function IdentitySection() {
       {/* Directory storage */}
       <div className="space-y-2">
         <label className="block text-sm font-semibold">{t("settingsView.storageFolder")}</label>
-        <p className="text-xs text-text-secondary">
-          {t("settingsView.storageFolderDesc")}
-        </p>
         <div className="flex gap-2.5">
           <input
             type="text"
@@ -129,13 +126,10 @@ export function IdentitySection() {
       {/* Debounce / Autosave setting */}
       <div className="space-y-2">
         <label className="block text-sm font-semibold">{t("settingsView.autosaveFrequency")}</label>
-        <p className="text-xs text-text-secondary">
-          {t("settingsView.autosaveFrequencyDesc")}
-        </p>
         <select
           value={config.autosave_interval}
           onChange={(e) => updateConfigField("autosave_interval", parseInt(e.target.value))}
-          className="w-full px-3.5 py-2 rounded-lg border border-border-brand bg-bg-input text-text-primary text-sm focus:outline-none focus:border-accent-brand transition-colors"
+          className="w-full pl-3.5 pr-9 py-2 rounded-lg border border-border-brand bg-bg-input text-text-primary text-sm focus:outline-none focus:border-accent-brand transition-colors appearance-none bg-no-repeat bg-[right_0.65rem_center] bg-[length:0.7rem] [background-image:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%23a1a1aa%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.23%207.21a.75.75%200%20011.06.02L10%2011.06l3.71-3.83a.75.75%200%20111.08%201.04l-4.25%204.39a.75.75%200%2001-1.08%200L5.21%208.27a.75.75%200%2001.02-1.06z%22%20clip-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E')]"
         >
           <option value={1}>{t("settingsView.autosave1s")}</option>
           <option value={10}>{t("settingsView.autosave10s")}</option>
@@ -147,13 +141,10 @@ export function IdentitySection() {
       {/* Language setting */}
       <div className="space-y-2">
         <label className="block text-sm font-semibold">{t("settingsView.languageLabel")}</label>
-        <p className="text-xs text-text-secondary">
-          {t("settingsView.languageDesc")}
-        </p>
         <select
           value={config.language || "en"}
           onChange={(e) => updateConfigField("language", e.target.value)}
-          className="w-full px-3.5 py-2 rounded-lg border border-border-brand bg-bg-input text-text-primary text-sm focus:outline-none focus:border-accent-brand transition-colors"
+          className="w-full pl-3.5 pr-9 py-2 rounded-lg border border-border-brand bg-bg-input text-text-primary text-sm focus:outline-none focus:border-accent-brand transition-colors appearance-none bg-no-repeat bg-[right_0.65rem_center] bg-[length:0.7rem] [background-image:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%23a1a1aa%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.23%207.21a.75.75%200%20011.06.02L10%2011.06l3.71-3.83a.75.75%200%20111.08%201.04l-4.25%204.39a.75.75%200%2001-1.08%200L5.21%208.27a.75.75%200%2001.02-1.06z%22%20clip-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E')]"
         >
           {SUPPORTED_LANGUAGES.map((lang) => (
             <option key={lang.code} value={lang.code}>
@@ -165,19 +156,21 @@ export function IdentitySection() {
 
       {/* Google Drive Sync Section */}
       <div className="border-t border-border-brand/40 pt-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-text-primary">Google Drive Sync</h3>
-          <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <h3 className="text-sm font-semibold text-text-primary">Google Drive Sync</h3>
+            {isDriveConnected && userEmail && (
+              <span className="text-xs text-text-secondary truncate">
+                ({userEmail})
+              </span>
+            )}
+          </div>
+          <span className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${
             isDriveConnected ? "bg-green-500/10 text-green-500 border border-green-500/20" : "bg-text-secondary/10 text-text-secondary border border-text-secondary/20"
           }`}>
             {isDriveConnected ? "Connected" : "Disconnected"}
           </span>
         </div>
-        <p className="text-xs text-text-secondary">
-          {isDriveConnected 
-            ? (userEmail ? `Connected as ${userEmail}.` : "Sync your journal entries securely to Google Drive.")
-            : "Connect your Google Account to enable the automatic sync feature."}
-        </p>
 
         {!isDriveConnected ? (
           <button
@@ -202,10 +195,7 @@ export function IdentitySection() {
           <div className="space-y-4 bg-bg-surface/30 p-3.5 border border-border-brand/40 rounded-xl">
             {/* Auto Sync Toggle */}
             <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <label className="block text-xs font-semibold text-text-secondary">Enable Auto-Sync</label>
-                <p className="text-[10px] text-text-secondary">Automatically sync entries on startup and after changes are saved. For best experience, please turn on auto-sync on both devices, and avoid using both app at the same time to prevent unkonw sync problems.</p>
-              </div>
+              <label className="block text-xs font-semibold text-text-secondary">Enable Auto-Sync</label>
               <input
                 type="checkbox"
                 checked={config.google_drive_auto_sync}
@@ -224,7 +214,7 @@ export function IdentitySection() {
                 >
                   {syncProgress.status === 'syncing' || syncProgress.status === 'connecting' ? 'Syncing...' : 'Sync Now'}
                 </button>
-                <span className="text-[10px] text-text-secondary">
+                <span className="text-xs text-text-secondary">
                   {syncProgress.message}
                 </span>
               </div>
@@ -256,13 +246,9 @@ export function IdentitySection() {
             {backingUp ? "Backing up..." : "Backup Now"}
           </button>
         </div>
-        <p className="text-xs text-text-secondary">
-          Create manual backups or recover your journal entries from local backups if files are accidentally deleted or corrupted.
-        </p>
-
         {backups.length === 0 ? (
           <p className="text-xs text-text-secondary italic bg-bg-surface/20 p-3 rounded-lg border border-border-brand/20">
-            No local backups found yet. Backups are automatically created before each Google Drive sync.
+            No backups yet.
           </p>
         ) : (
           <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
@@ -275,7 +261,7 @@ export function IdentitySection() {
                   <span className="font-medium text-text-primary">
                     {new Date(ts * 1000).toLocaleString()}
                   </span>
-                  <span className="text-[10px] text-text-secondary">
+                  <span className="text-xs text-text-secondary">
                     Timestamp: {ts}
                   </span>
                 </div>

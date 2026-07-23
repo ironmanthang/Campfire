@@ -2,6 +2,13 @@ import { StateCreator } from "zustand";
 import { getLocalYYYYMMDD } from "../../lib/dateUtils";
 import { AppState } from "../useAppStore";
 
+// Single, module-level timer state for the "click rain" effect. Lives outside
+// the store because (a) it never needs to trigger renders, (b) it must
+// survive a `startHeartRain` call without becoming stale when the store
+// updates, and (c) it must be globally cancelable from anywhere in the app.
+let heartRainTimeout: ReturnType<typeof setTimeout> | null = null;
+let heartRainStopTimeout: ReturnType<typeof setTimeout> | null = null;
+
 export interface NotificationMessage {
   text: string;
   type: "success" | "error";
@@ -49,6 +56,15 @@ export interface UiSlice {
   hearts: FallingHeart[];
   fireHearts: (count: number) => void;
   removeHeart: (id: number) => void;
+
+  /**
+   * Spawn one heart at a time on a randomized 300–500 ms interval for
+   * `durationMs`. Each call resets the timer, so clicking again within the
+   * window extends the rain for another full `durationMs` from the latest
+   * click. Calling with `durationMs <= 0` is a no-op (rain is one-shot per
+   * session of clicks).
+   */
+  startHeartRain: (durationMs: number) => void;
 
   // Heart gate modal
   heartGateOpen: boolean;
@@ -128,6 +144,46 @@ export const createUiSlice: StateCreator<
   },
   removeHeart: (id) => {
     set((state) => ({ hearts: state.hearts.filter((h) => h.id !== id) }));
+  },
+
+  startHeartRain: (durationMs) => {
+    if (durationMs <= 0) return;
+
+    // Each click resets the rain. Clear any pending spawn / stop timers and
+    // re-schedule from this click, so the rain lasts `durationMs` past the
+    // most recent click.
+    if (heartRainTimeout) {
+      clearTimeout(heartRainTimeout);
+      heartRainTimeout = null;
+    }
+    if (heartRainStopTimeout) {
+      clearTimeout(heartRainStopTimeout);
+      heartRainStopTimeout = null;
+    }
+
+    const { fireHearts } = get();
+
+    // Fire one immediately, then schedule the next one 300–500 ms later.
+    fireHearts(1);
+    const scheduleNext = () => {
+      const delay = 300 + Math.floor(Math.random() * 201); // 300..500 ms
+      heartRainTimeout = setTimeout(() => {
+        heartRainTimeout = null;
+        fireHearts(1);
+        scheduleNext();
+      }, delay);
+    };
+    scheduleNext();
+
+    // Stop the rain `durationMs` from now. If the user clicks again before
+    // this fires, the early-clear above will cancel it and we'll reschedule.
+    heartRainStopTimeout = setTimeout(() => {
+      if (heartRainTimeout) {
+        clearTimeout(heartRainTimeout);
+        heartRainTimeout = null;
+      }
+      heartRainStopTimeout = null;
+    }, durationMs);
   },
 
   heartGateOpen: false,

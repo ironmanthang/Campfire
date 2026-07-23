@@ -98,13 +98,13 @@ export function ChatSystemSection() {
                 <button
                   type="button"
                   onClick={handleCopyDefaultInstruction}
-                  className="inline-flex items-center gap-1 rounded-lg border border-border-brand/60 bg-bg-input px-2.5 py-1.5 text-[11px] font-semibold text-text-secondary transition-colors hover:border-accent-brand hover:text-accent-brand"
+                  className="inline-flex items-center gap-1 rounded-lg border border-border-brand/60 bg-bg-input px-2.5 py-1.5 text-sm font-semibold text-text-secondary transition-colors hover:border-accent-brand hover:text-accent-brand"
                 >
                   {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
                   {copied ? t("common.copied", "Copied") : t("common.copy", "Copy")}
                 </button>
               </div>
-              <pre className="w-full whitespace-pre-wrap rounded-xl border border-border-brand/60 bg-bg-input px-3 py-3 text-[11px] leading-5 text-text-primary font-mono overflow-auto max-h-72">
+              <pre className="w-full whitespace-pre-wrap rounded-xl border border-border-brand/60 bg-bg-input px-3 py-3 text-sm leading-5 text-text-primary font-mono overflow-auto max-h-72">
                 {systemInstructionPreview}
               </pre>
             </div>
@@ -127,12 +127,12 @@ export function ChatSystemSection() {
                 className="w-full bg-bg-input border border-border-brand/60 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-accent-brand/50 focus:border-accent-brand text-text-primary placeholder:text-text-secondary/60 resize-none font-mono"
               />
               {/* Template variables helper */}
-              <div className="text-[10px] text-text-secondary leading-relaxed bg-bg-app/40 rounded-lg p-2.5 border border-border-brand/20">
+              <div className="text-xs text-text-secondary leading-relaxed bg-bg-app/40 rounded-lg p-2.5 border border-border-brand/20">
                 <span className="font-semibold block mb-0.5 text-text-primary">
                   {t("chatView.availableTags", "Available Template Tags:")}
                 </span>
                 {t("chatView.availableTagsDesc", "You can use these tags to insert dynamic context into your instructions:")}
-                <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 mt-1 font-mono text-[9px] text-accent-brand">
+                <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 mt-1 font-mono text-xs text-accent-brand">
                   <span>{"{userName}"} - {t("chatView.tagUserName", "User's name")}</span>
                   <span>{"{currentDate}"} - {t("chatView.tagCurrentDate", "Today's date")}</span>
                   <span>{"{dayOfWeek}"} - {t("chatView.tagDayOfWeek", "Day of the week")}</span>

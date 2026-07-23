@@ -68,6 +68,8 @@ export const createConfigSlice: StateCreator<
     heart_size: 24,
     heart_position: null,
     heart_gate_dismissed: false,
+    heart_shortcut: "",
+    heart_custom_image: "",
   },
   loadingConfig: true,
 

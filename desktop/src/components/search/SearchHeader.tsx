@@ -133,7 +133,7 @@ export function SearchHeader() {
                       onTogglePin={togglePinModel}
                     />
                   ) : (
-                    <div className="text-[10px] text-red-500 font-semibold border border-red-500/25 bg-red-500/10 px-2 py-1 rounded">
+                    <div className="text-xs text-red-500 font-semibold border border-red-500/25 bg-red-500/10 px-2 py-1 rounded">
                       {t("searchView.noEmbeddingModels")}
                     </div>
                   )}
@@ -196,13 +196,13 @@ export function SearchHeader() {
             {/* Tag matching mode toggle */}
             {searchMode === "keyword" && (
               <div className="flex items-center gap-1.5 text-xs font-semibold text-text-secondary bg-bg-surface/40 px-2 py-1 rounded-xl border border-border-brand/40 shrink-0">
-                <span className="text-[10px] uppercase text-text-secondary pl-1 pr-0.5 select-none">
+                <span className="text-xs uppercase text-text-secondary pl-1 pr-0.5 select-none">
                   {t("searchView.tagModeLabel")}
                 </span>
                 <div className="flex rounded-lg bg-bg-app p-0.5 border border-border-brand/60 select-none">
                   <button
                     onClick={() => setTagMode("and")}
-                    className={`px-2 py-1 rounded-md text-[10px] font-bold transition-all cursor-pointer ${
+                    className={`px-2 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
                       tagMode === "and"
                         ? "bg-accent-brand text-bg-app shadow-sm"
                         : "text-text-secondary hover:text-text-primary"
@@ -212,7 +212,7 @@ export function SearchHeader() {
                   </button>
                   <button
                     onClick={() => setTagMode("or")}
-                    className={`px-2 py-1 rounded-md text-[10px] font-bold transition-all cursor-pointer ${
+                    className={`px-2 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
                       tagMode === "or"
                         ? "bg-accent-brand text-bg-app shadow-sm"
                         : "text-text-secondary hover:text-text-primary"

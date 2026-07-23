@@ -76,7 +76,7 @@ export function JournalEditorPane({
               }}
               className="px-2.5 py-1 text-xs bg-bg-input border border-border-brand/80 rounded-lg focus:outline-none focus:border-accent-brand text-text-primary w-48 font-sans"
             />
-            <span className="text-[10px] text-text-secondary font-mono px-1 select-none min-w-[32px]">
+            <span className="text-xs text-text-secondary font-mono px-1 select-none min-w-[32px]">
               {findMatches.length > 0 ? `${activeMatchIndex + 1}/${findMatches.length}` : "0/0"}
             </span>
           </div>

@@ -7,11 +7,22 @@ interface ResizerOptions {
   min?: number;
   max?: number;
   snapThreshold?: number;
+  /**
+   * How much the tracked value changes per pixel of cursor movement in px mode.
+   * Defaults to 2 to preserve the original side-pane behavior (the divider sits
+   * in the middle of the screen, so the cursor moving `dx` changes the pane's
+   * width by `2 * dx`).
+   * Pass 1 when the resize handle is on the outer edge of the element being
+   * resized (e.g. a modal's right edge) — cursor moves `dx`, width changes by
+   * `dx`.
+   */
+  multiplier?: number;
 }
 
-export function useResizer({ key, defaultVal, mode, min, max, snapThreshold }: ResizerOptions) {
+export function useResizer({ key, defaultVal, mode, min, max, snapThreshold, multiplier }: ResizerOptions) {
   const computedMin = min !== undefined ? min : (mode === "px" ? 480 : 20);
   const computedMax = max !== undefined ? max : (mode === "px" ? 1800 : 80);
+  const computedMultiplier = multiplier ?? 2;
 
   const [value, setValue] = useState(() => {
     const saved = localStorage.getItem(key);
@@ -58,9 +69,9 @@ export function useResizer({ key, defaultVal, mode, min, max, snapThreshold }: R
       let newVal = startVal;
       if (mode === "px") {
         if (side === "right") {
-          newVal = startVal + dx * 2;
+          newVal = startVal + dx * computedMultiplier;
         } else {
-          newVal = startVal - dx * 2;
+          newVal = startVal - dx * computedMultiplier;
         }
         const clamped = Math.max(computedMin, Math.min(newVal, window.innerWidth - 80));
         setValue(clamped);
@@ -105,7 +116,7 @@ export function useResizer({ key, defaultVal, mode, min, max, snapThreshold }: R
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [value, mode, key, computedMin, computedMax]);
+  }, [value, mode, key, computedMin, computedMax, computedMultiplier]);
 
   const reset = () => {
     setValue(defaultVal);

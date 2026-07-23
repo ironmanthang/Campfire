@@ -275,6 +275,7 @@ export function hasConflictMarkers(content: string): boolean {
   return /<<<<<<<.*?\n[\s\S]*?=======\n[\s\S]*?>>>>>>>/m.test(content);
 }
 
+
 export interface ParsedConflict {
   localContent: string;
   remoteContent: string;

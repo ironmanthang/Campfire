@@ -1,5 +1,5 @@
 import React from "react";
-import { ChevronUp, ChevronDown, ChevronRight, ChevronDown as ChevronDownIcon } from "lucide-react";
+import { ChevronUp, ChevronDown, ChevronRight, ChevronDown as ChevronDownIcon, Heart } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 interface SectionWrapperProps {
@@ -9,6 +9,8 @@ interface SectionWrapperProps {
   onToggle: () => void;
   title: string;
   badge?: string;
+  description?: string;
+  showDescriptionIcon?: boolean;
   isFirst: boolean;
   isLast: boolean;
   onMoveUp: () => void;
@@ -21,6 +23,8 @@ export function SectionWrapper({
   onToggle,
   title,
   badge,
+  description,
+  showDescriptionIcon,
   isFirst,
   isLast,
   onMoveUp,
@@ -53,7 +57,7 @@ export function SectionWrapper({
         </div>
         <div className="flex items-center gap-3">
           {badge && (
-            <span className="text-[10px] text-text-secondary font-semibold uppercase tracking-wider">
+            <span className="text-xs text-text-secondary font-semibold uppercase tracking-wider">
               {badge}
             </span>
           )}
@@ -87,8 +91,19 @@ export function SectionWrapper({
         </div>
       </div>
 
+      {!isCollapsed && description && (
+        <div className="mt-3 flex items-start gap-2 rounded-lg bg-red-500/10 border border-red-500/30 px-3 py-2">
+          {showDescriptionIcon && (
+            <Heart className="h-3.5 w-3.5 text-red-500 shrink-0 mt-0.5" fill="currentColor" />
+          )}
+          <p className="text-xs text-text-secondary leading-relaxed">
+            {description}
+          </p>
+        </div>
+      )}
+
       {!isCollapsed && (
-        <div className="space-y-6" onClick={(e) => e.stopPropagation()}>
+        <div className="space-y-6 mt-6" onClick={(e) => e.stopPropagation()}>
           {children}
         </div>
       )}

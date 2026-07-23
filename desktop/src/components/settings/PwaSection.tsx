@@ -31,23 +31,11 @@ export function PwaSection() {
 
   return (
     <div className="space-y-6">
-      {/* Description */}
-      <p className="text-xs text-text-secondary leading-relaxed">
-        {t("settingsView.pwaDesc", {
-          defaultValue: "Access your journal on the go by setting up the Campfire mobile Progressive Web App (PWA). Your entries can automatically sync between desktop and mobile via Google Drive."
-        })}
-      </p>
-
       {/* URL Input field */}
       <div className="space-y-2">
         <label className="block text-sm font-semibold">
           {t("settingsView.pwaUrlLabel", { defaultValue: "Mobile App URL" })}
         </label>
-        <p className="text-xs text-text-secondary">
-          {t("settingsView.pwaUrlDesc", {
-            defaultValue: "The hosted URL of your mobile PWA. If you deployed to Cloudflare Pages following the setup guide, this will be your page's live address."
-          })}
-        </p>
         <div className="flex gap-2.5">
           <input
             type="text"
@@ -103,10 +91,8 @@ export function PwaSection() {
             />
           </div>
           
-          <p className="text-[10px] text-text-secondary leading-relaxed max-w-[200px]">
-            {t("settingsView.pwaQrCodeDesc", {
-              defaultValue: "Scan this QR code with your phone's camera to open the application instantly."
-            })}
+          <p className="text-xs text-text-secondary leading-relaxed max-w-[200px]">
+            {t("settingsView.pwaQrCodeLabel", { defaultValue: "Scan with your phone" })}
           </p>
         </div>
 

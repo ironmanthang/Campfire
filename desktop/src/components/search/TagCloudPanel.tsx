@@ -30,7 +30,7 @@ export function TagCloudPanel({
           className="flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
         >
           <span>{t("searchView.quickFilterTitle")}</span>
-          <span className="text-[10px] bg-bg-app border border-border-brand/40 px-1.5 py-0.5 rounded-md text-text-secondary font-mono">
+          <span className="text-xs bg-bg-app border border-border-brand/40 px-1.5 py-0.5 rounded-md text-text-secondary font-mono">
             {allUniqueTags.length}
           </span>
           {tagsCollapsed ? (

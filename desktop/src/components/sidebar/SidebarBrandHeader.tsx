@@ -69,7 +69,7 @@ export function SidebarBrandHeader({ isCollapsed, onToggle }: SidebarBrandHeader
             {localTitle ? localTitle.charAt(0).toUpperCase() : "C"}
           </div>
           {/* Hover Edit Overlay */}
-          <div className="absolute inset-0 bg-black/50 rounded-lg opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white text-[9px] font-bold uppercase tracking-wider select-none">
+          <div className="absolute inset-0 bg-black/50 rounded-lg opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white text-xs font-bold uppercase tracking-wider select-none">
             Edit
           </div>
         </div>

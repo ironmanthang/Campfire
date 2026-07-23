@@ -58,10 +58,10 @@ export function ChatInputFooter() {
                   </div>
                 )}
                 <div className="flex flex-col min-w-0 max-w-[120px]">
-                  <span className="font-semibold text-text-primary truncate text-[11px]" title={att.name}>
+                  <span className="font-semibold text-text-primary truncate text-sm" title={att.name}>
                     {att.name}
                   </span>
-                  <span className="text-[9px] text-text-secondary/80">
+                  <span className="text-xs text-text-secondary/80">
                     {Math.round(att.size / 102.4) / 10} KB
                   </span>
                 </div>

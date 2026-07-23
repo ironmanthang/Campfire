@@ -210,13 +210,13 @@ export function ToolExecutorTestPanel() {
           <span className="text-lg">🧪</span>
           <div>
             <h3 className="font-bold text-sm tracking-wide">Tool Executor Test Panel</h3>
-            <p className="text-[10px] text-text-secondary">Simulate exact AI tool payloads and execution</p>
+            <p className="text-xs text-text-secondary">Simulate exact AI tool payloads and execution</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={syncWithAppState}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] bg-bg-app border border-border-brand/30 hover:border-accent-brand hover:text-accent-brand transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs bg-bg-app border border-border-brand/30 hover:border-accent-brand hover:text-accent-brand transition-all cursor-pointer"
             title="Pull live variables from the app settings & chat context"
           >
             <RefreshCw className="h-3 w-3" />
@@ -239,7 +239,7 @@ export function ToolExecutorTestPanel() {
         <div className="flex flex-col gap-4">
           {/* Tool Selection */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Select Tool</label>
+            <label className="text-xs font-bold uppercase tracking-wider text-text-secondary">Select Tool</label>
             <select
               value={toolName}
               onChange={(e) => setToolName(e.target.value)}
@@ -256,13 +256,13 @@ export function ToolExecutorTestPanel() {
           {/* Arguments JSON Editor */}
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Arguments (JSON)</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-text-secondary">Arguments (JSON)</label>
               {jsonError ? (
-                <span className="text-[10px] text-rose-400 flex items-center gap-1">
+                <span className="text-xs text-rose-400 flex items-center gap-1">
                   <AlertTriangle className="h-3 w-3 animate-pulse" /> Malformed JSON
                 </span>
               ) : (
-                <span className="text-[10px] text-emerald-400 flex items-center gap-1">
+                <span className="text-xs text-emerald-400 flex items-center gap-1">
                   <CheckCircle className="h-3 w-3" /> Valid format
                 </span>
               )}
@@ -271,11 +271,11 @@ export function ToolExecutorTestPanel() {
               value={argsJson}
               onChange={(e) => setArgsJson(e.target.value)}
               rows={isExpanded ? 10 : 5}
-              className="w-full font-mono text-[11px] bg-black/40 border border-border-brand/40 focus:border-accent-brand rounded-xl p-3 text-text-primary outline-none resize-y transition-all"
+              className="w-full font-mono text-sm bg-black/40 border border-border-brand/40 focus:border-accent-brand rounded-xl p-3 text-text-primary outline-none resize-y transition-all"
               placeholder='{"key": "value"}'
             />
             {jsonError && (
-              <p className="text-[10px] text-rose-400/90 font-mono bg-rose-950/20 border border-rose-900/30 rounded-lg p-2 leading-relaxed">
+              <p className="text-xs text-rose-400/90 font-mono bg-rose-950/20 border border-rose-900/30 rounded-lg p-2 leading-relaxed">
                 {jsonError}
               </p>
             )}
@@ -283,47 +283,47 @@ export function ToolExecutorTestPanel() {
 
           {/* Optional Context Configs */}
           <details className="group border border-border-brand/20 rounded-xl bg-bg-app/10 overflow-hidden">
-            <summary className="flex items-center justify-between px-3 py-2 cursor-pointer select-none text-[10px] font-bold uppercase tracking-wider text-text-secondary hover:bg-bg-app/30 hover:text-text-primary transition-all">
+            <summary className="flex items-center justify-between px-3 py-2 cursor-pointer select-none text-xs font-bold uppercase tracking-wider text-text-secondary hover:bg-bg-app/30 hover:text-text-primary transition-all">
               <span>Execution Context</span>
               <span className="text-text-secondary group-open:rotate-180 transition-transform duration-200">▼</span>
             </summary>
             <div className="p-3 border-t border-border-brand/20 flex flex-col gap-3">
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] text-text-secondary">AppConfig JSON:</span>
+                <span className="text-xs text-text-secondary">AppConfig JSON:</span>
                 <textarea
                   value={configJson}
                   onChange={(e) => setConfigJson(e.target.value)}
                   rows={4}
-                  className="w-full font-mono text-[10px] bg-black/40 border border-border-brand/30 rounded-lg p-2 outline-none focus:border-accent-brand"
+                  className="w-full font-mono text-xs bg-black/40 border border-border-brand/30 rounded-lg p-2 outline-none focus:border-accent-brand"
                 />
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] text-text-secondary">chatStartDate:</span>
+                  <span className="text-xs text-text-secondary">chatStartDate:</span>
                   <input
                     type="text"
                     value={chatStartDate}
                     onChange={(e) => setChatStartDate(e.target.value)}
-                    className="bg-black/40 border border-border-brand/30 rounded-lg px-2.5 py-1.5 outline-none focus:border-accent-brand text-[10px]"
+                    className="bg-black/40 border border-border-brand/30 rounded-lg px-2.5 py-1.5 outline-none focus:border-accent-brand text-xs"
                   />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] text-text-secondary">chatEndDate:</span>
+                  <span className="text-xs text-text-secondary">chatEndDate:</span>
                   <input
                     type="text"
                     value={chatEndDate}
                     onChange={(e) => setChatEndDate(e.target.value)}
-                    className="bg-black/40 border border-border-brand/30 rounded-lg px-2.5 py-1.5 outline-none focus:border-accent-brand text-[10px]"
+                    className="bg-black/40 border border-border-brand/30 rounded-lg px-2.5 py-1.5 outline-none focus:border-accent-brand text-xs"
                   />
                 </div>
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] text-text-secondary">activeModel:</span>
+                <span className="text-xs text-text-secondary">activeModel:</span>
                 <input
                   type="text"
                   value={activeModel}
                   onChange={(e) => setActiveModel(e.target.value)}
-                  className="bg-black/40 border border-border-brand/30 rounded-lg px-2.5 py-1.5 outline-none focus:border-accent-brand text-[10px]"
+                  className="bg-black/40 border border-border-brand/30 rounded-lg px-2.5 py-1.5 outline-none focus:border-accent-brand text-xs"
                 />
               </div>
             </div>
@@ -350,10 +350,10 @@ export function ToolExecutorTestPanel() {
           {/* Error Output */}
           {rawError && (
             <div className="flex flex-col gap-1 bg-rose-950/20 border border-rose-900/40 rounded-xl p-3 text-rose-400">
-              <span className="font-bold text-[10px] uppercase tracking-wider flex items-center gap-1">
+              <span className="font-bold text-xs uppercase tracking-wider flex items-center gap-1">
                 <AlertTriangle className="h-3.5 w-3.5" /> Execution Error
               </span>
-              <pre className="font-mono text-[10.5px] whitespace-pre-wrap break-all select-text overflow-auto max-h-[150px]">
+              <pre className="font-mono text-[0.65625rem] whitespace-pre-wrap break-all select-text overflow-auto max-h-[150px]">
                 {rawError}
               </pre>
             </div>
@@ -362,11 +362,11 @@ export function ToolExecutorTestPanel() {
           {/* Result Output */}
           {result ? (
             <div className="flex-1 flex flex-col gap-1.5 border border-border-brand/30 rounded-xl overflow-hidden bg-black/20 min-h-[180px]">
-              <div className="flex items-center justify-between px-3 py-2 bg-bg-app border-b border-border-brand/20 text-emerald-400 font-bold text-[10px] uppercase tracking-wider">
+              <div className="flex items-center justify-between px-3 py-2 bg-bg-app border-b border-border-brand/20 text-emerald-400 font-bold text-xs uppercase tracking-wider">
                 <span>Result (Role: {result.role})</span>
                 {result.name && <span>Tool: {result.name}</span>}
               </div>
-              <pre className="flex-1 font-mono text-[10.5px] p-3 text-text-primary select-text overflow-y-auto whitespace-pre-wrap break-words">
+              <pre className="flex-1 font-mono text-[0.65625rem] p-3 text-text-primary select-text overflow-y-auto whitespace-pre-wrap break-words">
                 {result.content}
               </pre>
             </div>
@@ -374,7 +374,7 @@ export function ToolExecutorTestPanel() {
             !rawError && (
               <div className="flex-1 flex flex-col items-center justify-center border border-dashed border-border-brand/20 rounded-xl p-6 text-text-secondary/60 select-none min-h-[180px]">
                 <span className="text-2xl mb-1">💡</span>
-                <p className="text-[10px] text-center max-w-[200px]">Run a tool using valid JSON arguments to inspect its output response here</p>
+                <p className="text-xs text-center max-w-[200px]">Run a tool using valid JSON arguments to inspect its output response here</p>
               </div>
             )
           )}

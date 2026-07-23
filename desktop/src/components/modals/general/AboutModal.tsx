@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { X } from "lucide-react";
+import { useResizer } from "../../../hooks/useResizer";
 import { AboutAppTab } from "../../about/AboutAppTab";
 
 interface AboutModalProps {
@@ -10,6 +11,15 @@ interface AboutModalProps {
 
 export function AboutModal({ isOpen, onClose }: AboutModalProps) {
   const { t } = useTranslation();
+
+  const [modalWidth, startResize, resetModalWidth] = useResizer({
+    key: "about-modal-width",
+    defaultVal: 512,
+    mode: "px",
+    min: 480,
+    max: 1400,
+    multiplier: 1,
+  });
 
   const modalRef = useRef<HTMLDivElement | null>(null);
   const pointerStartedInsideRef = useRef(false);
@@ -73,7 +83,8 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
       <div
         ref={modalRef}
         onClick={(e) => e.stopPropagation()}
-        className="bg-bg-surface border border-border-brand rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[85vh] overflow-hidden"
+        style={{ width: modalWidth }}
+        className="relative bg-bg-surface border border-border-brand rounded-2xl max-w-[95vw] shadow-2xl flex flex-col max-h-[85vh] overflow-hidden"
       >
         {/* Header */}
         <div className="flex border-b border-border-brand/30 bg-bg-app/10 items-center justify-between relative pr-12">
@@ -94,6 +105,16 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
         {/* Modal Body / Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin">
           <AboutAppTab />
+        </div>
+
+        {/* Right-edge resize handle (double-click resets to default) */}
+        <div
+          onMouseDown={startResize}
+          onDoubleClick={resetModalWidth}
+          className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-accent-brand/5 z-30 group flex items-center justify-center select-none"
+          title="Drag to resize · double-click to reset"
+        >
+          <div className="w-[2px] h-12 bg-border-brand/20 group-hover:bg-accent-brand/80 rounded transition-colors duration-150" />
         </div>
       </div>
     </div>

@@ -40,7 +40,7 @@ export function DateRangePresets({
             key={preset.label}
             onClick={() => handlePresetClick(preset)}
             onMouseDown={(e) => e.preventDefault()}
-            className={`px-2 py-1 rounded-md text-[10px] font-bold border transition-all duration-150 cursor-pointer ${
+            className={`px-2 py-1 rounded-md text-xs font-bold border transition-all duration-150 cursor-pointer ${
               isPresetActive
                 ? "bg-accent-brand border-accent-brand text-bg-app font-extrabold shadow-sm"
                 : "bg-bg-input border-border-brand/60 text-text-secondary hover:text-text-primary hover:border-border-brand"

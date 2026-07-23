@@ -58,19 +58,19 @@ export function ChatMessageBubble({
             <div className="mt-3 space-y-3">
               {toolCall && (
                 <div>
-                  <div className="text-[10px] text-text-secondary/60 font-bold uppercase tracking-wider mb-1">
+                  <div className="text-xs text-text-secondary/60 font-bold uppercase tracking-wider mb-1">
                     Input Arguments:
                   </div>
-                  <pre className="text-[11px] text-accent-brand bg-bg-app/60 rounded-lg p-2.5 border border-border-brand/30 overflow-x-auto whitespace-pre-wrap break-all leading-relaxed">
+                  <pre className="text-sm text-accent-brand bg-bg-app/60 rounded-lg p-2.5 border border-border-brand/30 overflow-x-auto whitespace-pre-wrap break-all leading-relaxed">
                     {JSON.stringify(toolCall.function.arguments, null, 2)}
                   </pre>
                 </div>
               )}
               <div>
-                <div className="text-[10px] text-text-secondary/60 font-bold uppercase tracking-wider mb-1">
+                <div className="text-xs text-text-secondary/60 font-bold uppercase tracking-wider mb-1">
                   Output Response:
                 </div>
-                <div className="text-[11px] text-text-primary bg-bg-app/40 rounded-lg p-2.5 whitespace-pre-wrap leading-relaxed border border-border-brand/40 overflow-x-auto">
+                <div className="text-sm text-text-primary bg-bg-app/40 rounded-lg p-2.5 whitespace-pre-wrap leading-relaxed border border-border-brand/40 overflow-x-auto">
                   {msg.content}
                   {msg.images &&
                     msg.images.map((imgBase64, imgIdx) => (
@@ -146,7 +146,7 @@ export function ChatMessageBubble({
                   <Sparkles className="h-3 w-3 text-accent-brand animate-pulse" />
                   {t("chatView.thoughtProcess")}
                 </summary>
-                <div className="mt-2 text-[11px] text-text-secondary leading-relaxed font-mono whitespace-pre-wrap pl-2 border-l-2 border-accent-brand/45">
+                <div className="mt-2 text-sm text-text-secondary leading-relaxed font-mono whitespace-pre-wrap pl-2 border-l-2 border-accent-brand/45">
                   {msg.thinking}
                 </div>
               </details>
@@ -154,11 +154,11 @@ export function ChatMessageBubble({
 
             {msg.tool_calls && msg.tool_calls.length > 0 && (
               <div className="mb-3 flex flex-wrap gap-1.5 items-center">
-                <span className="text-[10px] text-text-secondary font-mono">Invoking tools:</span>
+                <span className="text-xs text-text-secondary font-mono">Invoking tools:</span>
                 {msg.tool_calls.map((tc, tcIdx) => (
                   <span
                     key={tcIdx}
-                    className="px-2 py-0.5 rounded-md bg-accent-brand/10 border border-accent-brand/20 text-accent-brand text-[10px] font-mono flex items-center gap-1"
+                    className="px-2 py-0.5 rounded-md bg-accent-brand/10 border border-accent-brand/20 text-accent-brand text-xs font-mono flex items-center gap-1"
                   >
                     <Terminal className="h-3 w-3" />
                     {tc.function.name}

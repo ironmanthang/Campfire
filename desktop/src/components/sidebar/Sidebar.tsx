@@ -214,6 +214,21 @@ export function Sidebar({
                 <HelpCircle className="h-4.5 w-4.5" />
               </button>
             </div>
+
+            {/*
+              Anchor slot for the floating donation heart. When the user
+              resets the heart position, it lands here — inside the footer
+              bar, on the right side of the icon row. The element is
+              pointer-events:none and aria-hidden so it never intercepts
+              clicks, and it shrinks to a single icon-sized cell so the
+              heart (which is fixed-positioned and overlays this anchor)
+              doesn't shift the surrounding flex layout when shown.
+            */}
+            <div
+              data-heart-anchor
+              aria-hidden="true"
+              className="shrink-0 w-6 h-6 pointer-events-none"
+            />
           </div>
         </div>
       </aside>

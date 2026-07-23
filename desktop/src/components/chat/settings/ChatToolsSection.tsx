@@ -85,7 +85,7 @@ export function ChatToolsSection() {
                   setEnabledTools([]);
                 }
               }}
-              className="text-accent-brand hover:text-accent-brand-hover font-semibold transition-colors cursor-pointer disabled:opacity-50 text-[11px]"
+              className="text-accent-brand hover:text-accent-brand-hover font-semibold transition-colors cursor-pointer disabled:opacity-50 text-sm"
             >
               {config.web_search_enabled && allToolsNames.every((name) => enabledTools.includes(name))
                 ? t("chatView.untickAll", "Untick all")

@@ -46,7 +46,7 @@ export function OllamaModelList() {
               <div key={m.name} className="flex items-center justify-between p-2 rounded-md hover:bg-bg-surface/50 border border-transparent hover:border-border-brand/30 transition-all text-xs">
                 <div className="flex flex-col gap-0.5 truncate">
                   <span className="font-semibold text-text-primary truncate">{m.name}</span>
-                  <span className="text-[10px] text-text-secondary font-mono">
+                  <span className="text-xs text-text-secondary font-mono">
                     {isEmbedding ? t("settingsView.embeddingModel") : t("settingsView.chatPersonaModel")}{t("settingsView.modelSizeFormat", { size: (m.size / (1024 * 1024 * 1024)).toFixed(2) })}
                   </span>
                 </div>

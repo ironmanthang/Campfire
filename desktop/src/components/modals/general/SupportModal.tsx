@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { X } from "lucide-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { BANK_ID, ACCOUNT_NO, ACCOUNT_NAME } from "../../../lib/constants";
+import { useResizer } from "../../../hooks/useResizer";
 import { AboutMeTab } from "../../about/AboutMeTab";
 
 interface SupportModalProps {
@@ -15,6 +16,15 @@ export function SupportModal({ isOpen, onClose }: SupportModalProps) {
   const [donationTab, setDonationTab] = useState<"vietqr" | "kofi">("vietqr");
   const [isQrExpanded, setIsQrExpanded] = useState(false);
   const [customMessage, setCustomMessage] = useState("");
+
+  const [modalWidth, startResize, resetModalWidth] = useResizer({
+    key: "support-modal-width",
+    defaultVal: 512,
+    mode: "px",
+    min: 480,
+    max: 1400,
+    multiplier: 1,
+  });
 
   const modalRef = useRef<HTMLDivElement | null>(null);
   const pointerStartedInsideRef = useRef(false);
@@ -121,7 +131,8 @@ export function SupportModal({ isOpen, onClose }: SupportModalProps) {
       <div
         ref={modalRef}
         onClick={(e) => e.stopPropagation()}
-        className="bg-bg-surface border border-border-brand rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[85vh] overflow-hidden"
+        style={{ width: modalWidth }}
+        className="relative bg-bg-surface border border-border-brand rounded-2xl max-w-[95vw] shadow-2xl flex flex-col max-h-[85vh] overflow-hidden"
       >
         {/* Header */}
         <div className="flex border-b border-border-brand/30 bg-bg-app/10 items-center justify-between relative pr-12">
@@ -149,6 +160,16 @@ export function SupportModal({ isOpen, onClose }: SupportModalProps) {
             onVietQrDonate={() => setIsQrExpanded(true)}
             onKofiDonate={handleKofiClick}
           />
+        </div>
+
+        {/* Right-edge resize handle (double-click resets to default) */}
+        <div
+          onMouseDown={startResize}
+          onDoubleClick={resetModalWidth}
+          className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-accent-brand/5 z-30 group flex items-center justify-center select-none"
+          title="Drag to resize · double-click to reset"
+        >
+          <div className="w-[2px] h-12 bg-border-brand/20 group-hover:bg-accent-brand/80 rounded transition-colors duration-150" />
         </div>
       </div>
 
@@ -194,10 +215,10 @@ export function SupportModal({ isOpen, onClose }: SupportModalProps) {
                 {t("aboutModal.scanToPay")}
               </p>
               <div className="flex flex-col gap-1.5 items-center">
-                <p className="text-[11px] font-mono text-gray-600 bg-gray-100 px-4 py-1.5 rounded-full inline-block">
+                <p className="text-[0.6875rem] font-mono text-gray-600 bg-gray-100 px-4 py-1.5 rounded-full inline-block">
                   {t("aboutModal.bankInfo", { bank: BANK_ID, account: ACCOUNT_NO, owner: ACCOUNT_NAME })}
                 </p>
-                <p className="text-[10px] font-mono text-gray-500 bg-gray-50 border border-gray-100 px-3 py-1 rounded-md inline-block max-w-[90%] break-all">
+                <p className="text-[0.625rem] font-mono text-gray-500 bg-gray-50 border border-gray-100 px-3 py-1 rounded-md inline-block max-w-[90%] break-all">
                   {t("aboutModal.transferContentLabel", { content: addInfoText })}
                 </p>
               </div>

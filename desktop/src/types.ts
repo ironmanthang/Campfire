@@ -26,6 +26,20 @@ export interface AppConfig {
   heart_size: number; // px
   heart_position: { x: number; y: number } | null;
   heart_gate_dismissed: boolean;
+  /**
+   * Global keyboard shortcut that triggers the floating heart. Stored as a
+   * normalized lowercase string like "ctrl+shift+l", or "" for "no shortcut".
+   * Modifiers are always sorted as ctrl, alt, shift, meta, in that order.
+   */
+  heart_shortcut: string;
+  /**
+   * Optional `data:` URL (e.g. `data:image/png;base64,...`) for a custom
+   * image used in place of the default red heart icon. Empty string means
+   * "use the default red heart". The image is rendered at the same size
+   * as the heart, with all the same settings (size, speed, etc.) applying
+   * to it.
+   */
+  heart_custom_image: string;
 }
 
 export interface JournalEntryMetadata {

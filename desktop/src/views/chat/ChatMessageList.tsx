@@ -132,7 +132,7 @@ export function ChatMessageList({ visible }: ChatMessageListProps) {
                       {queued.attachments.map((att) => (
                         <span
                           key={att.id}
-                          className="px-2 py-0.5 rounded bg-bg-app border border-border-brand/40 text-[10px] text-text-secondary flex items-center gap-1"
+                          className="px-2 py-0.5 rounded bg-bg-app border border-border-brand/40 text-xs text-text-secondary flex items-center gap-1"
                         >
                           {att.type === "image" ? "🖼️" : "📄"} {att.name}
                         </span>

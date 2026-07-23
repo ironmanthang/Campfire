@@ -262,7 +262,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                   <span className="text-xs font-bold text-text-primary block leading-none">
                     {t("feedbackModal.includeDiagnostics")}
                   </span>
-                  <span className="text-[10px] text-text-secondary leading-normal flex items-center gap-1">
+                  <span className="text-xs text-text-secondary leading-normal flex items-center gap-1">
                     <FileText className="h-3 w-3 shrink-0" />
                     {t("feedbackModal.diagnosticsHelp")}
                   </span>

@@ -1,6 +1,7 @@
 import { MessageSquare, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useRef } from "react";
+import { useResizer } from "../../hooks/useResizer";
 
 interface ChatHelpModalProps {
   onClose: () => void;
@@ -13,6 +14,15 @@ export function ChatHelpModal({ onClose }: ChatHelpModalProps) {
   const pointerMovedRef = useRef(false);
   const activePointerIdRef = useRef<number | null>(null);
   const startPosRef = useRef<{ x: number; y: number } | null>(null);
+
+  const [modalWidth, startResize, resetModalWidth] = useResizer({
+    key: "chat-help-modal-width",
+    defaultVal: 672,
+    mode: "px",
+    min: 560,
+    max: 1400,
+    multiplier: 1,
+  });
 
   return (
     <div
@@ -52,7 +62,8 @@ export function ChatHelpModal({ onClose }: ChatHelpModalProps) {
       <div
         ref={modalRef}
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-2xl bg-bg-surface border border-border-brand rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[85vh]"
+        style={{ width: modalWidth }}
+        className="relative w-full max-w-[95vw] bg-bg-surface border border-border-brand rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[85vh]"
       >
         {/* Header */}
         <div className="p-5 border-b border-border-brand/60 flex items-center justify-between bg-bg-surface">
@@ -94,7 +105,7 @@ export function ChatHelpModal({ onClose }: ChatHelpModalProps) {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="bg-bg-app/40 p-4 rounded-xl border border-border-brand/40 space-y-1.5">
                 <div className="flex items-center gap-2 font-bold text-xs text-text-primary">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent-brand/10 text-[10px] text-accent-brand">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent-brand/10 text-xs text-accent-brand">
                     1
                   </span>
                   {t("chatView.helpModal.rule1Title")}
@@ -106,7 +117,7 @@ export function ChatHelpModal({ onClose }: ChatHelpModalProps) {
 
               <div className="bg-bg-app/40 p-4 rounded-xl border border-border-brand/40 space-y-1.5">
                 <div className="flex items-center gap-2 font-bold text-xs text-text-primary">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent-brand/10 text-[10px] text-accent-brand">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent-brand/10 text-xs text-accent-brand">
                     2
                   </span>
                   {t("chatView.helpModal.rule2Title")}
@@ -118,7 +129,7 @@ export function ChatHelpModal({ onClose }: ChatHelpModalProps) {
 
               <div className="bg-bg-app/40 p-4 rounded-xl border border-border-brand/40 space-y-1.5">
                 <div className="flex items-center gap-2 font-bold text-xs text-text-primary">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent-brand/10 text-[10px] text-accent-brand">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent-brand/10 text-xs text-accent-brand">
                     3
                   </span>
                   {t("chatView.helpModal.rule3Title")}
@@ -130,7 +141,7 @@ export function ChatHelpModal({ onClose }: ChatHelpModalProps) {
 
               <div className="bg-bg-app/40 p-4 rounded-xl border border-border-brand/40 space-y-1.5">
                 <div className="flex items-center gap-2 font-bold text-xs text-text-primary">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent-brand/10 text-[10px] text-accent-brand">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent-brand/10 text-xs text-accent-brand">
                     4
                   </span>
                   {t("chatView.helpModal.rule4Title")}
@@ -177,6 +188,16 @@ export function ChatHelpModal({ onClose }: ChatHelpModalProps) {
           >
             {t("chatView.helpModal.gotItButton")}
           </button>
+        </div>
+
+        {/* Right-edge resize handle (double-click resets to default) */}
+        <div
+          onMouseDown={startResize}
+          onDoubleClick={resetModalWidth}
+          className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-accent-brand/5 z-30 group flex items-center justify-center select-none"
+          title="Drag to resize · double-click to reset"
+        >
+          <div className="w-[2px] h-12 bg-border-brand/20 group-hover:bg-accent-brand/80 rounded transition-colors duration-150" />
         </div>
       </div>
     </div>

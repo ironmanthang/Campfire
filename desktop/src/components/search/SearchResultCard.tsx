@@ -118,7 +118,7 @@ export function SearchResultCard({
         <span className="text-text-secondary font-mono flex items-center gap-2">
           {t("searchView.lineLabel", { line: result.line_number })}
           {result.similarity !== undefined && (
-            <span className="px-1.5 py-0.5 rounded bg-accent-brand/15 text-accent-brand text-[10px] font-bold">
+            <span className="px-1.5 py-0.5 rounded bg-accent-brand/15 text-accent-brand text-xs font-bold">
               {t("searchView.matchPercentage", { percent: Math.round(result.similarity * 100) })}
             </span>
           )}
@@ -138,7 +138,7 @@ export function SearchResultCard({
                   e.stopPropagation();
                   handleTagClick(tag);
                 }}
-                className={`px-1.5 py-0.5 rounded text-[9px] font-medium select-none transition-colors border cursor-pointer ${
+                className={`px-1.5 py-0.5 rounded text-xs font-medium select-none transition-colors border cursor-pointer ${
                   isFilterActive
                     ? "bg-accent-brand text-bg-app border-accent-brand font-bold"
                     : "bg-accent-brand/10 text-accent-brand border-transparent hover:bg-accent-brand/20"

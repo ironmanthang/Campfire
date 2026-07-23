@@ -26,14 +26,14 @@ export function JournalEditorFooter({
               <button
                 key={tag}
                 onClick={() => handleTagClick(tag, navigateToView)}
-                className="px-2 py-0.5 rounded bg-accent-brand/10 border border-accent-brand/20 text-accent-brand font-medium text-[10px] hover:bg-accent-brand/20 hover:border-accent-brand transition-colors cursor-pointer select-none"
+                className="px-2 py-0.5 rounded bg-accent-brand/10 border border-accent-brand/20 text-accent-brand font-medium text-xs hover:bg-accent-brand/20 hover:border-accent-brand transition-colors cursor-pointer select-none"
               >
                 #{tag}
               </button>
             ))}
           </div>
         ) : (
-          <span className="text-text-secondary text-[10px]">{t("journalEditor.noTags")}</span>
+          <span className="text-text-secondary text-xs">{t("journalEditor.noTags")}</span>
         )}
       </div>
       <div className="text-text-secondary shrink-0 pl-2">

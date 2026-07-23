@@ -1,5 +1,57 @@
 import { useTranslation } from "react-i18next";
-import { Shield, Cpu, FileText } from "lucide-react";
+import {
+  Shield,
+  BookOpen,
+  Calendar,
+  Search as SearchIcon,
+  MessageSquare,
+  Sparkles,
+  Cloud,
+  Palette
+} from "lucide-react";
+
+type AboutModalKey =
+  | "featureLocalTitle" | "featureLocalDesc"
+  | "featureJournalTitle" | "featureJournalDesc"
+  | "featureTimelineTitle" | "featureTimelineDesc"
+  | "featureSearchTitle" | "featureSearchDesc"
+  | "featureChatTitle" | "featureChatDesc"
+  | "featureReflectionTitle" | "featureReflectionDesc"
+  | "featureSyncTitle" | "featureSyncDesc"
+  | "featureThemeTitle" | "featureThemeDesc";
+
+type IconKey = "local" | "journal" | "timeline" | "search" | "chat" | "reflection" | "sync" | "theme";
+
+interface Feature {
+  iconKey: IconKey;
+  titleKey: AboutModalKey;
+  descKey: AboutModalKey;
+}
+
+const FEATURES: Feature[] = [
+  { iconKey: "local", titleKey: "featureLocalTitle", descKey: "featureLocalDesc" },
+  { iconKey: "journal", titleKey: "featureJournalTitle", descKey: "featureJournalDesc" },
+  { iconKey: "timeline", titleKey: "featureTimelineTitle", descKey: "featureTimelineDesc" },
+  { iconKey: "search", titleKey: "featureSearchTitle", descKey: "featureSearchDesc" },
+  { iconKey: "chat", titleKey: "featureChatTitle", descKey: "featureChatDesc" },
+  { iconKey: "reflection", titleKey: "featureReflectionTitle", descKey: "featureReflectionDesc" },
+  { iconKey: "sync", titleKey: "featureSyncTitle", descKey: "featureSyncDesc" },
+  { iconKey: "theme", titleKey: "featureThemeTitle", descKey: "featureThemeDesc" },
+];
+
+function FeatureIcon({ iconKey }: { iconKey: IconKey }) {
+  const className = "h-5 w-5";
+  switch (iconKey) {
+    case "local": return <Shield className={className} />;
+    case "journal": return <BookOpen className={className} />;
+    case "timeline": return <Calendar className={className} />;
+    case "search": return <SearchIcon className={className} />;
+    case "chat": return <MessageSquare className={className} />;
+    case "reflection": return <Sparkles className={className} />;
+    case "sync": return <Cloud className={className} />;
+    case "theme": return <Palette className={className} />;
+  }
+}
 
 export function AboutAppTab() {
   const { t } = useTranslation();
@@ -23,47 +75,21 @@ export function AboutAppTab() {
       </blockquote>
 
       <div className="space-y-4 pt-2">
-        <div className="flex items-start gap-4">
-          <div className="p-2 rounded-xl bg-accent-brand/10 text-accent-brand shrink-0">
-            <Shield className="h-5 w-5" />
+        {FEATURES.map((feature) => (
+          <div key={feature.iconKey} className="flex items-start gap-4">
+            <div className="p-2 rounded-xl bg-accent-brand/10 text-accent-brand shrink-0">
+              <FeatureIcon iconKey={feature.iconKey} />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-text-primary">
+                {t(`aboutModal.${feature.titleKey}` as const)}
+              </h4>
+              <p className="text-xs text-text-secondary mt-1">
+                {t(`aboutModal.${feature.descKey}` as const)}
+              </p>
+            </div>
           </div>
-          <div>
-            <h4 className="text-sm font-bold text-text-primary">
-              {t("aboutModal.featureLocalTitle")}
-            </h4>
-            <p className="text-xs text-text-secondary mt-1">
-              {t("aboutModal.featureLocalDesc")}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-start gap-4">
-          <div className="p-2 rounded-xl bg-accent-brand/10 text-accent-brand shrink-0">
-            <Cpu className="h-5 w-5" />
-          </div>
-          <div>
-            <h4 className="text-sm font-bold text-text-primary">
-              {t("aboutModal.featureAiTitle")}
-            </h4>
-            <p className="text-xs text-text-secondary mt-1">
-              {t("aboutModal.featureAiDesc")}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-start gap-4">
-          <div className="p-2 rounded-xl bg-accent-brand/10 text-accent-brand shrink-0">
-            <FileText className="h-5 w-5" />
-          </div>
-          <div>
-            <h4 className="text-sm font-bold text-text-primary">
-              {t("aboutModal.featureMarkdownTitle")}
-            </h4>
-            <p className="text-xs text-text-secondary mt-1">
-              {t("aboutModal.featureMarkdownDesc")}
-            </p>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );
