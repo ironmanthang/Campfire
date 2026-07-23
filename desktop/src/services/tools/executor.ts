@@ -98,43 +98,6 @@ export async function executeToolCall(
       }
     }
 
-    case "get_laptop_brightness": {
-      try {
-        const res = await invoke<number>("get_laptop_brightness");
-        return {
-          role: "tool",
-          content: `Current laptop screen brightness is ${res}%.`,
-          name: "get_laptop_brightness"
-        };
-      } catch (err: any) {
-        console.error("Failed to run get_laptop_brightness tool:", err);
-        return {
-          role: "tool",
-          content: `Error: Could not retrieve laptop screen brightness. Details: ${err.message || err}`,
-          name: "get_laptop_brightness"
-        };
-      }
-    }
-
-    case "set_laptop_brightness": {
-      const brightness = args.brightness;
-      try {
-        await invoke("set_laptop_brightness", { brightness });
-        return {
-          role: "tool",
-          content: `Laptop screen brightness has been set to ${brightness}%.`,
-          name: "set_laptop_brightness"
-        };
-      } catch (err: any) {
-        console.error("Failed to run set_laptop_brightness tool:", err);
-        return {
-          role: "tool",
-          content: `Error: Could not set laptop screen brightness to ${brightness}%. Details: ${err.message || err}`,
-          name: "set_laptop_brightness"
-        };
-      }
-    }
-
     case "read_journal_entries": {
       const startDateArg = args.start_date;
       const endDateArg = args.end_date;

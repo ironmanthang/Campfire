@@ -39,7 +39,6 @@ fn run_system_cmd(program: String, args: Vec<String>) -> String {
 
 #[tauri::command]
 pub async fn get_system_resources() -> Result<SystemResources, String> {
-    let handle_gpu = std::thread::spawn(|| run_system_cmd("nvidia-smi".to_string(), vec![]));
     let handle_ollama = std::thread::spawn(|| run_system_cmd("ollama".to_string(), vec!["ps".to_string()]));
     let handle_cpu = std::thread::spawn(|| run_system_cmd("powershell".to_string(), vec![
         "-Command".to_string(),
@@ -50,7 +49,7 @@ pub async fn get_system_resources() -> Result<SystemResources, String> {
         "Get-CimInstance Win32_OperatingSystem | Select-Object FreePhysicalMemory,TotalVisibleMemorySize".to_string()
     ]));
 
-    let gpu_raw = handle_gpu.join().unwrap_or_else(|_| "Failed to query GPU".to_string());
+    let gpu_raw = "NVIDIA driver query disabled for Microsoft Store compliance".to_string();
     let ollama_ps_raw = handle_ollama.join().unwrap_or_else(|_| "Failed to query Ollama".to_string());
     let cpu_raw = handle_cpu.join().unwrap_or_else(|_| "Failed to query CPU".to_string());
     let ram_raw = handle_ram.join().unwrap_or_else(|_| "Failed to query RAM".to_string());
@@ -109,48 +108,3 @@ pub fn get_ollama_context_length() -> Result<u32, String> {
     }
 }
 
-#[tauri::command]
-pub fn get_laptop_brightness() -> Result<u32, String> {
-    #[cfg(target_os = "windows")]
-    {
-        let output = run_system_cmd("powershell".to_string(), vec![
-            "-Command".to_string(),
-            "(Get-CimInstance -Namespace root/WMI -ClassName WmiMonitorBrightness).CurrentBrightness".to_string()
-        ]);
-        if output.starts_with("Error:") || output.starts_with("Failed") {
-            return Err(output);
-        }
-        let parsed = output.trim().parse::<u32>()
-            .map_err(|e| format!("Failed to parse brightness value '{}': {}", output, e))?;
-        Ok(parsed)
-    }
-    #[cfg(not(target_os = "windows"))]
-    {
-        Err("Unsupported operating system".to_string())
-    }
-}
-
-#[tauri::command]
-pub fn set_laptop_brightness(brightness: u32) -> Result<(), String> {
-    if brightness > 100 {
-        return Err("Brightness value must be between 0 and 100".to_string());
-    }
-    #[cfg(target_os = "windows")]
-    {
-        let output = run_system_cmd("powershell".to_string(), vec![
-            "-Command".to_string(),
-            format!(
-                "Get-CimInstance -Namespace root/WMI -ClassName WmiMonitorBrightnessMethods | Invoke-CimMethod -MethodName WmiSetBrightness -Arguments @{{Brightness = {}; Timeout = 1}}",
-                brightness
-            )
-        ]);
-        if output.starts_with("Error:") || output.starts_with("Failed") {
-            return Err(output);
-        }
-        Ok(())
-    }
-    #[cfg(not(target_os = "windows"))]
-    {
-        Err("Unsupported operating system".to_string())
-    }
-}

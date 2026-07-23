@@ -15,34 +15,6 @@ export const LOCAL_TOOLS: OllamaTool[] = [
   {
     type: "function",
     function: {
-      name: "get_laptop_brightness",
-      description: "Retrieve the current brightness percentage level of the laptop screen (from 0 to 100). Use this whenever the user asks for the screen brightness.",
-      parameters: {
-        type: "object",
-        properties: {}
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "set_laptop_brightness",
-      description: "Set the laptop screen brightness to a specific percentage level (between 0 and 100). Use this whenever the user asks to adjust, change, increase, decrease, or set the brightness.",
-      parameters: {
-        type: "object",
-        properties: {
-          brightness: {
-            type: "integer",
-            description: "The target brightness level as a percentage, from 0 to 100."
-          }
-        },
-        required: ["brightness"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
       name: "read_journal_entries",
       description: "Retrieve raw journal entries by the user within a specific date range. Use this tool whenever you need to recall, double-check, verify, or Reexamine the journal logs to avoid hallucinating details. If you only need to read a single specific date, set both start_date and end_date to that same date. IMPORTANT: You are only allowed to query date ranges within your memory range.",
       parameters: {
