@@ -1,0 +1,22 @@
+{
+  "publisher": "CN=2BC2645C-EFF7-406D-A427-7E47E89D2842",
+  "publisherDisplayName": "happyKnight",
+  "capabilities": {
+    "general": [
+      "internetClient"
+    ]
+  },
+  "extensions": {
+    "shareTarget": false,
+    "fileAssociations": [],
+    "protocolHandlers": []
+  },
+  "signing": {
+    "pfx": null,
+    "pfxPassword": null
+  },
+  "resourceIndex": {
+    "enabled": false,
+    "keepConfig": false
+  }
+}

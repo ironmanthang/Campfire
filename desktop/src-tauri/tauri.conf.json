@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Campfire",
+  "productName": "Campfire Journal",
   "version": "0.1.0",
-  "identifier": "com.campfire.app",
+  "identifier": "happyKnight.CampfireJournal",
   "build": {
     "beforeDevCommand": "cd src-tauri && npm run dev",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Campfire",
+        "title": "Campfire Journal",
         "width": 800,
         "height": 600,
         "maximized": true,

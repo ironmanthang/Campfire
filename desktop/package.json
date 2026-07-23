@@ -12,7 +12,8 @@
     "tauri": "tauri",
     "i18n:check": "node scripts/i18n-check.js",
     "test": "vitest run --passWithNoTests",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "tauri:windows:build": "pnpm tauri build --target x86_64-pc-windows-msvc && tauri-windows-bundle build --runner pnpm"
   },
   "dependencies": {
     "@campfire/core": "workspace:*",
@@ -31,11 +32,12 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@choochmeque/tauri-windows-bundle": "^0.1.28",
     "@tauri-apps/cli": "^2",
     "@types/react": "^19.1.8",
-    "javascript-obfuscator": "^4.1.0",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.6.0",
+    "javascript-obfuscator": "^4.1.0",
     "typescript": "~5.8.3",
     "vite": "^7.0.4",
     "vitest": "^4.1.10"
