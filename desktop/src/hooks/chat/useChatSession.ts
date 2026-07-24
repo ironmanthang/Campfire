@@ -324,14 +324,42 @@ export function useChatSession({ visible }: { visible: boolean }) {
         }
       }
     } catch (err: any) {
-      if (err.name === "AbortError") {
+      if (err?.name === "AbortError" || err === "AbortError") {
         console.log("Chat stream aborted by user");
       } else {
         console.error(err);
-        const isGgmlCrash = (err.message || "").includes("GGML_SCHED_MAX_SPLIT_INPUTS");
-        const friendlyMessage = isGgmlCrash
-          ? t("chatView.errorCrashed")
-          : err.message || t("chatView.errorFailedResponse");
+        const errMsg = typeof err === "string" ? err : err?.message || String(err || "");
+
+        let extractedError = errMsg;
+        if (errMsg.includes('{"error":')) {
+          try {
+            const jsonStr = errMsg.substring(errMsg.indexOf("{"));
+            const parsed = JSON.parse(jsonStr);
+            if (parsed.error) {
+              extractedError = parsed.error;
+            }
+          } catch {
+            // Keep errMsg
+          }
+        }
+
+        const isContextTooLong = extractedError.includes("GGML_SCHED_MAX_SPLIT_INPUTS");
+        const isProcessCrash =
+          extractedError.includes("GGML_ASSERT") ||
+          extractedError.includes("0xc0000409") ||
+          extractedError.includes("0xc0000005") ||
+          extractedError.includes("stack-based buffer") ||
+          extractedError.includes("llama-server process has terminated");
+
+        let friendlyMessage: string;
+        if (isContextTooLong) {
+          friendlyMessage = t("chatView.errorCrashed");
+        } else if (isProcessCrash) {
+          friendlyMessage = t("chatView.errorProcessCrashed");
+        } else {
+          friendlyMessage = extractedError || t("chatView.errorFailedResponse");
+        }
+
         showNotification(friendlyMessage, "error");
       }
     } finally {

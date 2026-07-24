@@ -13,7 +13,7 @@
     "i18n:check": "node scripts/i18n-check.js",
     "test": "vitest run --passWithNoTests",
     "typecheck": "tsc --noEmit",
-    "tauri:windows:build": "pnpm tauri build --target x86_64-pc-windows-msvc && tauri-windows-bundle build --runner pnpm"
+    "tauri:windows:build": "pnpm tauri build --target x86_64-pc-windows-msvc && tauri-windows-bundle build --runner pnpm && node scripts/sign-msix.js"
   },
   "dependencies": {
     "@campfire/core": "workspace:*",

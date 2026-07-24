@@ -1,6 +1,14 @@
 use std::path::Path;
 use serde::{Deserialize, Serialize};
 
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
+
+/// Prevents a visible console window from flashing when spawning subprocesses
+/// in a packaged (MSIX) Windows GUI app that has no parent console.
+#[cfg(target_os = "windows")]
+const CREATE_NO_WINDOW: u32 = 0x08000000;
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SystemResources {
     pub gpu_raw: String,
@@ -11,11 +19,13 @@ pub struct SystemResources {
 
 fn run_system_cmd(program: String, args: Vec<String>) -> String {
     use std::process::Command;
+
     let output = if cfg!(target_os = "windows") {
         Command::new("cmd")
             .arg("/C")
             .arg(&program)
             .args(&args)
+            .creation_flags(CREATE_NO_WINDOW)
             .output()
     } else {
         Command::new(&program)
@@ -84,6 +94,7 @@ pub fn get_ollama_context_length() -> Result<u32, String> {
     let output = std::process::Command::new("sqlite3")
         .arg(db_path.to_string_lossy().to_string())
         .arg("SELECT context_length FROM settings LIMIT 1;")
+        .creation_flags(CREATE_NO_WINDOW)
         .output();
 
     match output {
