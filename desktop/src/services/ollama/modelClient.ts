@@ -1,8 +1,17 @@
-import { OLLAMA_BASE_URL } from "../../lib/constants";
+import { OLLAMA_BASE_URL, isTauri } from "../../lib/constants";
+import { invoke, Channel } from "@tauri-apps/api/core";
 import { OllamaModelInfo, OllamaActiveModelInfo } from "./types";
 
 // Check if Ollama service is running
 export async function checkOllamaStatus(): Promise<boolean> {
+  if (isTauri()) {
+    try {
+      return await invoke<boolean>("check_ollama_status", { baseUrl: OLLAMA_BASE_URL });
+    } catch (err) {
+      return false;
+    }
+  }
+
   try {
     const res = await fetch(`${OLLAMA_BASE_URL}/`);
     return res.ok;
@@ -14,9 +23,15 @@ export async function checkOllamaStatus(): Promise<boolean> {
 // Get list of downloaded models with context length and capabilities
 export async function getDownloadedModels(): Promise<OllamaModelInfo[]> {
   try {
-    const res = await fetch(`${OLLAMA_BASE_URL}/api/tags`);
-    if (!res.ok) return [];
-    const data = await res.json();
+    let data: any;
+    if (isTauri()) {
+      data = await invoke<any>("get_ollama_tags", { baseUrl: OLLAMA_BASE_URL });
+    } else {
+      const res = await fetch(`${OLLAMA_BASE_URL}/api/tags`);
+      if (!res.ok) return [];
+      data = await res.json();
+    }
+
     const models: OllamaModelInfo[] = [];
 
     for (const m of data.models || []) {
@@ -26,13 +41,21 @@ export async function getDownloadedModels(): Promise<OllamaModelInfo[]> {
       let parentModel: string | undefined = undefined;
 
       try {
-        const showRes = await fetch(`${OLLAMA_BASE_URL}/api/show`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: m.name }),
-        });
-        if (showRes.ok) {
-          const showData = await showRes.json();
+        let showData: any;
+        if (isTauri()) {
+          showData = await invoke<any>("get_ollama_show", { baseUrl: OLLAMA_BASE_URL, model: m.name });
+        } else {
+          const showRes = await fetch(`${OLLAMA_BASE_URL}/api/show`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: m.name }),
+          });
+          if (showRes.ok) {
+            showData = await showRes.json();
+          }
+        }
+
+        if (showData) {
           capabilities = showData.capabilities;
 
           if (showData.details) {
@@ -72,6 +95,11 @@ export async function getDownloadedModels(): Promise<OllamaModelInfo[]> {
 // Get list of active/loaded models in memory
 export async function getActiveModels(): Promise<OllamaActiveModelInfo[]> {
   try {
+    if (isTauri()) {
+      const data = await invoke<any>("get_ollama_ps", { baseUrl: OLLAMA_BASE_URL });
+      return data.models || [];
+    }
+
     const res = await fetch(`${OLLAMA_BASE_URL}/api/ps`);
     if (!res.ok) return [];
     const data = await res.json();
@@ -87,6 +115,27 @@ export async function downloadOllamaModel(
   modelName: string,
   onProgress: (progress: { status: string; percentage: number }) => void
 ): Promise<void> {
+  if (isTauri()) {
+    const channel = new Channel<any>();
+    channel.onmessage = (parsed) => {
+      const status = parsed.status || "Downloading...";
+      let percentage = 0;
+      if (parsed.total && parsed.completed) {
+        percentage = Math.round((parsed.completed / parsed.total) * 100);
+      } else if (status === "success") {
+        percentage = 100;
+      }
+      onProgress({ status, percentage });
+    };
+
+    await invoke("proxy_ollama_pull_stream", {
+      baseUrl: OLLAMA_BASE_URL,
+      model: modelName,
+      onChunk: channel,
+    });
+    return;
+  }
+
   const response = await fetch(`${OLLAMA_BASE_URL}/api/pull`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

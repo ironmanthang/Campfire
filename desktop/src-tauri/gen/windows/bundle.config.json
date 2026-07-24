@@ -3,7 +3,8 @@
   "publisherDisplayName": "happyKnight",
   "capabilities": {
     "general": [
-      "internetClient"
+      "internetClient",
+      "privateNetworkClientServer"
     ]
   },
   "extensions": {

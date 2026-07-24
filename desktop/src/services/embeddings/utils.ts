@@ -1,4 +1,5 @@
-import { OLLAMA_BASE_URL } from "../../lib/constants";
+import { OLLAMA_BASE_URL, isTauri } from "../../lib/constants";
+import { invoke } from "@tauri-apps/api/core";
 
 const EMBEDDING_MODEL_PATTERNS = [
   "embed",    // embeddinggemma, nomic-embed-text, snowflake-arctic-embed, etc.
@@ -35,13 +36,21 @@ async function getModelMetadata(modelName: string): Promise<ModelMetadata> {
   }
 
   try {
-    const response = await fetch(`${OLLAMA_BASE_URL}/api/show`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: modelName })
-    });
-    if (response.ok) {
-      const data = await response.json();
+    let data: any;
+    if (isTauri()) {
+      data = await invoke<any>("get_ollama_show", { baseUrl: OLLAMA_BASE_URL, model: modelName });
+    } else {
+      const response = await fetch(`${OLLAMA_BASE_URL}/api/show`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: modelName })
+      });
+      if (response.ok) {
+        data = await response.json();
+      }
+    }
+
+    if (data) {
       const meta = {
         family: data.details?.family,
         parentModel: data.details?.parent_model
@@ -103,23 +112,32 @@ export async function fetchEmbeddings(
 
   const prefixedTexts = prefix ? texts.map(t => prefix + t) : texts;
 
-  const response = await fetch(`${OLLAMA_BASE_URL}/api/embed`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model,
-      input: prefixedTexts
-    })
-  });
+  let data: any;
+  if (isTauri()) {
+    data = await invoke<any>("proxy_ollama_embed", {
+      baseUrl: OLLAMA_BASE_URL,
+      payload: { model, input: prefixedTexts }
+    });
+  } else {
+    const response = await fetch(`${OLLAMA_BASE_URL}/api/embed`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model,
+        input: prefixedTexts
+      })
+    });
 
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(errText || `Failed to fetch embeddings from Ollama using model ${model}`);
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(errText || `Failed to fetch embeddings from Ollama using model ${model}`);
+    }
+
+    data = await response.json();
   }
 
-  const data = await response.json();
   if (!data.embeddings || !Array.isArray(data.embeddings)) {
     throw new Error("Invalid response format from Ollama embed endpoint");
   }

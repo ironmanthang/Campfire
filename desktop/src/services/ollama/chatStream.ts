@@ -1,4 +1,5 @@
-import { OLLAMA_BASE_URL } from "../../lib/constants";
+import { OLLAMA_BASE_URL, isTauri } from "../../lib/constants";
+import { invoke, Channel } from "@tauri-apps/api/core";
 import { saveDebugPayload } from "../debug";
 import { OllamaMessage, OllamaTool, OllamaToolCall } from "./types";
 
@@ -20,6 +21,29 @@ export async function streamAIResponse(
     } catch (e) {
       console.error("Failed to save debug payload in streamAIResponse:", e);
     }
+  }
+
+  if (isTauri()) {
+    const channel = new Channel<any>();
+    const collectedToolCalls: OllamaToolCall[] = [];
+
+    channel.onmessage = (parsed) => {
+      if (parsed.error) throw new Error(parsed.error);
+      const content = parsed.message?.content || "";
+      const thinking = parsed.message?.thinking || "";
+      if (content || thinking) onChunk(content, thinking);
+      if (parsed.message?.tool_calls) {
+        collectedToolCalls.push(...parsed.message.tool_calls);
+      }
+    };
+
+    await invoke("proxy_ollama_chat_stream", {
+      baseUrl: OLLAMA_BASE_URL,
+      payload: chatBody,
+      onChunk: channel,
+    });
+
+    return collectedToolCalls.length > 0 ? collectedToolCalls : null;
   }
 
   const response = await fetch(`${OLLAMA_BASE_URL}/api/chat`, {

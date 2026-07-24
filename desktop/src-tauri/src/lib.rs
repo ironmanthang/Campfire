@@ -44,6 +44,15 @@ pub fn run() {
             commands::backup::create_journal_backup,
             commands::backup::list_journal_backups,
             commands::backup::restore_journal_backup,
+            commands::ollama::check_ollama_status,
+            commands::ollama::get_ollama_tags,
+            commands::ollama::get_ollama_show,
+            commands::ollama::get_ollama_ps,
+            commands::ollama::proxy_ollama_embed,
+            commands::ollama::proxy_ollama_tokenize,
+            commands::ollama::proxy_ollama_chat,
+            commands::ollama::proxy_ollama_chat_stream,
+            commands::ollama::proxy_ollama_pull_stream,
             debug::write_debug_payload // DEBUG
         ])
         .run(tauri::generate_context!())
