@@ -1,7 +1,8 @@
-import { Sparkles, X } from "lucide-react";
+import { Sparkles, X, Check, Copy, Terminal, ExternalLink } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useResizer } from "../../hooks/useResizer";
+import { openUrl } from "@tauri-apps/plugin-opener";
 
 interface SearchHelpModalProps {
   onClose: () => void;
@@ -10,11 +11,18 @@ interface SearchHelpModalProps {
 
 export function SearchHelpModal({ onClose, embeddingModel }: SearchHelpModalProps) {
   const { t } = useTranslation();
+  const [copiedCommand, setCopiedCommand] = useState<string | null>(null);
   const modalRef = useRef<HTMLDivElement | null>(null);
   const pointerStartedInsideRef = useRef(false);
   const pointerMovedRef = useRef(false);
   const activePointerIdRef = useRef<number | null>(null);
   const startPosRef = useRef<{ x: number; y: number } | null>(null);
+
+  const handleCopy = (command: string) => {
+    navigator.clipboard.writeText(command);
+    setCopiedCommand(command);
+    setTimeout(() => setCopiedCommand(null), 2000);
+  };
 
   const [modalWidth, startResize, resetModalWidth] = useResizer({
     key: "search-help-modal-width",
@@ -74,7 +82,11 @@ export function SearchHelpModal({ onClose, embeddingModel }: SearchHelpModalProp
             </div>
             <div>
               <h3 className="font-bold text-text-primary text-lg">{t("searchView.helpModal.title")}</h3>
-              <p className="text-xs text-text-secondary">{t("searchView.helpModal.subtitle", { model: embeddingModel })}</p>
+              <p className="text-xs text-text-secondary">
+                {embeddingModel
+                  ? t("searchView.helpModal.subtitle", { model: embeddingModel })
+                  : t("searchView.helpModal.subtitleFallback", { defaultValue: "Optimizing your writing for semantic vector search" })}
+              </p>
             </div>
           </div>
           <button
@@ -91,8 +103,49 @@ export function SearchHelpModal({ onClose, embeddingModel }: SearchHelpModalProp
           <div className="bg-accent-brand/5 border border-accent-brand/20 p-4 rounded-xl space-y-1">
             <span className="text-xs font-bold text-accent-brand uppercase tracking-wider">{t("searchView.helpModal.howSearchWorksTitle")}</span>
             <p className="text-xs text-text-secondary leading-relaxed">
-              {t("searchView.helpModal.howSearchWorksDesc", { model: embeddingModel })}
+              {t("searchView.helpModal.howSearchWorksDesc", { model: embeddingModel || "embedding" })}
             </p>
+          </div>
+
+          {/* Pull Embedding Models Guide */}
+          <div className="bg-bg-app/50 border border-border-brand/60 p-4 rounded-xl space-y-3">
+            <div className="flex items-center gap-2 font-bold text-xs text-text-primary">
+              <Terminal className="h-4 w-4 text-accent-brand" />
+              <span>{t("searchView.helpModal.pullGuideTitle", { defaultValue: "How to Download Embedding Models" })}</span>
+            </div>
+            <p className="text-xs text-text-secondary leading-relaxed">
+              {t("searchView.helpModal.pullGuideDesc", {
+                defaultValue: "Semantic search requires an embedding model in Ollama. Open your Terminal (CMD or Terminal) and run a command to download one, or browse the Ollama Library:"
+              })}
+            </p>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
+              <div className="flex-1 flex items-center justify-between gap-2 rounded-lg border border-border-brand/40 bg-bg-surface px-3 py-2">
+                <code className="font-mono text-xs text-accent-brand select-all">
+                  ollama pull qwen3-embedding:0.6b
+                </code>
+                <button
+                  type="button"
+                  onClick={() => handleCopy("ollama pull qwen3-embedding:0.6b")}
+                  className="hover:text-accent-brand transition-colors p-1 text-text-secondary cursor-pointer flex items-center gap-1 shrink-0"
+                  title={t("searchView.helpModal.copyCommand", { defaultValue: "Copy command" })}
+                >
+                  {copiedCommand === "ollama pull qwen3-embedding:0.6b" ? (
+                    <Check className="h-4 w-4 text-emerald-500" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => openUrl("https://ollama.com/search?c=embedding")}
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-accent-brand text-bg-app rounded-lg font-semibold text-xs hover:opacity-90 transition-opacity shrink-0 cursor-pointer"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                <span>{t("settingsView.browseOllamaLibrary")}</span>
+              </button>
+            </div>
           </div>
 
           {/* Guidelines List */}

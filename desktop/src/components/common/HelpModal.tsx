@@ -139,7 +139,7 @@ This is the heart of Campfire. The other views help you _write_, _find_, and _re
   - **Spotting what's missing.** If you wrote about a plan or a worry and then went quiet, the Narrator will gently name the silence — without inventing reasons. "You said on the 5th you'd start Spanish every morning. I don't see it come up again. What changed?"
   - **Noticing the gap between what you said and what you did.** Compare your stated intentions to your lived entries, side by side. This is the Narrator's most useful move.
 - **How to start a useful conversation**: You don't have to use a special prompt. The Narrator will work with whatever you say. Some gentle openers to try:
-  - _"How do you read this month?"_
+  - _"What should i this month?"_
   - _"What have I been avoiding?"_
   - _"What did I get right this week?"_
   - _"I feel stuck. Can you look at the last 30 days and tell me what you see?"_
@@ -485,7 +485,7 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
                   <div className="bg-bg-app/40 rounded-xl p-3.5 border border-border-brand/40">
                     <span className="font-bold text-xs text-text-primary block mb-1">Just start writing</span>
                     <span className="text-xs text-text-secondary leading-relaxed">
-                      The moment you open today's page, the cursor is already waiting for you. No buttons to click, no menus to open — just type.
+                      The moment you open today's page, the app is already waiting for you. No buttons to click, no menus to open — just type.
                     </span>
                   </div>
                   <div className="bg-bg-app/40 rounded-xl p-3.5 border border-border-brand/40">
@@ -525,7 +525,7 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
                   Timeline Browse
                 </h3>
                 <p className="text-text-secondary text-xs leading-relaxed">
-                  This is where you look back over your life. Every day you wrote something is laid out in order, newest first, with the month gently labeled in the background as you scroll. It's a quiet way to see your story unfold.
+                  This is where you look back over your life. Every day you wrote something is laid out in order. It's a quiet way to see your story unfold.
                 </p>
                 <div className="space-y-3">
                   <div className="bg-bg-app/40 rounded-xl p-3.5 border border-border-brand/40">
@@ -585,7 +585,7 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
                       At the top of the page, you can switch between two search modes:
                       <ul className="list-disc pl-4.5 mt-1.5 space-y-1">
                         <li><strong>Keyword</strong> — the everyday one. Type a word or phrase and we find every line in your journal that contains it. Fast, private, works the moment you type. Think of it like Ctrl+F, but for your whole life.</li>
-                        <li><strong>Semantic</strong> — the magic one. Describe what you mean in plain words, even if you never used those exact words. Search for <em>"days I felt stuck at work"</em> and we'll find entries that <em>talk about</em> that, not just ones that literally use those words. This one needs a small helper called Ollama running on your computer; the small <strong>?</strong> next to the title explains how to set it up.</li>
+                        <li><strong>Semantic</strong> — the magic one. Describe what you mean in plain words, even if you never used those exact words. Search for <em>"days I felt stuck at work"</em> and we'll find entries that <em>talk about</em> that, not just ones that literally use those words. This one needs a small helper called Ollama running on your computer; The small info icon next to the subtitle explains how to set it up.</li>
                       </ul>
                     </span>
                   </div>
@@ -681,12 +681,12 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
                   <div className="bg-bg-app/40 rounded-xl p-3.5 border border-border-brand/40">
                     <span className="font-bold text-xs text-text-primary block mb-1">Your words stay close to home</span>
                     <span className="text-xs text-text-secondary leading-relaxed">
-                      By default, the Narrator runs on a small AI model <em>on your own computer</em>, through a free helper called Ollama. Your journal entries never leave your machine — they aren't sent to a server to be read. If your computer is older or doesn't have a strong graphics card and the local models feel slow, you can switch to a <strong>Cloud model</strong> in the model picker at the top of the page. The trade-off: a Cloud model is faster and more capable, but it does send your chat to that provider, so only use it if you trust it with your reflections. You can switch back to local any time.
+                      By default, the Narrator runs on a small AI model <em>on your own computer</em>, through a free helper called Ollama. Your journal entries never leave your machine — they aren't sent to a server to be read. If your computer is older or doesn't have a strong graphics card and the local models feel slow, you can switch to a <strong>Cloud model</strong> in the model picker at the top of the page. The trade-off: a Cloud model is faster and more capable, but it may send your chat's info to a third-party provider, so only use Cloud models if you trust it. You can switch back to local any time.
                     </span>
                   </div>
                 </div>
                 <p className="text-text-secondary text-xs leading-relaxed pt-2 italic">
-                  The Narrator isn't a therapist and won't pretend to be. But it is honest, brief, and actually paying attention. That's rarer than it sounds.
+                  The Narrator isn't a therapist and won't pretend to be. But it is honest, brief, and actually paying attention. which is rarer than it sounds.
                 </p>
               </div>
             )}
@@ -746,49 +746,66 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
                   Configuration
                 </h3>
                 <p className="text-text-secondary text-xs leading-relaxed">
-                  This is where Campfire gets shaped to fit you. The Settings view is split into a handful of sections, each focused on one part of the app. You can drag the section handle to reorder them, or collapse a section you're not actively using.
+                  This is where Campfire gets shaped to fit you. The Settings view is split into sections that you can reorder, expand, or collapse to keep your space neat.
                 </p>
                 <div className="space-y-3">
                   <div className="bg-bg-app/40 rounded-xl p-3.5 border border-border-brand/40">
-                    <span className="font-bold text-xs text-text-primary block mb-1">Identity — your name, your folder, your pace</span>
+                    <span className="font-bold text-xs text-text-primary block mb-1">Identity & Storage — your name, folder, sync & backups</span>
                     <span className="text-xs text-text-secondary leading-relaxed">
-                      The first section is the one you'll visit most.
+                      Keep your personal profile and journal files safe and organized:
                       <ul className="list-disc pl-4.5 mt-1.5 space-y-1">
-                        <li><strong>Your name</strong> — used by the AI when it talks to you in Chat. Leave it blank to stay anonymous.</li>
-                        <li><strong>Storage folder</strong> — the folder on your computer where your journal lives. It's a normal folder of plain <code className="bg-bg-surface px-1.5 py-0.5 rounded font-mono text-xs border border-border-brand/50">.md</code> files; you can open it in Finder or Explorer any time. Click <strong>Browse</strong> to point Campfire at a different folder.</li>
-                        <li><strong>Autosave</strong> — how long Campfire waits after you stop typing before writing to disk. Default is 1 second; you can also pick 10 seconds, 1 minute, or <em>off</em> if you want to save only on date change.</li>
-                        <li><strong>Language</strong> — switch the interface between English and Vietnamese without restarting the app.</li>
+                        <li><strong>Your name</strong> — used by the AI helper when talking to you in Chat. Leave it blank if you prefer to stay anonymous.</li>
+                        <li><strong>Storage folder</strong> — the folder on your computer where your journal entries are saved. Click <strong>Browse</strong> to pick a different folder.</li>
+                        <li><strong>Autosave frequency</strong> — choose how long Campfire waits after you stop typing before saving your work (1 second, 10 seconds, 1 minute, or off).</li>
+                        <li><strong>Language</strong> — switch the app interface between English and Vietnamese instantly.</li>
+                        <li><strong>Google Drive Sync</strong> — connect your Google account so your journal stays in sync across all your devices.</li>
+                        <li><strong>Local Backups</strong> — create a safe backup copy of your journal with one click, or restore a previous snapshot whenever you need.</li>
                       </ul>
                     </span>
                   </div>
                   <div className="bg-bg-app/40 rounded-xl p-3.5 border border-border-brand/40">
-                    <span className="font-bold text-xs text-text-primary block mb-1">Heart — make the screen yours</span>
+                    <span className="font-bold text-xs text-text-primary block mb-1">Heart Settings — customize the floating heart</span>
                     <span className="text-xs text-text-secondary leading-relaxed">
-                      The little floating heart in the corner is draggable: pick it up, drop it anywhere on the screen, and Campfire remembers where you put it. There's also a small lock so a curious finger (yours or a pet's) can't accidentally move it.
+                      Make the floating heart widget your own:
+                      <ul className="list-disc pl-4.5 mt-1.5 space-y-1">
+                        <li><strong>Show donation heart</strong> — show or hide the floating heart. You can drag and drop it anywhere on the screen, and Campfire will remember your favorite spot.</li>
+                        <li><strong>Click behavior</strong> — choose whether clicking the heart showers your screen with falling hearts or opens the support window.</li>
+                        <li><strong>Falling heart speed</strong> — adjust how fast or slow the hearts float down your screen.</li>
+                        <li><strong>Heart size</strong> — make the floating heart icon larger or smaller.</li>
+                        <li><strong>Keyboard shortcut</strong> — pick a key on your keyboard to trigger a shower of falling hearts anytime you press it.</li>
+                        <li><strong>Custom heart image</strong> — upload your own picture or icon to replace the red heart, or remove it to return to default.</li>
+                        <li><strong>Reset position and size</strong> — snap the heart back to its default location and size if it ever gets misplaced.</li>
+                      </ul>
                     </span>
                   </div>
                   <div className="bg-bg-app/40 rounded-xl p-3.5 border border-border-brand/40">
-                    <span className="font-bold text-xs text-text-primary block mb-1">Ollama — your local AI</span>
+                    <span className="font-bold text-xs text-text-primary block mb-1">Ollama Local AI Link — your private local AI</span>
                     <span className="text-xs text-text-secondary leading-relaxed">
-                      This section is where you check whether Campfire can talk to your local AI (the small helper that powers Chat, Reflection, and Semantic Search). If Ollama isn't installed yet, the section shows a one-click download. If it is, you'll see the list of models you have available and a guide to downloading more.
+                      Check and manage your local AI helper that powers Chat, Reflection reports, and Search:
+                      <ul className="list-disc pl-4.5 mt-1.5 space-y-1">
+                        <li><strong>Connection status</strong> — see if your local AI is ready, or use the one-click download button if it's not installed yet.</li>
+                        <li><strong>Guide & installed models</strong> — check which AI models are ready on your computer and view helpful setup tips.</li>
+                      </ul>
                     </span>
                   </div>
                   <div className="bg-bg-app/40 rounded-xl p-3.5 border border-border-brand/40">
-                    <span className="font-bold text-xs text-text-primary block mb-1">Google Drive Sync — optional backup</span>
+                    <span className="font-bold text-xs text-text-primary block mb-1">Mobile App Setup (PWA) — Campfire on your phone</span>
                     <span className="text-xs text-text-secondary leading-relaxed">
-                      Connect your own Google Drive so your journal can sync across the devices you use Campfire on. Connecting is one button; the section shows the account you're signed in as, a toggle for auto-sync, and (on desktop) a button to create a manual backup and a list of recent ones you can roll back to. Nothing is shared with anyone else — it's your Drive, your files.
+                      Set up Campfire on your mobile phone or tablet so it works like a regular app:
+                      <ul className="list-disc pl-4.5 mt-1.5 space-y-1">
+                        <li><strong>Mobile Link & QR Code</strong> — copy the web address with one click or scan the QR code with your phone camera.</li>
+                        <li><strong>Installation guide</strong> — follow simple step-by-step instructions for iPhone, iPad, or Android to add Campfire to your home screen.</li>
+                      </ul>
                     </span>
                   </div>
                   <div className="bg-bg-app/40 rounded-xl p-3.5 border border-border-brand/40">
-                    <span className="font-bold text-xs text-text-primary block mb-1">Mobile App Setup (PWA)</span>
+                    <span className="font-bold text-xs text-text-primary block mb-1">Export / Import — keep or move your journal</span>
                     <span className="text-xs text-text-secondary leading-relaxed">
-                      Want Campfire in your phone or tablet too? This section walks you through installing the mobile web app to your home screen in a couple of taps, so it behaves like a regular app — full screen, its own icon, offline-capable.
-                    </span>
-                  </div>
-                  <div className="bg-bg-app/40 rounded-xl p-3.5 border border-border-brand/40">
-                    <span className="font-bold text-xs text-text-primary block mb-1">Legacy Export (when shown)</span>
-                    <span className="text-xs text-text-secondary leading-relaxed">
-                      This section only appears once you've set a storage folder. It lets you bundle your whole journal into a single Markdown or JSON file — useful for moving your writing somewhere else, or for keeping a personal archive outside the app.
+                      Appears once a storage folder is set:
+                      <ul className="list-disc pl-4.5 mt-1.5 space-y-1">
+                        <li><strong>Export journal</strong> — bundle your entire journal into a single file to keep a personal archive or move it somewhere else.</li>
+                        <li><strong>Import journal</strong> — bring past journal files back into Campfire.</li>
+                      </ul>
                     </span>
                   </div>
                 </div>

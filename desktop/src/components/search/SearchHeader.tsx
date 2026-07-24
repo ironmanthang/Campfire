@@ -106,6 +106,13 @@ export function SearchHeader() {
                 <h2 className="text-2xl font-bold tracking-tight">{t("searchView.title")}</h2>
                 <div className="flex items-center gap-1.5 mt-1">
                   <p className="text-sm text-text-secondary">{t("searchView.subtitle")}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {searchMode === "semantic" && (
+                <div className="flex items-center gap-2 text-xs text-text-secondary select-none">
                   <button
                     type="button"
                     onClick={() => setShowHelpModal(true)}
@@ -114,13 +121,6 @@ export function SearchHeader() {
                   >
                     <Info className="h-4.5 w-4.5" />
                   </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              {searchMode === "semantic" && (
-                <div className="flex items-center gap-2 text-xs text-text-secondary select-none">
                   <span className="font-medium">{t("searchView.modelLabel")}</span>
                   {embeddingModels.length > 0 ? (
                     <ModelSelector
@@ -133,9 +133,14 @@ export function SearchHeader() {
                       onTogglePin={togglePinModel}
                     />
                   ) : (
-                    <div className="text-xs text-red-500 font-semibold border border-red-500/25 bg-red-500/10 px-2 py-1 rounded">
-                      {t("searchView.noEmbeddingModels")}
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowHelpModal(true)}
+                      className="text-xs text-red-500 font-semibold border border-red-500/25 bg-red-500/10 px-2.5 py-1 rounded cursor-pointer hover:bg-red-500/20 transition-colors flex items-center gap-1.5"
+                      title={t("searchView.noEmbeddingModelsTooltip")}
+                    >
+                      <span>{t("searchView.noEmbeddingModels")}</span>
+                    </button>
                   )}
                 </div>
               )}

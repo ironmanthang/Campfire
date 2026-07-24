@@ -13,9 +13,23 @@ interface SupportModalProps {
 
 export function SupportModal({ isOpen, onClose }: SupportModalProps) {
   const { t, i18n } = useTranslation();
-  const [donationTab, setDonationTab] = useState<"vietqr" | "kofi">("vietqr");
+  const [donationTab, setDonationTab] = useState<"vietqr" | "kofi">(() =>
+    i18n.language === "vi" ? "vietqr" : "kofi"
+  );
   const [isQrExpanded, setIsQrExpanded] = useState(false);
   const [customMessage, setCustomMessage] = useState("");
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+  const [prevLanguage, setPrevLanguage] = useState(i18n.language);
+
+  if ((isOpen && !prevIsOpen) || (isOpen && i18n.language !== prevLanguage)) {
+    setPrevIsOpen(isOpen);
+    setPrevLanguage(i18n.language);
+    setDonationTab(i18n.language === "vi" ? "vietqr" : "kofi");
+    setIsQrExpanded(false);
+    setCustomMessage("");
+  } else if (!isOpen && prevIsOpen) {
+    setPrevIsOpen(false);
+  }
 
   const [modalWidth, startResize, resetModalWidth] = useResizer({
     key: "support-modal-width",
@@ -31,14 +45,6 @@ export function SupportModal({ isOpen, onClose }: SupportModalProps) {
   const pointerMovedRef = useRef(false);
   const activePointerIdRef = useRef<number | null>(null);
   const startPosRef = useRef<{ x: number; y: number } | null>(null);
-
-  useEffect(() => {
-    if (isOpen) {
-      setDonationTab(i18n.language === "vi" ? "vietqr" : "kofi");
-      setIsQrExpanded(false);
-      setCustomMessage("");
-    }
-  }, [isOpen, i18n.language]);
 
   // Close on Escape key press
   useEffect(() => {

@@ -11,7 +11,7 @@ export function KofiPanel({ onDonateClick }: KofiPanelProps) {
   return (
     <div className="space-y-4 animate-fade-in">
       <div className="flex items-center gap-3">
-        <Heart className="h-5 w-5 text-red-500 fill-red-500/20 shrink-0" />
+        <Heart className="h-5 w-5 text-red-500 fill-red-500 shrink-0" />
         <h4 className="text-sm font-bold text-text-primary">
           {t("aboutModal.supportTitle")}
         </h4>
