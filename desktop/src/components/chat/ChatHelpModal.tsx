@@ -1,7 +1,8 @@
-import { MessageSquare, X } from "lucide-react";
+import { MessageSquare, X, Check, Copy, Terminal, ExternalLink } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useResizer } from "../../hooks/useResizer";
+import { openUrl } from "@tauri-apps/plugin-opener";
 
 interface ChatHelpModalProps {
   onClose: () => void;
@@ -9,11 +10,18 @@ interface ChatHelpModalProps {
 
 export function ChatHelpModal({ onClose }: ChatHelpModalProps) {
   const { t } = useTranslation();
+  const [copiedCommand, setCopiedCommand] = useState<string | null>(null);
   const modalRef = useRef<HTMLDivElement | null>(null);
   const pointerStartedInsideRef = useRef(false);
   const pointerMovedRef = useRef(false);
   const activePointerIdRef = useRef<number | null>(null);
   const startPosRef = useRef<{ x: number; y: number } | null>(null);
+
+  const handleCopy = (command: string) => {
+    navigator.clipboard.writeText(command);
+    setCopiedCommand(command);
+    setTimeout(() => setCopiedCommand(null), 2000);
+  };
 
   const [modalWidth, startResize, resetModalWidth] = useResizer({
     key: "chat-help-modal-width",
@@ -94,6 +102,47 @@ export function ChatHelpModal({ onClose }: ChatHelpModalProps) {
             <p className="text-xs text-text-secondary leading-relaxed">
               {t("chatView.helpModal.howChatWorksDesc")}
             </p>
+          </div>
+
+          {/* Pull Chat Models Guide */}
+          <div className="bg-bg-app/50 border border-border-brand/60 p-4 rounded-xl space-y-3">
+            <div className="flex items-center gap-2 font-bold text-xs text-text-primary">
+              <Terminal className="h-4 w-4 text-accent-brand" />
+              <span>{t("chatView.helpModal.pullGuideTitle", { defaultValue: "How to Download Chat Models" })}</span>
+            </div>
+            <p className="text-xs text-text-secondary leading-relaxed">
+              {t("chatView.helpModal.pullGuideDesc", {
+                defaultValue: "Chatting with your journals locally requires an LLM model in Ollama. Open your Terminal (Command Prompt or Terminal) and run a command to download one, or browse the Ollama Library:"
+              })}
+            </p>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
+              <div className="flex-1 flex items-center justify-between gap-2 rounded-lg border border-border-brand/40 bg-bg-surface px-3 py-2">
+                <code className="font-mono text-xs text-accent-brand select-all">
+                  ollama pull gemma4:e2b-it-qat
+                </code>
+                <button
+                  type="button"
+                  onClick={() => handleCopy("ollama pull gemma4:e2b-it-qat")}
+                  className="hover:text-accent-brand transition-colors p-1 text-text-secondary cursor-pointer flex items-center gap-1 shrink-0"
+                  title={t("chatView.helpModal.copyCommand", { defaultValue: "Copy command" })}
+                >
+                  {copiedCommand === "ollama pull gemma4:e2b-it-qat" ? (
+                    <Check className="h-4 w-4 text-emerald-500" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => openUrl("https://ollama.com/search")}
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-accent-brand text-bg-app rounded-lg font-semibold text-xs hover:opacity-90 transition-opacity shrink-0 cursor-pointer"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                <span>{t("settingsView.browseOllamaLibrary")}</span>
+              </button>
+            </div>
           </div>
 
           {/* Guidelines List */}

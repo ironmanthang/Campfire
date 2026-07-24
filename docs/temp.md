@@ -5,7 +5,7 @@ add desktop link, to the mobile when later publish to microsoft store
 
 some files uses direct English text in JSX, so its content stays in English even when the app language is switched to Vietnamese. scan the whole desktop folder, make plan to ensure all ui files code use en.json and vi.json to automatically switch languages.
 
-  
+
 
 
 i want to add "Feedback is always welcome via the Report Bug & Feedback form! But if you want to buy me a coffee and drop a note at the same time, donation alerts hit my phone instantly, so I'll see your message right away : D" to the support me section.
