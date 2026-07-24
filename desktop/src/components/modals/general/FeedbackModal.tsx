@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { X, Send, CheckCircle, AlertCircle, FileText } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
+import { APP_VERSION } from "../../../lib/appVersion";
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -107,7 +108,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
       const resultStr = await invoke<string>("submit_feedback", {
         description,
         userEmail: email.trim() || "Anonymous",
-        appVersion: "v1.0.0",
+        appVersion: APP_VERSION,
         systemPlatform: diagnostics?.platform || null,
         userAgent: diagnostics?.userAgent || null,
         screenResolution: diagnostics ? `${diagnostics.screenWidth}x${diagnostics.screenHeight}` : null,

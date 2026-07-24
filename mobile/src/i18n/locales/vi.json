@@ -63,6 +63,7 @@
     "logoTitle": "Logo ứng dụng",
     "logoDesc": "Tùy chỉnh logo ở đầu trang ứng dụng. Hỗ trợ các định dạng ảnh phổ biến.",
     "logoPreviewAlt": "Xem trước logo",
+    "versionLabel": "Phiên bản ứng dụng",
     "logoUpload": "Tải ảnh lên",
     "logoReset": "Đặt lại",
     "googleSyncTitle": "Đồng bộ Google Drive",

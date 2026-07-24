@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { APP_VERSION } from "../../lib/appVersion";
 import {
   Shield,
   BookOpen,
@@ -62,7 +63,7 @@ export function AboutAppTab() {
         <h3 className="text-2xl font-black tracking-tight text-accent-brand flex items-center justify-center gap-2">
           {t("aboutModal.appTitle")}
           <span className="text-xs font-mono text-text-secondary bg-bg-app/50 border border-border-brand/40 px-2 py-0.5 rounded-full font-normal select-text">
-            {t("sidebar.version")}
+            {t("sidebar.version", { version: APP_VERSION })}
           </span>
         </h3>
         <p className="text-sm font-medium text-text-secondary leading-relaxed px-4">

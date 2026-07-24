@@ -17,6 +17,7 @@ import {
 import { SUPPORTED_LANGUAGES } from '../i18n/languages';
 import { LANGUAGE_STORAGE_KEY } from '../i18n';
 import i18n from '../i18n';
+import { APP_VERSION } from '../lib/appVersion';
 
 interface SettingsModalProps {
   onClose: () => void;
@@ -206,6 +207,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </option>
               ))}
             </select>
+          </div>
+
+          <hr className="border-border-brand" />
+
+          <div className="flex items-center justify-between text-[11px] text-text-secondary">
+            <span>{t('settings.versionLabel', { defaultValue: 'App version' })}</span>
+            <span className="font-mono">v{APP_VERSION}</span>
           </div>
 
           <hr className="border-border-brand" />

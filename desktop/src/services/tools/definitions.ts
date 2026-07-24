@@ -5,7 +5,7 @@ export const LOCAL_TOOLS: OllamaTool[] = [
     type: "function",
     function: {
       name: "get_system_resources",
-      description: "Query and retrieve the host computer's live hardware statistics, including current CPU usage percentage, free/total system memory (RAM), NVIDIA GPU active load/VRAM usage/temperature, and any running Ollama local AI models in memory. Use this whenever the user asks about the computer status, performance, resource consumption, or running AI models.",
+      description: "Query and retrieve the host computer's live hardware statistics, including current CPU usage percentage, free/total system memory (RAM), and any running Ollama local AI models in memory. Use this whenever the user asks about the computer status, performance, resource consumption, or running AI models.",
       parameters: {
         type: "object",
         properties: {}

@@ -4,7 +4,7 @@ import { RefreshCw, Loader2, Square } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { SystemResources } from "../../../types";
 import { useOllamaStore } from "../../../store/useOllamaStore";
-import { parseCpuPercentage, parseRamInfo, parseGpuInfo } from "../../../lib/systemResources";
+import { parseCpuPercentage, parseRamInfo } from "../../../lib/systemResources";
 
 function formatExpiry(expiresAt: string, t: any) {
   try {
@@ -187,37 +187,6 @@ export function OllamaDiagnostics() {
                 );
               })()}
 
-              {/* GPU / VRAM progress bar */}
-              {(() => {
-                const gpuInfo = parseGpuInfo(resources.gpu_raw);
-                if (!gpuInfo) {
-                  return (
-                    <div className="text-xs text-text-secondary italic mt-1">
-                      {t("settingsView.noNvidiaGpu")}
-                    </div>
-                  );
-                }
-                return (
-                  <div className="space-y-1.5 p-2.5 rounded-lg border border-border-brand bg-bg-app/40">
-                    <div className="flex justify-between text-sm font-semibold text-text-secondary">
-                      <span className="truncate">{gpuInfo.name}</span>
-                      <span className="shrink-0">{t("settingsView.gpuStatusFormat", { temp: gpuInfo.temp, load: gpuInfo.util })}</span>
-                    </div>
-                    <div className="flex justify-between text-xs font-mono text-text-secondary">
-                      <span>{t("settingsView.vramUsage")}</span>
-                      <span>{t("settingsView.vramUsageFormat", { used: gpuInfo.usedVram.toFixed(2), total: gpuInfo.totalVram.toFixed(2), percent: gpuInfo.usedPercent.toFixed(0) })}</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-bg-app rounded-full overflow-hidden border border-border-brand/40">
-                      <div 
-                        className={`h-full rounded-full transition-all duration-300 ${
-                          gpuInfo.usedPercent < 70 ? "bg-emerald-500" : gpuInfo.usedPercent < 90 ? "bg-amber-500" : "bg-red-500"
-                        }`}
-                        style={{ width: `${gpuInfo.usedPercent}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })()}
             </div>
           )}
         </div>

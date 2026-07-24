@@ -63,6 +63,7 @@
     "logoTitle": "App Logo",
     "logoDesc": "Customize the in-app header logo. Supports standard image formats.",
     "logoPreviewAlt": "Logo preview",
+    "versionLabel": "App version",
     "logoUpload": "Upload Image",
     "logoReset": "Reset",
     "googleSyncTitle": "Google Drive Sync",

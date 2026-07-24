@@ -126,7 +126,7 @@ export function SupportModal({ isOpen, onClose }: SupportModalProps) {
         startPosRef.current = null;
         onClose();
       }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 select-none animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in"
     >
       <div
         ref={modalRef}
@@ -151,7 +151,7 @@ export function SupportModal({ isOpen, onClose }: SupportModalProps) {
         </div>
 
         {/* Modal Body / Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin select-text">
           <AboutMeTab
             donationTab={donationTab}
             setDonationTab={setDonationTab}

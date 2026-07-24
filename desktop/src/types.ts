@@ -84,7 +84,6 @@ export interface EmbeddingCacheData {
 }
 
 export interface SystemResources {
-  gpu_raw: string;
   ollama_ps_raw: string;
   cpu_raw: string;
   ram_raw: string;

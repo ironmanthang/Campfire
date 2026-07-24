@@ -11,7 +11,6 @@ const CREATE_NO_WINDOW: u32 = 0x08000000;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SystemResources {
-    pub gpu_raw: String,
     pub ollama_ps_raw: String,
     pub cpu_raw: String,
     pub ram_raw: String,
@@ -59,13 +58,11 @@ pub async fn get_system_resources() -> Result<SystemResources, String> {
         "Get-CimInstance Win32_OperatingSystem | Select-Object FreePhysicalMemory,TotalVisibleMemorySize".to_string()
     ]));
 
-    let gpu_raw = "NVIDIA driver query disabled for Microsoft Store compliance".to_string();
     let ollama_ps_raw = handle_ollama.join().unwrap_or_else(|_| "Failed to query Ollama".to_string());
     let cpu_raw = handle_cpu.join().unwrap_or_else(|_| "Failed to query CPU".to_string());
     let ram_raw = handle_ram.join().unwrap_or_else(|_| "Failed to query RAM".to_string());
 
     Ok(SystemResources {
-        gpu_raw,
         ollama_ps_raw,
         cpu_raw,
         ram_raw,
