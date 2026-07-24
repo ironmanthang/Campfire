@@ -24,6 +24,7 @@ dist-ssr
 *.sw?
 
 storage
+storage test
 .env
 \docs\temp.md
 et\ --soft\ HEAD~2q

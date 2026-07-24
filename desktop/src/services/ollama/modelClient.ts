@@ -4,7 +4,7 @@ import { OllamaModelInfo, OllamaActiveModelInfo } from "./types";
 // Check if Ollama service is running
 export async function checkOllamaStatus(): Promise<boolean> {
   try {
-    const res = await fetch(`${OLLAMA_BASE_URL}/`, { method: "HEAD" });
+    const res = await fetch(`${OLLAMA_BASE_URL}/`);
     return res.ok;
   } catch (err) {
     return false;
