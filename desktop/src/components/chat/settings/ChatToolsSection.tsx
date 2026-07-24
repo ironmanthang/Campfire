@@ -4,7 +4,6 @@ import {
   ChevronDown,
   ChevronRight,
   Cpu,
-  Laptop,
   BookOpen,
   Compass,
   Trash2,
@@ -41,7 +40,6 @@ export function ChatToolsSection() {
 
   const allToolsNames = [
     "get_system_resources",
-    "laptop_brightness",
     "read_journal_entries",
     "navigate_to_journal_date",
     "scan_for_garbage"
@@ -107,14 +105,6 @@ export function ChatToolsSection() {
               label: t("chatView.toolTelemetry"),
               desc: t("chatView.toolTelemetryDesc"),
               icon: Cpu,
-              hasSubSettings: false
-            },
-            {
-              id: "brightness",
-              name: "laptop_brightness",
-              label: t("chatView.toolBrightness"),
-              desc: t("chatView.toolBrightnessDesc"),
-              icon: Laptop,
               hasSubSettings: false
             },
             {

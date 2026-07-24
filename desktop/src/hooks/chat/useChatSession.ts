@@ -35,7 +35,6 @@ export function useChatSession({ visible }: { visible: boolean }) {
   const [activeToolName, setActiveToolName] = useState<string | null>(null);
   const [enabledTools, setEnabledTools] = usePersistedState("chat_enabled_tools", [
     "get_system_resources",
-    "laptop_brightness",
     "read_journal_entries",
     "navigate_to_journal_date",
     "scan_for_garbage"
@@ -231,7 +230,6 @@ export function useChatSession({ visible }: { visible: boolean }) {
     const activeTools: OllamaTool[] = [];
     const toolMapping: Record<string, string[]> = {
       get_system_resources: ["get_system_resources"],
-      laptop_brightness: ["get_laptop_brightness", "set_laptop_brightness"],
       read_journal_entries: ["read_journal_entries"],
       navigate_to_journal_date: ["navigate_to_journal_date"],
       scan_for_garbage: ["scan_for_garbage"],

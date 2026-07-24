@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Sparkles, ChevronDown, ChevronRight, Copy, Check } from "lucide-react";
+import { SquareTerminal, ChevronDown, ChevronRight, Copy, Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAppStore } from "../../../store/useAppStore";
 import { getSystemInstruction } from "../../../services/prompts";
@@ -48,7 +48,7 @@ export function ChatSystemSection() {
         className="w-full flex items-center justify-between font-bold text-text-primary transition-colors select-none text-left"
       >
         <div className="flex items-center gap-2">
-          <Sparkles className="h-4.5 w-4.5 text-accent-brand" />
+          <SquareTerminal className="h-4.5 w-4.5 text-accent-brand" />
           <span className="text-sm">{t("chatView.systemPromptSettings", "System Prompt Behavior")}</span>
         </div>
         {collapsed ? (

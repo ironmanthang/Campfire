@@ -408,8 +408,6 @@
     "showSuggestedPromptDesc": "Hiện một gợi ý nhanh phía trên ô chat để bạn có thể chỉnh sửa trước khi gửi.",
     "toolTelemetry": "Đo hiệu năng hệ thống",
     "toolTelemetryDesc": "Cho phép AI kiểm tra CPU, RAM, GPU và các model Ollama.",
-    "toolBrightness": "Độ sáng màn hình",
-    "toolBrightnessDesc": "Cho phép AI đọc và điều chỉnh độ sáng màn hình.",
     "toolArchive": "Đọc lại nhật ký",
     "toolArchiveDesc": "Cho phép AI đọc lại các trang nhật ký cũ trong khoảng ngày được chọn.",
     "toolNavigate": "Điều hướng ngày",

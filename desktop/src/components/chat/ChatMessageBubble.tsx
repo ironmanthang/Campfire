@@ -176,10 +176,6 @@ export function ChatMessageBubble({
                   {(() => {
                     const statusText = activeToolName === "get_system_resources"
                       ? "Checking system hardware..."
-                      : activeToolName === "get_laptop_brightness"
-                      ? "Reading screen brightness..."
-                      : activeToolName === "set_laptop_brightness"
-                      ? "Adjusting screen brightness..."
                       : activeToolName === "read_journal_entries"
                       ? "Reading historical journals..."
                       : activeToolName === "navigate_to_journal_date"

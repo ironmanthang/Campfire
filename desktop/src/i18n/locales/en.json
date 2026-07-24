@@ -408,8 +408,6 @@
     "showSuggestedPromptDesc": "Show a quick prompt above the chat input so you can edit it before sending.",
     "toolTelemetry": "System Diagnostics",
     "toolTelemetryDesc": "Allow AI to inspect CPU, RAM, GPU, and loaded Ollama models.",
-    "toolBrightness": "Laptop Brightness",
-    "toolBrightnessDesc": "Allow AI to read and adjust screen brightness percentage.",
     "toolArchive": "Read Journal Archive",
     "toolArchiveDesc": "Allow AI to reread specific journal logs within the cloned timeframe.",
     "toolNavigate": "Journal Date Navigation",
