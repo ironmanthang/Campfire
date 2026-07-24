@@ -33,26 +33,28 @@ export function OllamaModelList() {
         />
       </div>
 
-      <div className="max-h-[160px] overflow-y-auto rounded-lg border border-border-brand bg-bg-app p-2 space-y-1 scrollbar-thin">
-        {checkingOllama ? (
-          <div className="flex items-center justify-center gap-2 py-4 text-xs text-text-secondary italic">
+      <div className="min-h-[120px] max-h-[160px] overflow-y-auto rounded-lg border border-border-brand bg-bg-app p-2 space-y-1 scrollbar-thin">
+        {checkingOllama && modelsList.length === 0 ? (
+          <div className="flex items-center justify-center gap-2 py-8 text-xs text-text-secondary italic min-h-[100px]">
             <Loader2 className="h-3.5 w-3.5 animate-spin text-accent-brand" />
             {t("settingsView.fetchingLocalModels")}
           </div>
         ) : filteredModelsList.length > 0 ? (
-          filteredModelsList.map((m) => {
-            const isEmbedding = isEmbeddingModel(m.name, m.capabilities);
-            return (
-              <div key={m.name} className="flex items-center justify-between p-2 rounded-md hover:bg-bg-surface/50 border border-transparent hover:border-border-brand/30 transition-all text-xs">
-                <div className="flex flex-col gap-0.5 truncate">
-                  <span className="font-semibold text-text-primary truncate">{m.name}</span>
-                  <span className="text-xs text-text-secondary font-mono">
-                    {isEmbedding ? t("settingsView.embeddingModel") : t("settingsView.chatPersonaModel")}{t("settingsView.modelSizeFormat", { size: (m.size / (1024 * 1024 * 1024)).toFixed(2) })}
-                  </span>
+          <div className={`space-y-1 transition-opacity duration-150 ${checkingOllama ? "opacity-70" : ""}`}>
+            {filteredModelsList.map((m) => {
+              const isEmbedding = isEmbeddingModel(m.name, m.capabilities);
+              return (
+                <div key={m.name} className="flex items-center justify-between p-2 rounded-md hover:bg-bg-surface/50 border border-transparent hover:border-border-brand/30 transition-all text-xs">
+                  <div className="flex flex-col gap-0.5 truncate">
+                    <span className="font-semibold text-text-primary truncate">{m.name}</span>
+                    <span className="text-xs text-text-secondary font-mono">
+                      {isEmbedding ? t("settingsView.embeddingModel") : t("settingsView.chatPersonaModel")}{t("settingsView.modelSizeFormat", { size: (m.size / (1024 * 1024 * 1024)).toFixed(2) })}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            );
-          })
+              );
+            })}
+          </div>
         ) : (
           <div className="text-center py-4 text-xs text-text-secondary italic">
             {modelsList.length === 0 ? t("settingsView.noLocalModels") : t("settingsView.noMatchingModels")}

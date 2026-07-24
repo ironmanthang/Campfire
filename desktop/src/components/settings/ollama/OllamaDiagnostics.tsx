@@ -37,7 +37,6 @@ export function OllamaDiagnostics() {
   } = useOllamaStore();
 
   const fetchSystemResources = async () => {
-    setResources(null);
     try {
       const res = await invoke<SystemResources>("get_system_resources");
       setResources(res);
@@ -117,13 +116,13 @@ export function OllamaDiagnostics() {
           {/* Loaded Models Sub-section */}
           <div className="space-y-2">
             <span className="block text-xs font-bold text-text-secondary uppercase tracking-wider">{t("settingsView.loadedModels")}</span>
-            {checkingOllama || loadingActiveModels ? (
-              <div className="flex items-center justify-center gap-2 py-3 text-xs text-text-secondary italic">
+            {(checkingOllama || loadingActiveModels) && activeModelsList.length === 0 ? (
+              <div className="p-3 rounded-lg border border-border-brand bg-bg-app flex items-center justify-center gap-2 text-xs text-text-secondary italic min-h-[42px]">
                 <Loader2 className="h-3.5 w-3.5 animate-spin text-accent-brand" />
                 {t("settingsView.fetchingActiveModels")}
               </div>
             ) : activeModelsList.length > 0 ? (
-              <div className="space-y-2">
+              <div className={`space-y-2 transition-opacity duration-150 ${loadingActiveModels ? "opacity-70" : ""}`}>
                 {activeModelsList.map((am) => (
                   <div key={am.name} className="p-2.5 rounded-lg border border-border-brand bg-bg-app text-xs flex justify-between items-center gap-3">
                     <div className="space-y-0.5 min-w-0 flex-1">
@@ -154,7 +153,7 @@ export function OllamaDiagnostics() {
                 ))}
               </div>
             ) : (
-              <div className="p-3 rounded-lg border border-border-brand bg-bg-app text-center text-xs text-text-secondary italic">
+              <div className="p-3 rounded-lg border border-border-brand bg-bg-app text-center text-xs text-text-secondary italic min-h-[42px] flex items-center justify-center">
                 {t("settingsView.noModelsLoaded")}
               </div>
             )}
@@ -164,12 +163,12 @@ export function OllamaDiagnostics() {
           <div className="space-y-3 border-t border-border-brand/20 pt-3">
             <span className="block text-xs font-bold text-text-secondary uppercase tracking-wider">{t("settingsView.hardwareStats")}</span>
             {!resources ? (
-              <div className="flex items-center justify-center gap-2 py-3 text-xs text-text-secondary italic">
+              <div className="p-4 rounded-lg border border-border-brand bg-bg-app/40 flex items-center justify-center gap-2 min-h-[110px] text-xs text-text-secondary italic">
                 <Loader2 className="h-3.5 w-3.5 animate-spin text-accent-brand" />
                 {t("settingsView.fetchingStats")}
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className={`space-y-3 transition-opacity duration-150 ${loadingActiveModels ? "opacity-70" : ""}`}>
                 {/* CPU progress bar */}
                 {(() => {
                   const cpuPercent = parseCpuPercentage(resources.cpu_raw);
