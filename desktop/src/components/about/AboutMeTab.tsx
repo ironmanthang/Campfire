@@ -29,10 +29,7 @@ export function AboutMeTab({
           {t("aboutModal.meTitle")}
         </h3>
         <p className="text-sm text-text-secondary leading-relaxed">
-          {t("aboutModal.meStory1")}
-        </p>
-        <p className="text-sm text-text-secondary leading-relaxed">
-          {t("aboutModal.meStory2")}
+          {t("aboutModal.meStory")}
         </p>
       </div>
 
