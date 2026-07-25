@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type LocalJournalEntry } from '../services/db';
-import { Plus, Search, Calendar, FileText, SlidersHorizontal } from 'lucide-react';
+import { Plus, Search, Calendar, FileText, SlidersHorizontal, X } from 'lucide-react';
 
 interface JournalListProps {
   entries: LocalJournalEntry[];
@@ -15,7 +15,9 @@ export const JournalList: React.FC<JournalListProps> = ({
   onCreateToday
 }) => {
   const { t, i18n } = useTranslation();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(() => {
+    return localStorage.getItem('campfire_mobile_search_query') || '';
+  });
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [dateRange, setDateRange] = useState<'all' | '30d' | '3m' | 'year'>(() => {
     const saved = localStorage.getItem('campfire_mobile_filter_dateRange');
@@ -31,6 +33,10 @@ export const JournalList: React.FC<JournalListProps> = ({
     }
     return 'newest';
   });
+
+  useEffect(() => {
+    localStorage.setItem('campfire_mobile_search_query', searchQuery);
+  }, [searchQuery]);
 
   useEffect(() => {
     localStorage.setItem('campfire_mobile_filter_dateRange', dateRange);
@@ -147,8 +153,17 @@ export const JournalList: React.FC<JournalListProps> = ({
             placeholder={t("journalList.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-sm rounded-xl border border-border-brand bg-bg-input text-text-primary outline-none focus:border-accent-brand transition-all"
+            className="w-full pl-9 pr-8 py-2 text-sm rounded-xl border border-border-brand bg-bg-input text-text-primary outline-none focus:border-accent-brand transition-all"
           />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-2.5 p-1 rounded-lg hover:bg-bg-surface text-text-secondary hover:text-text-primary transition-all cursor-pointer"
+              title="Clear search"
+            >
+              <X size={14} />
+            </button>
+          )}
         </div>
         <button
           onClick={() => setIsFilterOpen(true)}
@@ -247,6 +262,7 @@ export const JournalList: React.FC<JournalListProps> = ({
               <span className="font-bold text-text-primary text-base">{t("journalList.filterTitle")}</span>
               <button
                 onClick={() => {
+                  setSearchQuery('');
                   setDateRange('all');
                   setSortOrder('newest');
                 }}

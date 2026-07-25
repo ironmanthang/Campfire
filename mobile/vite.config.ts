@@ -38,6 +38,9 @@ export default defineConfig({
       '@campfire/core': path.resolve(__dirname, '../core/src')
     }
   },
+  server: {
+    allowedHosts: ['.trycloudflare.com']
+  },
   build: {
     sourcemap: false,
   }

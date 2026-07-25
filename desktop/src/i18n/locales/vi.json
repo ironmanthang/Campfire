@@ -23,7 +23,7 @@
     "navChat": "Campfire Chat",
     "navReflectionTooltipDisconnected": "Ollama chưa kết nối",
     "navReflectionTooltipConnected": "Tạo báo cáo suy ngẫm",
-    "navReflection": "Báo cáo suy ngẫm",
+    "navReflection": "Góc suy ngẫm",
     "navSettings": "Cài đặt",
     "toggleThemeTooltip": "Đổi giao diện sáng/tối",
     "collapseSidebar": "Thu gọn",
@@ -607,7 +607,7 @@
     }
   },
   "reflectionView": {
-    "title": "Báo cáo suy ngẫm AI",
+    "title": "Suy ngẫm với AI",
     "subtitle": "Gom nhật ký theo thời gian và tạo báo cáo phân tích khách quan.",
     "analyzePeriod": "Khoảng phân tích:",
     "to": "đến",

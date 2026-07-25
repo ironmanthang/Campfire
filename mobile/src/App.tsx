@@ -9,6 +9,7 @@ import { DonateModal } from './components/DonateModal';
 
 // Hooks
 import { useTheme } from './hooks/useTheme';
+import { useFontSize } from './hooks/useFontSize';
 import { useJournalDb } from './hooks/useJournalDb';
 import { useJournalNavigation } from './hooks/useJournalNavigation';
 import { useGoogleSync } from './hooks/useGoogleSync';
@@ -24,6 +25,9 @@ function App() {
 
   const [showDonateBanner, setShowDonateBanner] = useState(false);
   const [bannerReason, setBannerReason] = useState<'count' | 'streak' | null>(null);
+
+  // Initialize font size preference
+  useFontSize();
 
   // Ensure the persisted language is applied even if localStorage was read
   // before the i18n module initialized.

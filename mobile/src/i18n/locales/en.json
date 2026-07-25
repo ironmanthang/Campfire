@@ -90,7 +90,15 @@
     "privacyLink": "Privacy Policy",
     "termsLink": "Terms of Service",
     "languageLabel": "Language",
-    "languageDesc": "Choose your display language for the application."
+    "languageDesc": "Choose your display language for the application.",
+    "fontSizeTitle": "Font Size",
+    "fontSizeDesc": "Adjust text size.",
+    "fontSizeSmall": "Small",
+    "fontSizeMedium": "Medium",
+    "fontSizeLarge": "Large",
+    "fontSizeXLarge": "Extra",
+    "fontSizePreviewLabel": "Live Preview",
+    "fontSizePreviewText": "The quick brown fox jumps over the lazy dog."
   },
   "donate": {
     "modalTitle": "Support Campfire",

@@ -12,6 +12,34 @@
   --color-accent-hover: #B57A48;
   --border-color: #E6DFD3;
   --bg-input: #FCFAF7;
+
+  /* Font size variables */
+  --editor-font-size: 1rem;
+  --preview-font-size: 1rem;
+}
+
+html[data-font-size="small"] {
+  font-size: 14px;
+  --editor-font-size: 0.875rem;
+  --preview-font-size: 0.875rem;
+}
+
+html[data-font-size="medium"] {
+  font-size: 16px;
+  --editor-font-size: 1rem;
+  --preview-font-size: 1rem;
+}
+
+html[data-font-size="large"] {
+  font-size: 18px;
+  --editor-font-size: 1.125rem;
+  --preview-font-size: 1.125rem;
+}
+
+html[data-font-size="xlarge"] {
+  font-size: 20px;
+  --editor-font-size: 1.25rem;
+  --preview-font-size: 1.25rem;
 }
 
 :root.dark {

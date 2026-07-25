@@ -90,7 +90,15 @@
     "privacyLink": "Chính sách bảo mật",
     "termsLink": "Điều khoản dịch vụ",
     "languageLabel": "Ngôn ngữ",
-    "languageDesc": "Chọn ngôn ngữ hiển thị cho ứng dụng."
+    "languageDesc": "Chọn ngôn ngữ hiển thị cho ứng dụng.",
+    "fontSizeTitle": "Kích thước chữ",
+    "fontSizeDesc": "Điều chỉnh kích thước chữ.",
+    "fontSizeSmall": "Nhỏ",
+    "fontSizeMedium": "Vừa",
+    "fontSizeLarge": "Lớn",
+    "fontSizeXLarge": "Rất lớn",
+    "fontSizePreviewLabel": "Xem trước",
+    "fontSizePreviewText": "Cần cù bù siêng năng, Ronaldo Siuuuuu"
   },
   "donate": {
     "modalTitle": "Ủng hộ Campfire",

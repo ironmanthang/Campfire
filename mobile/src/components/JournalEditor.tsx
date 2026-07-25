@@ -116,7 +116,10 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
       <div className="flex-1 flex flex-col min-h-0 relative">
         {isPreview ? (
           /* Preview Panel */
-          <div className="flex-1 overflow-y-auto px-5 py-4 markdown-preview text-text-primary">
+          <div 
+            className="flex-1 overflow-y-auto px-5 py-4 markdown-preview text-text-primary"
+            style={{ fontSize: 'var(--editor-font-size)' }}
+          >
             <h1 className="text-xl font-bold border-b border-border-brand pb-2 mb-4">{formatDate(date)}</h1>
             {content.trim() ? (
               <ReactMarkdown>{content}</ReactMarkdown>
@@ -133,7 +136,8 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
               onChange={(e) => onChange(e.target.value)}
               placeholder={isLoading ? "" : t("journalEditor.placeholder", { date: formatDate(date) })}
               disabled={isLoading}
-              className="flex-1 w-full bg-transparent text-text-primary resize-none outline-none text-base leading-relaxed placeholder:text-text-secondary/50 font-sans"
+              style={{ fontSize: 'var(--editor-font-size)' }}
+              className="flex-1 w-full bg-transparent text-text-primary resize-none outline-none leading-relaxed placeholder:text-text-secondary/50 font-sans"
             />
           </div>
         )}
