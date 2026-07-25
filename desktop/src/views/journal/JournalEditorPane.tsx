@@ -86,7 +86,7 @@ export function JournalEditorPane({
               onClick={handleFindPrev}
               disabled={findMatches.length === 0}
               className="p-1 hover:bg-bg-app/80 rounded-lg transition-colors text-text-secondary hover:text-text-primary disabled:opacity-30 cursor-pointer"
-              title="Previous Match (Shift+F3 / Shift+Ctrl+G)"
+              title={t("journalEditor.findPrevTooltip")}
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
@@ -95,7 +95,7 @@ export function JournalEditorPane({
               onClick={handleFindNext}
               disabled={findMatches.length === 0}
               className="p-1 hover:bg-bg-app/80 rounded-lg transition-colors text-text-secondary hover:text-text-primary disabled:opacity-30 cursor-pointer"
-              title="Next Match (F3 / Ctrl+G)"
+              title={t("journalEditor.findNextTooltip")}
             >
               <ChevronRight className="h-4 w-4" />
             </button>
@@ -104,7 +104,7 @@ export function JournalEditorPane({
               type="button"
               onClick={handleCloseFind}
               className="p-1 hover:bg-bg-app/80 rounded-lg transition-colors text-text-secondary hover:text-text-primary cursor-pointer"
-              title="Close (Esc)"
+              title={t("journalEditor.findCloseTooltip")}
             >
               <X className="h-4 w-4" />
             </button>
@@ -115,7 +115,7 @@ export function JournalEditorPane({
         <div className="flex-1 flex flex-col items-center justify-center gap-2">
           <Loader2 className="h-6 w-6 animate-spin text-accent-brand" />
           <span className="text-xs text-text-secondary">
-            {initialSyncInProgress ? "Syncing with cloud memory..." : t("journalEditor.loadingFlatFile")}
+            {initialSyncInProgress ? t("journalEditor.statusSyncingCloudMemory") : t("journalEditor.loadingFlatFile")}
           </span>
         </div>
       ) : (
@@ -127,8 +127,8 @@ export function JournalEditorPane({
                   <AlertTriangle className="h-5 w-5" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-sm font-bold text-text-primary">Sync Conflict Detected</span>
-                  <span className="text-xs text-text-secondary">Keep your version or overwrite with the cloud version to resolve:</span>
+                  <span className="text-sm font-bold text-text-primary">{t("journalEditor.conflictTitle")}</span>
+                  <span className="text-xs text-text-secondary">{t("journalEditor.conflictDesc")}</span>
                 </div>
               </div>
               <div className="flex items-center gap-2 pl-12 flex-wrap">
@@ -137,21 +137,21 @@ export function JournalEditorPane({
                   onClick={() => resolveConflict("local")}
                   className="px-3.5 py-1.5 rounded-xl bg-accent-brand text-bg-app hover:bg-accent-brand-hover text-xs font-semibold shadow-sm transition-all cursor-pointer"
                 >
-                  Keep My Version
+                  {t("journalEditor.keepLocal")}
                 </button>
                 <button
                   type="button"
                   onClick={() => resolveConflict("remote")}
                   className="px-3.5 py-1.5 rounded-xl bg-bg-surface border border-border-brand hover:border-accent-brand text-text-primary text-xs font-semibold shadow-sm transition-all cursor-pointer"
                 >
-                  Keep Cloud Version
+                  {t("journalEditor.keepRemote")}
                 </button>
                 <button
                   type="button"
                   onClick={() => resolveConflict("both")}
                   className="px-3.5 py-1.5 rounded-xl bg-bg-surface border border-border-brand hover:border-accent-brand text-text-primary text-xs font-semibold shadow-sm transition-all cursor-pointer"
                 >
-                  Keep Both
+                  {t("journalEditor.keepBoth")}
                 </button>
               </div>
             </div>

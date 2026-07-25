@@ -251,17 +251,17 @@ export function SearchHeader() {
                     setClickMode(clickMode === "open" ? "select" : "open");
                   }}
                   className="px-4 py-1.5 rounded-lg border border-border-brand hover:border-accent-brand text-text-primary hover:bg-bg-surface/50 text-sm font-medium transition-all duration-200 cursor-pointer ml-2 flex items-center gap-1.5 select-none"
-                  title={clickMode === "open" ? "Clicking card will open the editor" : "Clicking card will select the entry"}
+                  title={clickMode === "open" ? t("common.clickToOpenTooltip") : t("common.clickToSelectTooltip")}
                 >
                   {clickMode === "open" ? (
                     <>
                       <BookOpen className="h-4 w-4 text-accent-brand shrink-0" />
-                      <span>Click to Open</span>
+                      <span>{t("common.clickToOpen")}</span>
                     </>
                   ) : (
                     <>
                       <input type="checkbox" checked disabled className="h-3.5 w-3.5 rounded border border-border-brand text-accent-brand bg-bg-input shrink-0 cursor-not-allowed pointer-events-none" />
-                      <span>Click to Select</span>
+                      <span>{t("common.clickToSelect")}</span>
                     </>
                   )}
                 </button>

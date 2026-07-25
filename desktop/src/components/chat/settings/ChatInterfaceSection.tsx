@@ -134,10 +134,10 @@ export function ChatInterfaceSection() {
           <div className="flex flex-col gap-2 p-2 rounded-lg hover:bg-bg-surface border border-transparent hover:border-border-brand/30 transition-all">
             <div className="flex flex-col gap-0.5">
               <span className="font-semibold text-text-primary">
-                Mid-Generation Submissions
+                {t("chatView.submissionModeTitle")}
               </span>
               <span className="text-xs text-text-secondary leading-relaxed">
-                Choose what happens when you send a message while the AI is busy.
+                {t("chatView.submissionModeDesc")}
               </span>
             </div>
             <div className="grid grid-cols-2 gap-2 mt-1 select-none">
@@ -150,7 +150,7 @@ export function ChatInterfaceSection() {
                     : "bg-bg-input border-border-brand/60 text-text-secondary hover:border-border-brand hover:text-text-primary"
                 }`}
               >
-                Queue (Send after AI finishes)
+                {t("chatView.submissionModeQueue")}
               </button>
               <button
                 type="button"
@@ -161,7 +161,7 @@ export function ChatInterfaceSection() {
                     : "bg-bg-input border-border-brand/60 text-text-secondary hover:border-border-brand hover:text-text-primary"
                 }`}
               >
-                Steer (Interrupt & send)
+                {t("chatView.submissionModeInterrupt")}
               </button>
             </div>
           </div>

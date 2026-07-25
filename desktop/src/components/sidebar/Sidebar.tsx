@@ -209,7 +209,7 @@ export function Sidebar({
                 onClick={onOpenHelp}
                 onMouseDown={(e) => e.preventDefault()}
                 className="p-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-surface transition-colors flex items-center justify-center cursor-pointer"
-                title="Feature Guide"
+                title={t("sidebar.featureGuideTooltip")}
               >
                 <HelpCircle className="h-4.5 w-4.5" />
               </button>

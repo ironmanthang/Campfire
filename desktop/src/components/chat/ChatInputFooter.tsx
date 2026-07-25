@@ -69,7 +69,7 @@ export function ChatInputFooter() {
                   type="button"
                   onClick={() => handleRemoveAttachment(att.id)}
                   className="absolute -top-1 -right-1 h-4.5 w-4.5 bg-red-500 text-white rounded-full flex items-center justify-center cursor-pointer shadow opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 scale-90"
-                  title="Remove attachment"
+                  title={t("chatView.removeAttachmentTooltip")}
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -141,7 +141,7 @@ export function ChatInputFooter() {
               className={`p-2.5 rounded-xl border border-border-brand bg-bg-surface hover:bg-bg-app/40 text-text-secondary hover:text-text-primary transition-all cursor-pointer flex items-center justify-center shrink-0 ${
                 showChatSettings ? "bg-bg-app/60 text-accent-brand border-accent-brand" : ""
               }`}
-              title="Chat Settings & Tools"
+              title={t("chatView.chatSettingsTooltip")}
             >
               <Settings className="h-4 w-4" />
             </button>

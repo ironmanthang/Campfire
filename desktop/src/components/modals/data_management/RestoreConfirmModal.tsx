@@ -1,5 +1,6 @@
 import { AlertTriangle } from "lucide-react";
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 
 interface RestoreConfirmModalProps {
   dateStr: string;
@@ -8,6 +9,7 @@ interface RestoreConfirmModalProps {
 }
 
 export function RestoreConfirmModal({ dateStr, onCancel, onConfirm }: RestoreConfirmModalProps) {
+  const { t } = useTranslation();
   const modalRef = useRef<HTMLDivElement | null>(null);
   const pointerStartedInsideRef = useRef(false);
   const pointerMovedRef = useRef(false);
@@ -51,13 +53,11 @@ export function RestoreConfirmModal({ dateStr, onCancel, onConfirm }: RestoreCon
       <div ref={modalRef} className="bg-bg-surface border border-border-brand rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
         <div className="flex items-center gap-3 text-yellow-500">
           <AlertTriangle className="h-6 w-6 shrink-0" />
-          <h3 className="text-lg font-bold text-text-primary">Restore Backup</h3>
+          <h3 className="text-lg font-bold text-text-primary">{t("restoreConfirmModal.title")}</h3>
         </div>
 
-        <p className="text-sm text-text-secondary leading-relaxed">
-          Are you sure you want to restore the backup from <strong className="text-text-primary">{dateStr}</strong>?
-          <br /><br />
-          This will <strong className="text-red-500">completely replace</strong> all journal entries in your active storage folder with the entries from this backup. Current files not in this backup will be removed.
+        <p className="text-sm text-text-secondary leading-relaxed whitespace-pre-line">
+          {t("restoreConfirmModal.message", { date: dateStr })}
         </p>
 
         <div className="flex justify-end gap-3 pt-2">
@@ -65,13 +65,13 @@ export function RestoreConfirmModal({ dateStr, onCancel, onConfirm }: RestoreCon
             onClick={onCancel}
             className="px-4 py-2 rounded-lg border border-border-brand hover:border-accent-brand text-xs font-semibold text-text-primary hover:bg-bg-surface/50 transition-all cursor-pointer"
           >
-            Cancel
+            {t("restoreConfirmModal.cancel")}
           </button>
           <button
             onClick={onConfirm}
             className="px-4 py-2 rounded-lg bg-accent-brand hover:bg-accent-brand-hover text-xs font-semibold text-bg-app shadow-sm transition-all cursor-pointer"
           >
-            Restore Backup
+            {t("restoreConfirmModal.confirm")}
           </button>
         </div>
       </div>

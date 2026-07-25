@@ -76,7 +76,7 @@ export function SearchResultCard({
                 setSelectedDates(new Set([result.date]));
               }}
               className="h-4 w-4 rounded border-border-brand text-accent-brand focus:ring-accent-brand/30 accent-accent-brand cursor-pointer shrink-0"
-              title="Select entry"
+              title={t("searchView.selectEntry", "Select entry")}
             />
             <button
               onClick={() => {

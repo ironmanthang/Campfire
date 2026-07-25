@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Pin, ChevronDown, Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { OllamaModelInfo } from "../../services/ollama";
 
 interface ModelSelectorProps {
@@ -18,12 +19,15 @@ export function ModelSelector({
   models,
   pinnedModels,
   onTogglePin,
-  placeholder = "Select a model...",
+  placeholder,
   className = ""
 }: ModelSelectorProps) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const effectivePlaceholder = placeholder ?? t("modelSelector.placeholder");
 
   // Click outside to close dropdown
   useEffect(() => {
@@ -52,7 +56,7 @@ export function ModelSelector({
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center justify-between gap-2 bg-bg-input border border-border-brand/60 px-3 py-1.5 rounded-lg text-text-primary text-xs font-semibold focus:outline-none focus:border-accent-brand cursor-pointer transition-all min-w-[200px]"
       >
-        <span className="truncate">{selectedModel || placeholder}</span>
+        <span className="truncate">{selectedModel || effectivePlaceholder}</span>
         <ChevronDown className={`h-3.5 w-3.5 text-text-secondary transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
@@ -64,7 +68,7 @@ export function ModelSelector({
             <Search className="h-3.5 w-3.5 text-text-secondary shrink-0" />
             <input
               type="text"
-              placeholder="Search models..."
+              placeholder={t("modelSelector.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-transparent border-none text-text-primary text-xs focus:outline-none placeholder-text-secondary/60"
@@ -75,14 +79,14 @@ export function ModelSelector({
           {/* Options list */}
           <div className="overflow-y-auto p-1.5 space-y-1 select-none scrollbar-thin max-h-56">
             {pinned.length === 0 && unpinned.length === 0 ? (
-              <div className="text-center py-4 text-xs text-text-secondary italic">No models found</div>
+              <div className="text-center py-4 text-xs text-text-secondary italic">{t("modelSelector.noModelsFound")}</div>
             ) : (
               <>
                 {/* Pinned Models */}
                 {pinned.length > 0 && (
                   <div className="space-y-0.5">
                     <div className="px-2 py-1 text-xs font-bold text-text-secondary uppercase tracking-wider flex items-center gap-1">
-                      <span>📌 Pinned Models</span>
+                      <span>{t("modelSelector.pinnedModels")}</span>
                     </div>
                     {pinned.map((m) => (
                       <div
@@ -110,7 +114,7 @@ export function ModelSelector({
                             onTogglePin(m.name);
                           }}
                           className="p-1.5 rounded-md hover:bg-bg-input text-accent-brand transition-colors shrink-0"
-                          title="Unpin Model"
+                          title={t("modelSelector.unpinTooltip")}
                         >
                           <Pin className="h-3.5 w-3.5 fill-current" />
                         </button>
@@ -123,7 +127,7 @@ export function ModelSelector({
                 {unpinned.length > 0 && (
                   <div className="space-y-0.5 pt-1">
                     <div className="px-2 py-1 text-xs font-bold text-text-secondary uppercase tracking-wider">
-                      {pinned.length > 0 ? "Others" : "All Models"}
+                      {pinned.length > 0 ? t("modelSelector.otherModels") : t("modelSelector.allModels")}
                     </div>
                     {unpinned.map((m) => (
                       <div
@@ -151,7 +155,7 @@ export function ModelSelector({
                             onTogglePin(m.name);
                           }}
                           className="p-1.5 rounded-md hover:bg-bg-input text-text-secondary hover:text-text-primary transition-colors shrink-0"
-                          title="Pin Model"
+                          title={t("modelSelector.pinTooltip")}
                         >
                           <Pin className="h-3.5 w-3.5" />
                         </button>

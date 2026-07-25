@@ -216,10 +216,10 @@ export function TimelineView() {
         cancelLabel={t("timeline.cancel")}
         titleLabel={t("timeline.title")}
         subtitleLabel={t("timeline.subtitle")}
-        clickToOpenTooltip="Clicking card will open the editor"
-        clickToOpenLabel="Click to Open"
-        clickToSelectTooltip="Clicking card will select the entry"
-        clickToSelectLabel="Click to Select"
+        clickToOpenTooltip={t("common.clickToOpenTooltip")}
+        clickToOpenLabel={t("common.clickToOpen")}
+        clickToSelectTooltip={t("common.clickToSelectTooltip")}
+        clickToSelectLabel={t("common.clickToSelect")}
       />
 
       <div className="flex-1 overflow-y-auto" onScroll={handleTimelineScroll}>

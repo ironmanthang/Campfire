@@ -51,7 +51,7 @@ export function LogoModal({ onClose }: LogoModalProps) {
         className="bg-bg-surface border border-border-brand rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-5"
       >
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-bold text-text-primary">Logo Customization</h3>
+          <h3 className="text-lg font-bold text-text-primary">{t("logoModal.title")}</h3>
           <button
             onClick={onClose}
             className="p-1 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-app/40 transition-colors cursor-pointer"
@@ -79,7 +79,7 @@ export function LogoModal({ onClose }: LogoModalProps) {
             </div>
           </div>
           <p className="text-xs text-text-secondary text-center max-w-[250px]">
-            Change the sidebar and in-app logo. Standard formats like PNG, JPG, SVG, and WebP are supported.
+            {t("logoModal.desc")}
           </p>
         </div>
 
@@ -89,7 +89,7 @@ export function LogoModal({ onClose }: LogoModalProps) {
             className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-accent-brand hover:bg-accent-brand/90 text-bg-app font-semibold text-xs transition-all cursor-pointer shadow-sm"
           >
             <Upload className="h-4 w-4" />
-            <span>Upload New Logo</span>
+            <span>{t("logoModal.uploadButton")}</span>
           </button>
 
           {config.custom_logo && (
@@ -98,7 +98,7 @@ export function LogoModal({ onClose }: LogoModalProps) {
               className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-xl border border-border-brand hover:border-red-500 hover:text-red-500 text-text-primary font-semibold text-xs transition-all cursor-pointer bg-bg-app/20"
             >
               <RotateCcw className="h-4 w-4" />
-              <span>Reset to Default Logo</span>
+              <span>{t("logoModal.resetButton")}</span>
             </button>
           )}
 
@@ -106,7 +106,7 @@ export function LogoModal({ onClose }: LogoModalProps) {
             onClick={onClose}
             className="w-full py-2 px-4 rounded-xl border border-border-brand hover:bg-bg-app/20 text-text-secondary font-semibold text-xs transition-all cursor-pointer"
           >
-            Close
+            {t("logoModal.close")}
           </button>
         </div>
       </div>

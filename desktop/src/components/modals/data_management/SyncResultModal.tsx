@@ -1,5 +1,6 @@
 import { X, CheckCircle, BookOpen } from "lucide-react";
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { formatToDDMMYY } from "../../../lib/dateUtils";
 import { useAppStore } from "../../../store/useAppStore";
 
@@ -9,6 +10,7 @@ interface SyncResultModalProps {
 }
 
 export function SyncResultModal({ updatedDates, onClose }: SyncResultModalProps) {
+  const { t } = useTranslation();
   const { setCurrentDate, navigateToView } = useAppStore();
   const modalRef = useRef<HTMLDivElement | null>(null);
   const pointerStartedInsideRef = useRef(false);
@@ -55,7 +57,7 @@ export function SyncResultModal({ updatedDates, onClose }: SyncResultModalProps)
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 text-accent-brand">
             <CheckCircle className="h-6 w-6 shrink-0" />
-            <h3 className="text-lg font-bold text-text-primary">Sync Completed</h3>
+            <h3 className="text-lg font-bold text-text-primary">{t("syncResultModal.title")}</h3>
           </div>
           <button 
             onClick={onClose} 
@@ -67,7 +69,7 @@ export function SyncResultModal({ updatedDates, onClose }: SyncResultModalProps)
 
         <div className="space-y-2">
           <p className="text-xs text-text-secondary leading-relaxed">
-            The following files were updated/downloaded on this device:
+            {t("syncResultModal.subtitle")}
           </p>
           <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1">
             {updatedDates.map((date) => (
@@ -83,7 +85,7 @@ export function SyncResultModal({ updatedDates, onClose }: SyncResultModalProps)
                     onClose();
                   }}
                   className="p-1 rounded-md hover:bg-bg-surface border border-transparent hover:border-border-brand/40 text-text-secondary hover:text-accent-brand transition-all duration-150 cursor-pointer shrink-0"
-                  title="Open entry"
+                  title={t("syncResultModal.openEntryTooltip")}
                 >
                   <BookOpen className="h-4 w-4" />
                 </button>
@@ -97,7 +99,7 @@ export function SyncResultModal({ updatedDates, onClose }: SyncResultModalProps)
             onClick={onClose}
             className="px-4 py-2 rounded-lg bg-accent-brand hover:bg-accent-brand-hover text-xs font-semibold text-bg-app shadow-sm transition-all cursor-pointer"
           >
-            Close
+            {t("syncResultModal.close")}
           </button>
         </div>
       </div>

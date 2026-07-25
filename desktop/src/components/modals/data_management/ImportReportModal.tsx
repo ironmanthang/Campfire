@@ -149,7 +149,7 @@ export function ImportReportModal({ report, onClose }: ImportReportModalProps) {
             onClick={onClose}
             className="px-4 py-2 rounded-lg bg-accent-brand hover:bg-accent-brand-hover text-xs font-semibold text-bg-app shadow-sm transition-all cursor-pointer"
           >
-            Close
+            {t("notification.close")}
           </button>
         </div>
       </div>

@@ -81,7 +81,7 @@ export function ChatSettingsModal({ onClose }: ChatSettingsModalProps) {
                 {t("chatView.settingsTitle", "Chat Settings & Customization")}
               </h3>
               <p className="text-xs text-text-secondary">
-                Configure interface behavior, visual thinking details, and active tools.
+                {t("chatView.settingsSubtitle")}
               </p>
             </div>
           </div>

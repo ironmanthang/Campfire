@@ -112,7 +112,7 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
           onMouseDown={startResize}
           onDoubleClick={resetModalWidth}
           className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-accent-brand/5 z-30 group flex items-center justify-center select-none"
-          title="Drag to resize · double-click to reset"
+          title={t("common.dragToResize")}
         >
           <div className="w-[2px] h-12 bg-border-brand/20 group-hover:bg-accent-brand/80 rounded transition-colors duration-150" />
         </div>

@@ -112,9 +112,9 @@ export function JournalEditorHeader({
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border-brand hover:border-accent-brand bg-bg-surface/30 text-text-secondary hover:text-text-primary transition-colors disabled:opacity-85 text-xs font-semibold cursor-pointer active:scale-95"
             title={
               !isDriveConnected
-                ? "Drive not connected"
+                ? t("journalEditor.driveNotConnected")
                 : syncProgress.status === "idle"
-                ? "Drive Connected (Click to sync now)"
+                ? t("journalEditor.driveClickToSync")
                 : syncProgress.message
             }
           >
@@ -129,14 +129,14 @@ export function JournalEditorHeader({
             )}
             <span className="hidden sm:inline">
               {!isDriveConnected
-                ? "Offline"
+                ? t("journalEditor.statusOffline")
                 : syncProgress.status === "syncing"
-                ? "Syncing"
+                ? t("journalEditor.statusSyncing")
                 : syncProgress.status === "connecting"
-                ? "Connecting"
+                ? t("journalEditor.statusConnecting")
                 : syncProgress.status === "error"
-                ? "Error"
-                : "Synced"}
+                ? t("journalEditor.statusError")
+                : t("journalEditor.statusSynced")}
             </span>
           </button>
         )}

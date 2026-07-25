@@ -116,12 +116,12 @@ export function ChatMessageList({ visible }: ChatMessageListProps) {
                   <div className="flex items-center justify-between gap-6 text-xs font-semibold text-text-secondary mb-2.5 select-none">
                     <div className="flex items-center gap-2">
                       <Loader2 className="h-3.5 w-3.5 animate-spin text-accent-brand shrink-0" />
-                      <span>Queued Message</span>
+                      <span>{t("chatView.queuedMessage", "Queued Message")}</span>
                     </div>
                     <button
                       onClick={() => cancelQueuedMessage(qIdx)}
                       className="p-1 rounded-lg border border-border-brand/60 bg-bg-surface hover:bg-red-500 hover:text-white text-text-secondary hover:border-red-500 transition-all cursor-pointer shadow-sm flex items-center justify-center shrink-0"
-                      title="Cancel Queued Message"
+                      title={t("chatView.cancelQueuedMessage", "Cancel Queued Message")}
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>

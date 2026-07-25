@@ -49,7 +49,7 @@ export function ChatMessageBubble({
             >
               <Wrench className="h-3.5 w-3.5 text-accent-brand shrink-0" />
               <span>
-                Tool Called:{" "}
+                {t("chatView.toolCalled")}
                 <code className="text-accent-brand font-bold bg-bg-app/60 px-1.5 py-0.5 rounded">
                   {msg.name || "Telemetry"}
                 </code>
@@ -59,7 +59,7 @@ export function ChatMessageBubble({
               {toolCall && (
                 <div>
                   <div className="text-xs text-text-secondary/60 font-bold uppercase tracking-wider mb-1">
-                    Input Arguments:
+                    {t("chatView.inputArguments")}
                   </div>
                   <pre className="text-sm text-accent-brand bg-bg-app/60 rounded-lg p-2.5 border border-border-brand/30 overflow-x-auto whitespace-pre-wrap break-all leading-relaxed">
                     {JSON.stringify(toolCall.function.arguments, null, 2)}
@@ -68,7 +68,7 @@ export function ChatMessageBubble({
               )}
               <div>
                 <div className="text-xs text-text-secondary/60 font-bold uppercase tracking-wider mb-1">
-                  Output Response:
+                  {t("chatView.outputResponse")}
                 </div>
                 <div className="text-sm text-text-primary bg-bg-app/40 rounded-lg p-2.5 whitespace-pre-wrap leading-relaxed border border-border-brand/40 overflow-x-auto">
                   {msg.content}
@@ -80,7 +80,7 @@ export function ChatMessageBubble({
                       >
                         <img
                           src={`data:image/jpeg;base64,${imgBase64}`}
-                          alt="Image response"
+                          alt={t("chatView.imageResponseAlt")}
                           className="w-full h-auto object-contain max-h-60"
                         />
                       </div>
@@ -123,7 +123,7 @@ export function ChatMessageBubble({
               <button
                 onClick={() => handleInitiateEditMessage(index)}
                 className="absolute top-0 right-0 p-1.5 rounded-md bg-black/10 text-bg-app hover:bg-black/20 opacity-0 group-hover/bubble:opacity-100 transition-opacity cursor-pointer duration-150 shadow-sm"
-                title="Edit Message"
+                title={t("chatView.editMessageTooltip")}
               >
                 <Pencil className="h-3 w-3" />
               </button>
@@ -154,7 +154,7 @@ export function ChatMessageBubble({
 
             {msg.tool_calls && msg.tool_calls.length > 0 && (
               <div className="mb-3 flex flex-wrap gap-1.5 items-center">
-                <span className="text-xs text-text-secondary font-mono">Invoking tools:</span>
+                <span className="text-xs text-text-secondary font-mono">{t("chatView.invokingTools")}</span>
                 {msg.tool_calls.map((tc, tcIdx) => (
                   <span
                     key={tcIdx}
@@ -175,11 +175,11 @@ export function ChatMessageBubble({
                 <span>
                   {(() => {
                     const statusText = activeToolName === "get_system_resources"
-                      ? "Checking system hardware..."
+                      ? t("chatView.statusCheckingHardware")
                       : activeToolName === "read_journal_entries"
-                      ? "Reading historical journals..."
+                      ? t("chatView.statusReadingHistory")
                       : activeToolName === "navigate_to_journal_date"
-                      ? "Navigating to date in Editor..."
+                      ? t("chatView.statusNavigatingDate")
                       : activeToolName === "web_search"
                       ? t("chatView.searchingWebStatus")
                       : t("chatView.waitingResponse");

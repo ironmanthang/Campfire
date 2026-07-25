@@ -143,7 +143,7 @@ export function DatePicker({ value, onChange, className = "" }: DatePickerProps)
                 type="button"
                 onClick={goPrevMonth}
                 className="p-1 rounded hover:bg-bg-app text-text-secondary hover:text-text-primary"
-                title="Previous month"
+                title={t("datePicker.prevMonth", "Previous month")}
               >
                 <ChevronUp className="h-4 w-4" />
               </button>
@@ -151,7 +151,7 @@ export function DatePicker({ value, onChange, className = "" }: DatePickerProps)
                 type="button"
                 onClick={goNextMonth}
                 className="p-1 rounded hover:bg-bg-app text-text-secondary hover:text-text-primary"
-                title="Next month"
+                title={t("datePicker.nextMonth", "Next month")}
               >
                 <ChevronDown className="h-4 w-4" />
               </button>

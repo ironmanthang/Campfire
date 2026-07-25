@@ -244,9 +244,9 @@ export function ChatToolsSection() {
                         onChange={(e) => updateConfigField("web_search_provider", e.target.value as any)}
                         className="w-full bg-bg-input border border-border-brand/60 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-accent-brand/50 focus:border-accent-brand text-text-primary cursor-pointer font-medium"
                       >
-                        <option value="brave_free">Brave Search (Free, Keyless)</option>
-                        <option value="tavily">Tavily Search (LLM-optimized, Key Required)</option>
-                        <option value="google">Google Custom Search (Key & CX Required)</option>
+                        <option value="brave_free">{t("chatView.providerBrave")}</option>
+                        <option value="tavily">{t("chatView.providerTavily")}</option>
+                        <option value="google">{t("chatView.providerGoogle")}</option>
                       </select>
                     </div>
 

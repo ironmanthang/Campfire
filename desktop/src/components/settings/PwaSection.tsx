@@ -22,7 +22,7 @@ export function PwaSection() {
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error(err);
-      showNotification("Failed to copy link", "error");
+      showNotification(t("settingsView.pwaCopyFailed"), "error");
     }
   };
 

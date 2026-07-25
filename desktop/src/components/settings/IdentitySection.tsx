@@ -59,11 +59,11 @@ export function IdentitySection() {
     setBackingUp(true);
     try {
       await invoke("create_journal_backup", { dirPath: config.journal_dir });
-      showNotification("Backup created successfully!", "success");
+      showNotification(t("settingsView.backupSuccess", "Backup created successfully!"), "success");
       await fetchBackups();
     } catch (err: any) {
       console.error(err);
-      const errMsg = typeof err === 'string' ? err : (err.message || "Failed to create backup");
+      const errMsg = typeof err === 'string' ? err : (err.message || t("settingsView.backupFailed", "Failed to create backup"));
       showNotification(errMsg, "error");
     } finally {
       setBackingUp(false);
@@ -158,7 +158,7 @@ export function IdentitySection() {
       <div className="border-t border-border-brand/40 pt-6 space-y-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
-            <h3 className="text-sm font-semibold text-text-primary">Google Drive Sync</h3>
+            <h3 className="text-sm font-semibold text-text-primary">{t("settingsView.googleDriveTitle", "Google Drive Sync")}</h3>
             {isDriveConnected && userEmail && (
               <span className="text-xs text-text-secondary truncate">
                 ({userEmail})
@@ -168,7 +168,7 @@ export function IdentitySection() {
           <span className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${
             isDriveConnected ? "bg-green-500/10 text-green-500 border border-green-500/20" : "bg-text-secondary/10 text-text-secondary border border-text-secondary/20"
           }`}>
-            {isDriveConnected ? "Connected" : "Disconnected"}
+            {isDriveConnected ? t("settingsView.connected", "Connected") : t("settingsView.disconnected", "Disconnected")}
           </span>
         </div>
 
@@ -180,14 +180,14 @@ export function IdentitySection() {
             }}
             className="w-full py-2.5 bg-accent-brand text-bg-app hover:bg-accent-brand-hover rounded-xl text-xs font-semibold transition-colors text-center cursor-pointer font-medium"
           >
-            Connect Account
+            {t("settingsView.connectAccount", "Connect Account")}
           </button>
         ) : (
           <button
             onClick={disconnectDrive}
             className="w-full py-2.5 bg-red-500/10 hover:bg-red-500/15 border border-red-500/25 text-red-500 rounded-xl text-xs font-semibold transition-colors text-center cursor-pointer font-medium"
           >
-            Disconnect Account
+            {t("settingsView.disconnectAccount", "Disconnect Account")}
           </button>
         )}
 
@@ -195,7 +195,7 @@ export function IdentitySection() {
           <div className="space-y-4 bg-bg-surface/30 p-3.5 border border-border-brand/40 rounded-xl">
             {/* Auto Sync Toggle */}
             <div className="flex items-center justify-between">
-              <label className="block text-xs font-semibold text-text-secondary">Enable Auto-Sync</label>
+              <label className="block text-xs font-semibold text-text-secondary">{t("settingsView.enableAutoSync", "Enable Auto-Sync")}</label>
               <input
                 type="checkbox"
                 checked={config.google_drive_auto_sync}
@@ -212,7 +212,9 @@ export function IdentitySection() {
                   disabled={syncProgress.status === 'syncing' || syncProgress.status === 'connecting'}
                   className="px-4 py-2 bg-accent-brand text-bg-app hover:bg-accent-brand-hover rounded-lg text-xs font-semibold transition-colors disabled:opacity-50 cursor-pointer"
                 >
-                  {syncProgress.status === 'syncing' || syncProgress.status === 'connecting' ? 'Syncing...' : 'Sync Now'}
+                  {syncProgress.status === 'syncing' || syncProgress.status === 'connecting'
+                    ? t("settingsView.syncing", "Syncing...")
+                    : t("settingsView.syncNow", "Sync Now")}
                 </button>
                 <span className="text-xs text-text-secondary">
                   {syncProgress.message}
@@ -236,19 +238,19 @@ export function IdentitySection() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <History size={16} className="text-accent-brand" />
-            <h3 className="text-sm font-semibold text-text-primary">Local Backups</h3>
+            <h3 className="text-sm font-semibold text-text-primary">{t("settingsView.localBackups", "Local Backups")}</h3>
           </div>
           <button
             onClick={handleCreateBackup}
             disabled={backingUp || !config.journal_dir}
             className="px-3.5 py-1.5 bg-accent-brand text-bg-app hover:bg-accent-brand-hover rounded-lg text-xs font-semibold transition-colors disabled:opacity-50"
           >
-            {backingUp ? "Backing up..." : "Backup Now"}
+            {backingUp ? t("settingsView.backingUp", "Backing up...") : t("settingsView.backupNow", "Backup Now")}
           </button>
         </div>
         {backups.length === 0 ? (
           <p className="text-xs text-text-secondary italic bg-bg-surface/20 p-3 rounded-lg border border-border-brand/20">
-            No backups yet.
+            {t("settingsView.noBackupsYet", "No backups yet.")}
           </p>
         ) : (
           <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
@@ -262,7 +264,7 @@ export function IdentitySection() {
                     {new Date(ts * 1000).toLocaleString()}
                   </span>
                   <span className="text-xs text-text-secondary">
-                    Timestamp: {ts}
+                    {t("settingsView.timestampLabel", "Timestamp:")} {ts}
                   </span>
                 </div>
                 <button
@@ -270,7 +272,7 @@ export function IdentitySection() {
                   disabled={restoringBackup !== null}
                   className="px-3 py-1.5 bg-border-brand hover:bg-border-brand/75 text-text-primary rounded-lg font-medium transition-colors disabled:opacity-50"
                 >
-                  {restoringBackup === ts ? "Restoring..." : "Restore"}
+                  {restoringBackup === ts ? t("settingsView.restoring", "Restoring...") : t("settingsView.restore", "Restore")}
                 </button>
               </div>
             ))}

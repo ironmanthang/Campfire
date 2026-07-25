@@ -339,7 +339,7 @@ function App() {
         {loadingConfig ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-3">
             <Loader2 className="h-8 w-8 animate-spin text-accent-brand" />
-            <p className="text-sm text-text-secondary">Loading local memory config...</p>
+            <p className="text-sm text-text-secondary">{t("app.loadingConfig")}</p>
           </div>
         ) : (
           <>
