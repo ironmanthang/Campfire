@@ -29,7 +29,8 @@
     "filterSortLabel": "Sort Order",
     "filterSortNewest": "Newest First",
     "filterSortOldest": "Oldest First",
-    "filterApply": "Apply Filters"
+    "filterApply": "Apply Filters",
+    "clearSearchTooltip": "Clear search"
   },
   "journalEditor": {
     "wordCount": "{{count}} word",
@@ -52,7 +53,9 @@
   },
   "datePicker": {
     "selectDate": "Select Date",
-    "swipeHint": "Swipe left/right to change month"
+    "swipeHint": "Swipe left/right to change month",
+    "clear": "Clear",
+    "today": "Today"
   },
   "settings": {
     "title": "Settings",
@@ -105,7 +108,9 @@
     "desktopFeature2": "Seamless Google Drive cross-device sync",
     "desktopStoreButton": "Get on Microsoft Store",
     "desktopCopyLink": "Copy PC Link",
-    "desktopCopied": "Copied!"
+    "desktopCopied": "Copied!",
+    "googleClientIdMissing": "Google OAuth Client ID is not configured in the environment.",
+    "googleLoginFailed": "Login failed"
   },
   "donate": {
     "modalTitle": "Support Campfire",

@@ -29,7 +29,8 @@
     "filterSortLabel": "Thứ tự",
     "filterSortNewest": "Mới nhất trước",
     "filterSortOldest": "Cũ nhất trước",
-    "filterApply": "Áp dụng bộ lọc"
+    "filterApply": "Áp dụng bộ lọc",
+    "clearSearchTooltip": "Xóa tìm kiếm"
   },
   "journalEditor": {
     "wordCount": "{{count}} từ",
@@ -52,7 +53,9 @@
   },
   "datePicker": {
     "selectDate": "Chọn ngày",
-    "swipeHint": "Vuốt trái/phải để đổi tháng"
+    "swipeHint": "Vuốt trái/phải để đổi tháng",
+    "clear": "Xóa",
+    "today": "Hôm nay"
   },
   "settings": {
     "title": "Cài đặt",
@@ -105,7 +108,9 @@
     "desktopFeature2": "Đồng bộ với nhiều thiết bị qua Google Drive",
     "desktopStoreButton": "Tải trên Microsoft Store",
     "desktopCopyLink": "Sao chép liên kết PC",
-    "desktopCopied": "Đã chép!"
+    "desktopCopied": "Đã chép!",
+    "googleClientIdMissing": "Chưa cấu hình Google OAuth Client ID trong môi trường.",
+    "googleLoginFailed": "Đăng nhập thất bại"
   },
   "donate": {
     "modalTitle": "Ủng hộ Campfire",

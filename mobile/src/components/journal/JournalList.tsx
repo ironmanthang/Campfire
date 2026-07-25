@@ -130,7 +130,7 @@ export const JournalList: React.FC<JournalListProps> = ({
             <button
               onClick={() => setSearchQuery('')}
               className="absolute right-2.5 p-1 rounded-lg hover:bg-bg-surface text-text-secondary hover:text-text-primary transition-all cursor-pointer"
-              title="Clear search"
+              title={t("journalList.clearSearchTooltip")}
             >
               <X size={14} />
             </button>

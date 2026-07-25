@@ -212,14 +212,14 @@ export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, classNa
               }}
               className="text-xs font-semibold text-red-500 hover:text-red-600 transition-colors cursor-pointer"
             >
-              Clear
+              {t("datePicker.clear")}
             </button>
             <button
               type="button"
               onClick={() => handleSelect(today)}
               className="text-xs font-semibold text-accent-brand hover:text-accent-brand-hover transition-colors cursor-pointer"
             >
-              Today
+              {t("datePicker.today")}
             </button>
           </div>
         </div>

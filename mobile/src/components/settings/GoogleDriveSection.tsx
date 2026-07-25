@@ -46,7 +46,7 @@ export const GoogleDriveSection: React.FC = () => {
     setAuthLoading(true);
     try {
       if (!clientId.trim()) {
-        throw new Error('Google OAuth Client ID is not configured in the environment.');
+        throw new Error(t("settings.googleClientIdMissing"));
       }
       await requestDriveAuth(clientId.trim());
       setIsLoggedIn(true);
@@ -56,7 +56,7 @@ export const GoogleDriveSection: React.FC = () => {
         }
       }).catch(console.error);
     } catch (err: any) {
-      setAuthError(err.message || 'Login failed');
+      setAuthError(err.message || t("settings.googleLoginFailed"));
     } finally {
       setAuthLoading(false);
     }
