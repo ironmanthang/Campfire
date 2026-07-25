@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Heart, ExternalLink } from 'lucide-react';
+import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 
 interface DonateModalProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface DonateModalProps {
 export const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => {
   const { t } = useTranslation();
   const [donationTab, setDonationTab] = useState<'vietqr' | 'kofi'>('kofi');
+  const { handleManualClose } = useModalBackHandler(isOpen, onClose);
 
   if (!isOpen) return null;
 
@@ -18,15 +20,21 @@ export const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md bg-bg-surface border border-border-brand rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+    <div
+      onClick={handleManualClose}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 cursor-pointer"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-md bg-bg-surface border border-border-brand rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden cursor-default"
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border-brand bg-bg-app/10">
           <h2 className="text-lg font-bold tracking-tight text-text-primary m-0 flex items-center gap-2">
             <Heart size={18} className="text-red-500 fill-red-500/20" />
             <span>{t("donate.modalTitle")}</span>
           </h2>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-bg-app transition-colors text-text-secondary">
+          <button onClick={handleManualClose} className="p-1.5 rounded-lg hover:bg-bg-app transition-colors text-text-secondary">
             <X size={20} />
           </button>
         </div>

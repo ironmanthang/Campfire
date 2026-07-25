@@ -9,7 +9,7 @@ import { BrandingSection } from './BrandingSection';
 import { GoogleDriveSection } from './GoogleDriveSection';
 import { DesktopSection } from './DesktopSection';
 import { ExportSection } from './ExportSection';
-import { DebugLogsSection } from './DebugLogsSection';
+import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 
 interface SettingsModalProps {
   onClose: () => void;
@@ -27,14 +27,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onLogoChange
 }) => {
   const { t } = useTranslation();
+  const { handleManualClose } = useModalBackHandler(true, onClose);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md bg-bg-surface border border-border-brand rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
+    <div
+      onClick={handleManualClose}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 cursor-pointer"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-md bg-bg-surface border border-border-brand rounded-2xl shadow-2xl flex flex-col max-h-[90vh] cursor-default"
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border-brand">
           <h2 className="text-xl font-bold tracking-tight text-text-primary m-0">{t("settings.title")}</h2>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-bg-app transition-colors text-text-secondary">
+          <button onClick={handleManualClose} className="p-1.5 rounded-lg hover:bg-bg-app transition-colors text-text-secondary">
             <X size={20} />
           </button>
         </div>
@@ -82,9 +89,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* Export data section */}
           <ExportSection />
 
-          {/* Debug logs section */}
-          <DebugLogsSection />
-
           {/* Privacy & Terms Links */}
           <div className="flex justify-center items-center gap-3 pt-6 border-t border-border-brand/40 text-[11px] text-text-secondary">
             <a
@@ -110,3 +114,4 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     </div>
   );
 };
+

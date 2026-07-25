@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ImageCropModal } from '../modals/ImageCropModal';
 
 interface BrandingSectionProps {
   customLogo: string | null;
@@ -8,18 +9,25 @@ interface BrandingSectionProps {
 
 export const BrandingSection: React.FC<BrandingSectionProps> = ({ customLogo, onLogoChange }) => {
   const { t } = useTranslation();
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      const base64String = reader.result as string;
-      localStorage.setItem('past_you_custom_logo', base64String);
-      onLogoChange(base64String);
+      setCropImageSrc(reader.result as string);
     };
     reader.readAsDataURL(file);
+    // Reset target value so selecting the same file again triggers onChange
+    e.target.value = '';
+  };
+
+  const handleCropConfirm = (croppedBase64: string) => {
+    localStorage.setItem('past_you_custom_logo', croppedBase64);
+    onLogoChange(croppedBase64);
+    setCropImageSrc(null);
   };
 
   const handleResetLogo = () => {
@@ -45,7 +53,7 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({ customLogo, on
             <input
               type="file"
               accept="image/*"
-              onChange={handleLogoUpload}
+              onChange={handleFileSelect}
               className="hidden"
             />
           </label>
@@ -59,6 +67,16 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({ customLogo, on
           )}
         </div>
       </div>
+
+      {cropImageSrc && (
+        <ImageCropModal
+          isOpen={!!cropImageSrc}
+          imageSrc={cropImageSrc}
+          onClose={() => setCropImageSrc(null)}
+          onConfirm={handleCropConfirm}
+        />
+      )}
     </div>
   );
 };
+

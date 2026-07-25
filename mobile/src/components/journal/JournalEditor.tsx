@@ -33,8 +33,7 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
   // Undo / Redo history state
   const [past, setPast] = useState<string[]>([]);
   const [future, setFuture] = useState<string[]>([]);
-  const lastCommittedRef = useRef<string>(content);
-  const isImmediateRef = useRef<boolean>(false);
+  const lastSavedRef = useRef<string>(content);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Reset scroll position and clear history buffers when switching to a different entry date
@@ -44,12 +43,19 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
     }
     setPast([]);
     setFuture([]);
-    lastCommittedRef.current = content;
+    lastSavedRef.current = content;
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
   }, [date]);
+
+  // Sync baseline snapshot when content loads asynchronously and history is empty
+  useEffect(() => {
+    if (past.length === 0 && future.length === 0 && !timerRef.current) {
+      lastSavedRef.current = content;
+    }
+  }, [content]);
 
   // Clean up timer on unmount (e.g. going back to home screen)
   useEffect(() => {
@@ -92,79 +98,55 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
     onDateChange(`${y}-${m}-${day}`);
   };
 
-  // Helper to commit a text snapshot into past stack
-  const pushSnapshot = (textToPush: string) => {
-    setPast((prevPast) => {
-      if (prevPast.length > 0 && prevPast[prevPast.length - 1] === textToPush) {
-        return prevPast;
-      }
-      const updated = [...prevPast, textToPush];
-      return updated.slice(-MAX_HISTORY);
-    });
-    setFuture([]);
-    lastCommittedRef.current = textToPush;
-  };
-
-  // Handle content edits with smart 2s inactivity & immediate triggers (space, enter, paste, cut, bulk delete)
+  // Debounced snapshot recorder for typing pauses (700ms)
   const handleContentChange = (newVal: string) => {
-    const currentCommitted = lastCommittedRef.current;
-    const currentVal = content;
-    const isImmediate = isImmediateRef.current;
-    isImmediateRef.current = false;
-
     onChange(newVal);
 
     if (timerRef.current) {
       clearTimeout(timerRef.current);
+    }
+
+    timerRef.current = setTimeout(() => {
       timerRef.current = null;
-    }
-
-    const isBulkDelete = Math.abs(newVal.length - currentVal.length) > 3;
-
-    if (isImmediate || isBulkDelete) {
-      // Flush uncommitted typing state prior to this action
-      if (currentCommitted !== currentVal) {
-        pushSnapshot(currentVal);
+      if (newVal !== lastSavedRef.current) {
+        setPast((prevPast) => {
+          if (prevPast.length > 0 && prevPast[prevPast.length - 1] === lastSavedRef.current) {
+            return prevPast;
+          }
+          return [...prevPast, lastSavedRef.current].slice(-MAX_HISTORY);
+        });
+        setFuture([]);
+        lastSavedRef.current = newVal;
       }
-      pushSnapshot(newVal);
-    } else {
-      // Debounce 2 seconds of inactivity
-      timerRef.current = setTimeout(() => {
-        pushSnapshot(newVal);
-      }, 2000);
-    }
+    }, 700);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === ' ' || e.key === 'Enter') {
-      isImmediateRef.current = true;
-    }
-  };
-
-  const handlePaste = () => {
-    isImmediateRef.current = true;
-  };
-
-  const handleCut = () => {
-    isImmediateRef.current = true;
-  };
+  const canUndo = past.length > 0 || (content !== lastSavedRef.current);
+  const canRedo = future.length > 0;
 
   const handleUndo = () => {
-    if (past.length === 0) return;
+    if (!canUndo) return;
+
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
 
-    const currentVal = content;
-    const lastPast = past[past.length - 1];
-    const newPast = past.slice(0, -1);
-
-    setPast(newPast);
-    setFuture((prevFuture) => [currentVal, ...prevFuture].slice(0, MAX_HISTORY));
-    lastCommittedRef.current = lastPast;
-
-    onChange(lastPast);
+    if (content !== lastSavedRef.current) {
+      // Undo active uncommitted typing back to baseline
+      const activeContent = content;
+      const targetState = lastSavedRef.current;
+      setFuture((prevFuture) => [activeContent, ...prevFuture].slice(0, MAX_HISTORY));
+      onChange(targetState);
+    } else if (past.length > 0) {
+      // Pop previous snapshot from history
+      const activeContent = content;
+      const previousState = past[past.length - 1];
+      setPast((prevPast) => prevPast.slice(0, -1));
+      setFuture((prevFuture) => [activeContent, ...prevFuture].slice(0, MAX_HISTORY));
+      lastSavedRef.current = previousState;
+      onChange(previousState);
+    }
 
     if (textareaRef.current) {
       textareaRef.current.focus();
@@ -172,21 +154,21 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
   };
 
   const handleRedo = () => {
-    if (future.length === 0) return;
+    if (!canRedo) return;
+
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
 
-    const nextVal = future[0];
+    const nextState = future[0];
     const newFuture = future.slice(1);
-    const currentVal = content;
+    const activeContent = content;
 
-    setPast((prevPast) => [...prevPast, currentVal].slice(-MAX_HISTORY));
+    setPast((prevPast) => [...prevPast, activeContent].slice(-MAX_HISTORY));
     setFuture(newFuture);
-    lastCommittedRef.current = nextVal;
-
-    onChange(nextVal);
+    lastSavedRef.current = nextState;
+    onChange(nextState);
 
     if (textareaRef.current) {
       textareaRef.current.focus();
@@ -200,7 +182,7 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
         {/* Undo button */}
         <button
           onClick={handleUndo}
-          disabled={isPreview || isLoading || past.length === 0}
+          disabled={isPreview || isLoading || !canUndo}
           className="p-2 px-3 rounded-xl border border-border-brand/40 hover:border-accent-brand/50 hover:bg-bg-app hover:text-text-primary transition-all active:scale-95 disabled:opacity-25 disabled:pointer-events-none flex items-center gap-1 cursor-pointer"
           title={t("journalEditor.undoTooltip")}
           aria-label={t("journalEditor.undoTooltip")}
@@ -216,7 +198,7 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
         {/* Redo button */}
         <button
           onClick={handleRedo}
-          disabled={isPreview || isLoading || future.length === 0}
+          disabled={isPreview || isLoading || !canRedo}
           className="p-2 px-3 rounded-xl border border-border-brand/40 hover:border-accent-brand/50 hover:bg-bg-app hover:text-text-primary transition-all active:scale-95 disabled:opacity-25 disabled:pointer-events-none flex items-center gap-1 cursor-pointer"
           title={t("journalEditor.redoTooltip")}
           aria-label={t("journalEditor.redoTooltip")}
@@ -285,9 +267,6 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
               ref={textareaRef}
               value={content}
               onChange={(e) => handleContentChange(e.target.value)}
-              onKeyDown={handleKeyDown}
-              onPaste={handlePaste}
-              onCut={handleCut}
               placeholder={isLoading ? "" : t("journalEditor.placeholder", { date: formatDate(date) })}
               disabled={isLoading}
               style={{ fontSize: 'var(--editor-font-size)' }}
