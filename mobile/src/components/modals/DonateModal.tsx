@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Heart, ExternalLink } from 'lucide-react';
+import { X, Heart, ExternalLink, Download, Check } from 'lucide-react';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 
 interface DonateModalProps {
@@ -11,12 +11,56 @@ interface DonateModalProps {
 export const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => {
   const { t } = useTranslation();
   const [donationTab, setDonationTab] = useState<'vietqr' | 'kofi'>('kofi');
+  const [customMessage, setCustomMessage] = useState('');
+  const [copiedToast, setCopiedToast] = useState(false);
   const { handleManualClose } = useModalBackHandler(isOpen, onClose);
 
   if (!isOpen) return null;
 
-  const handleKofiClick = () => {
+  // Clean Vietnamese accents & special characters for bank transfer content
+  const getCleanTransferMessage = (msg: string) => {
+    return msg
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'D')
+      .replace(/[^a-zA-Z0-9 ]/g, '')
+      .trim()
+      .substring(0, 25);
+  };
+
+  const cleanMsg = getCleanTransferMessage(customMessage);
+  const addInfoText = cleanMsg ? `Donate Campfire ${cleanMsg}` : 'Donate Campfire';
+  const vietQrUrl = `https://img.vietqr.io/image/vietcombank-9949420500-compact.png?addInfo=${encodeURIComponent(addInfoText)}&accountName=NGUYEN%20NHU%20THANG`;
+
+  const handleKofiClick = async () => {
+    if (customMessage.trim()) {
+      try {
+        await navigator.clipboard.writeText(`Campfire: ${customMessage.trim()}`);
+        setCopiedToast(true);
+        setTimeout(() => setCopiedToast(false), 2500);
+      } catch (e) {
+        console.error('Clipboard copy failed:', e);
+      }
+    }
     window.open('https://ko-fi.com/thang504', '_blank');
+  };
+
+  const handleDownloadQr = async () => {
+    try {
+      const response = await fetch(vietQrUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `VietQR-Campfire-${addInfoText.replace(/\s+/g, '-')}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('Failed to download QR:', e);
+    }
   };
 
   return (
@@ -40,10 +84,25 @@ export const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => 
         </div>
 
         {/* Body */}
-        <div className="p-5 flex-1 overflow-y-auto space-y-6">
+        <div className="p-5 flex-1 overflow-y-auto space-y-5">
           <p className="text-xs text-text-secondary leading-relaxed">
             {t("donate.modalBody")}
           </p>
+
+          {/* Shared Custom Message Input */}
+          <div className="space-y-1.5 bg-bg-app/30 border border-border-brand/30 rounded-xl p-3">
+            <label className="block text-[11px] font-bold text-text-secondary uppercase tracking-wider">
+              {t("donate.supportMessageLabel")}
+            </label>
+            <input
+              type="text"
+              maxLength={40}
+              value={customMessage}
+              onChange={(e) => setCustomMessage(e.target.value)}
+              placeholder={t("donate.supportMessagePlaceholder")}
+              className="w-full px-3 py-2 rounded-lg border border-border-brand/40 bg-bg-surface text-text-primary text-xs font-medium placeholder:text-text-secondary/40 focus:border-accent-brand focus:ring-1 focus:ring-accent-brand/35 outline-none transition-all"
+            />
+          </div>
 
           {/* Donation Tabs Switcher */}
           <div className="border border-border-brand/40 bg-bg-app/20 rounded-2xl p-4 space-y-4">
@@ -75,29 +134,48 @@ export const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => 
                 <p className="text-xs text-text-secondary text-left leading-relaxed">
                   {t("donate.vietQrBody")}
                 </p>
-                <div className="inline-block p-2 bg-white rounded-xl border border-border-brand/20">
+                <div className="inline-block p-2 bg-white rounded-xl border border-border-brand/20 relative group">
                   <img
-                    src="https://img.vietqr.io/image/vietcombank-9949420500-compact.png?addInfo=Donate%20Campfire&accountName=NGUYEN%20NHU%20THANG"
+                    src={vietQrUrl}
                     alt={t("donate.vietQrImageAlt")}
                     className="w-48 h-48 mx-auto object-contain rounded"
                   />
                 </div>
+                
+                {/* Download QR Button */}
+                <div className="flex justify-center">
+                  <button
+                    onClick={handleDownloadQr}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-app border border-border-brand hover:border-accent-brand text-xs font-semibold text-text-secondary hover:text-text-primary transition-all active:scale-95"
+                  >
+                    <Download size={14} />
+                    <span>Download QR</span>
+                  </button>
+                </div>
+
                 <div className="text-[10px] text-left text-text-secondary space-y-1 bg-bg-app/40 p-3 rounded-lg border border-border-brand/10 font-mono">
                   <div><strong>{t("donate.vietQrBank")}:</strong> Vietcombank</div>
                   <div><strong>{t("donate.vietQrAccount")}:</strong> 9949420500</div>
                   <div><strong>{t("donate.vietQrOwner")}:</strong> NGUYEN NHU THANG</div>
-                  <div><strong>{t("donate.vietQrContent")}:</strong> Donate Campfire</div>
+                  <div><strong>{t("donate.vietQrContent")}:</strong> {addInfoText}</div>
                 </div>
-
               </div>
             ) : (
               <div className="space-y-4">
                 <p className="text-xs text-text-secondary leading-relaxed">
                   {t("donate.kofiBody")}
                 </p>
+
+                {copiedToast && (
+                  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-accent-brand/15 border border-accent-brand/30 text-accent-brand text-xs font-medium animate-fade-in">
+                    <Check size={14} />
+                    <span>{t("donate.kofiCopiedToast")}</span>
+                  </div>
+                )}
+
                 <button
                   onClick={handleKofiClick}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-accent-brand hover:bg-accent-brand/90 text-bg-app font-bold text-sm shadow-md transition-all active:scale-95"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-accent-brand hover:bg-accent-brand/90 text-bg-app font-bold text-sm shadow-md transition-all active:scale-95 cursor-pointer"
                 >
                   <span>{t("donate.kofiButton")}</span>
                   <ExternalLink size={16} />

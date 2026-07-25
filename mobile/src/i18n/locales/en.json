@@ -128,7 +128,10 @@
     "kofiBody": "For international supporters. Payments are processed securely via Ko-fi & PayPal, supporting Apple Pay, Google Pay, cards, and PayPal.",
     "kofiButton": "Support my poor soul on Ko-fi 🥀",
     "kofiSupports": "Supports",
-    "kofiSupportsList": "Apple Pay, Google Pay, Visa, Mastercard, PayPal"
+    "kofiSupportsList": "Apple Pay, Google Pay, Visa, Mastercard, PayPal",
+    "supportMessageLabel": "Attach a message (optional)",
+    "supportMessagePlaceholder": "e.g. Love the app!",
+    "kofiCopiedToast": "Message copied! You can paste it on Ko-fi."
   },
   "donateBanner": {
     "count": "You've written 10 journal entries in Campfire! If this app brings value to your day, consider supporting its development.",

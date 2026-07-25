@@ -2,10 +2,18 @@ import { useTranslation } from "react-i18next";
 import { Heart, ExternalLink } from "lucide-react";
 
 interface KofiPanelProps {
+  customMessage: string;
+  setCustomMessage: (val: string) => void;
   onDonateClick: () => void;
+  characterLimit: number;
 }
 
-export function KofiPanel({ onDonateClick }: KofiPanelProps) {
+export function KofiPanel({
+  customMessage,
+  setCustomMessage,
+  onDonateClick,
+  characterLimit,
+}: KofiPanelProps) {
   const { t } = useTranslation();
 
   return (
@@ -21,10 +29,28 @@ export function KofiPanel({ onDonateClick }: KofiPanelProps) {
         {t("aboutModal.supportDesc")}
       </p>
 
-      {/* Ko-fi hosts its own message field on the donation page */}
-      <p className="text-xs text-text-secondary/70 leading-relaxed border-t border-border-brand/20 pt-3">
-        {t("aboutModal.supportNotifyTipKofi")}
-      </p>
+      {/* Custom Support Message */}
+      <div className="space-y-2 border-t border-border-brand/20 pt-4">
+        <label className="block text-xs font-bold text-text-secondary uppercase tracking-wider">
+          {t("aboutModal.supportMessageLabel")}
+        </label>
+        <input
+          type="text"
+          maxLength={characterLimit}
+          value={customMessage}
+          onChange={(e) => setCustomMessage(e.target.value)}
+          placeholder={t("aboutModal.supportMessagePlaceholder")}
+          className="w-full px-3 py-2 rounded-xl border border-border-brand/40 bg-bg-input text-text-primary text-xs font-semibold placeholder:text-text-secondary/40 focus:border-accent-brand focus:ring-1 focus:ring-accent-brand/35 outline-none transition-colors"
+        />
+        <div className="flex justify-between items-start text-xs text-text-secondary/60 leading-normal gap-4">
+          <span>
+            {t("aboutModal.supportNotifyTipKofi")}
+          </span>
+          <span className="shrink-0 font-mono text-xs bg-bg-app/30 border border-border-brand/20 px-1.5 py-0.5 rounded">
+            {customMessage.length}/{characterLimit}
+          </span>
+        </div>
+      </div>
 
       <div className="pt-2">
         <button

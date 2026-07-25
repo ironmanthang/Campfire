@@ -1,12 +1,13 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Settings, RefreshCw, AlertTriangle, Cloud, CloudOff, Heart } from 'lucide-react';
+import { Settings, RefreshCw, AlertTriangle, Cloud, CloudOff, Sun, Moon } from 'lucide-react';
 import { type SyncProgress } from '../../services/sync';
 
 interface HeaderProps {
   onSettingsOpen: () => void;
   onSync: () => void;
-  onDonateOpen: () => void;
+  onThemeToggle: () => void;
+  theme: 'light' | 'dark';
   syncProgress: SyncProgress;
   isLoggedIn: boolean;
   customLogo: string | null;
@@ -15,7 +16,8 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   onSettingsOpen,
   onSync,
-  onDonateOpen,
+  onThemeToggle,
+  theme,
   syncProgress,
   isLoggedIn,
   customLogo
@@ -76,13 +78,13 @@ export const Header: React.FC<HeaderProps> = ({
           </span>
         </button>
 
-        {/* Donation Heart */}
+        {/* Theme Toggle */}
         <button
-          onClick={onDonateOpen}
-          className="p-2 rounded-xl bg-bg-app border border-border-brand hover:border-accent-brand text-red-500 hover:text-red-600 transition-all active:scale-95 animate-pulse"
-          title={t("header.donateTooltip")}
+          onClick={onThemeToggle}
+          className="p-2 rounded-xl bg-bg-app border border-border-brand hover:border-accent-brand text-text-secondary hover:text-text-primary transition-all active:scale-95 flex items-center justify-center"
+          title={theme === 'dark' ? t("common.themeLight", "Switch to Light Mode") : t("common.themeDark", "Switch to Dark Mode")}
         >
-          <Heart size={18} className="fill-red-500/10" />
+          {theme === 'dark' ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} className="text-indigo-400" />}
         </button>
 
         {/* Settings Trigger */}

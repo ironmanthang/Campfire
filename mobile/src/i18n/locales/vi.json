@@ -126,9 +126,12 @@
     "vietQrOwner": "Chủ tài khoản",
     "vietQrContent": "Nội dung",
     "kofiBody": "Dành cho người ủng hộ quốc tế. Thanh toán được xử lý an toàn qua Ko-fi & PayPal, hỗ trợ Apple Pay, Google Pay, thẻ tín dụng và PayPal.",
-    "kofiButton": "Ủng hộ linh hồn nghèo khổ của mình trên Ko-fi 🥀:",
+    "kofiButton": "Ủng hộ mình trên Ko-fi 🥀",
     "kofiSupports": "Hỗ trợ",
-    "kofiSupportsList": "Apple Pay, Google Pay, Visa, Mastercard, PayPal"
+    "kofiSupportsList": "Apple Pay, Google Pay, Visa, Mastercard, PayPal",
+    "supportMessageLabel": "Lời nhắn kèm theo (tùy chọn)",
+    "supportMessagePlaceholder": "Ví dụ: Thích app lắm!",
+    "kofiCopiedToast": "Đã chép lời nhắn! Bạn có thể dán vào Ko-fi."
   },
   "donateBanner": {
     "count": "Bạn đã viết 10 mục nhật ký trong Campfire! Nếu ứng dụng mang lại giá trị cho ngày của bạn, hãy cân nhắc ủng hộ quá trình phát triển.",

@@ -129,7 +129,8 @@ function App() {
       <Header 
         onSettingsOpen={() => setIsSettingsOpen(true)}
         onSync={handleSync}
-        onDonateOpen={() => setIsDonateOpen(true)}
+        onThemeToggle={toggleTheme}
+        theme={theme}
         syncProgress={syncProgress}
         isLoggedIn={isLoggedIn}
         customLogo={customLogo}
@@ -233,6 +234,7 @@ function App() {
           entries={entries}
           onSelectEntry={handleSelectEntry}
           onCreateToday={handleCreateToday}
+          onDonateOpen={() => setIsDonateOpen(true)}
         />
       )}
 

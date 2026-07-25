@@ -69,6 +69,13 @@ export function SupportModal({ isOpen, onClose }: SupportModalProps) {
   if (!isOpen) return null;
 
   const handleKofiClick = async () => {
+    if (customMessage.trim()) {
+      try {
+        await navigator.clipboard.writeText(`Campfire: ${customMessage.trim()}`);
+      } catch (err) {
+        console.error("Failed to copy message to clipboard:", err);
+      }
+    }
     try {
       await openUrl("https://ko-fi.com/thang504");
     } catch (err) {

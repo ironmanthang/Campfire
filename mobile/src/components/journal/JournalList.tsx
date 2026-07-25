@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type LocalJournalEntry } from '../../services/db';
-import { Plus, Search, FileText, SlidersHorizontal, X } from 'lucide-react';
+import { Plus, Search, FileText, SlidersHorizontal, X, Heart } from 'lucide-react';
 import { JournalListItem } from './JournalListItem';
 import { FilterModal, type DateRangeFilter, type SortOrderFilter } from './FilterModal';
 
@@ -9,12 +9,14 @@ interface JournalListProps {
   entries: LocalJournalEntry[];
   onSelectEntry: (date: string) => void;
   onCreateToday: () => void;
+  onDonateOpen: () => void;
 }
 
 export const JournalList: React.FC<JournalListProps> = ({
   entries,
   onSelectEntry,
-  onCreateToday
+  onCreateToday,
+  onDonateOpen
 }) => {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState(() => {
@@ -168,10 +170,19 @@ export const JournalList: React.FC<JournalListProps> = ({
         )}
       </div>
 
-      {/* Floating Action Button */}
+      {/* Floating Donate Button (Bottom Left) */}
+      <button 
+        onClick={onDonateOpen}
+        className="absolute bottom-8 left-8 w-14 h-14 rounded-full bg-bg-surface border border-border-brand text-red-500 shadow-lg shadow-red-500/15 hover:bg-bg-surface/90 hover:scale-105 flex items-center justify-center transition-all duration-200 active:scale-95"
+        title={t("header.donateTooltip")}
+      >
+        <Heart size={26} className="fill-red-500 text-red-500" />
+      </button>
+
+      {/* Floating Action Button (Bottom Right) */}
       <button 
         onClick={onCreateToday}
-        className="absolute bottom-6 right-6 w-14 h-14 rounded-full bg-accent-brand text-bg-app shadow-lg shadow-accent-brand/35 hover:bg-accent-brand-hover hover:scale-105 flex items-center justify-center transition-all duration-200 active:scale-95"
+        className="absolute bottom-8 right-8 w-14 h-14 rounded-full bg-accent-brand text-bg-app shadow-lg shadow-accent-brand/35 hover:bg-accent-brand-hover hover:scale-105 flex items-center justify-center transition-all duration-200 active:scale-95"
       >
         <Plus size={26} />
       </button>
