@@ -19,6 +19,7 @@ import { LANGUAGE_STORAGE_KEY } from '../i18n';
 import i18n from '../i18n';
 import { APP_VERSION } from '../lib/appVersion';
 import { useFontSize, type FontSizeOption } from '../hooks/useFontSize';
+import { DesktopSection } from './settings/DesktopSection';
 
 interface SettingsModalProps {
   onClose: () => void;
@@ -368,6 +369,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </button>
               )}
             </div>
+
+            <hr className="border-border-brand" />
+
+            {/* Desktop App Guidance Section */}
+            <DesktopSection />
 
             <hr className="border-border-brand" />
 

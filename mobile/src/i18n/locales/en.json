@@ -98,7 +98,14 @@
     "fontSizeLarge": "Large",
     "fontSizeXLarge": "Extra",
     "fontSizePreviewLabel": "Live Preview",
-    "fontSizePreviewText": "The quick brown fox jumps over the lazy dog."
+    "fontSizePreviewText": "The quick brown fox jumps over the lazy dog.",
+    "desktopTitle": "Campfire for Windows",
+    "desktopDesc": "Prefer writing on PC? Get the official native Windows app on Microsoft Store.",
+    "desktopFeature1": "Native offline storage & auto-save to local files",
+    "desktopFeature2": "Seamless Google Drive cross-device sync",
+    "desktopStoreButton": "Get on Microsoft Store",
+    "desktopCopyLink": "Copy PC Link",
+    "desktopCopied": "Copied!"
   },
   "donate": {
     "modalTitle": "Support Campfire",

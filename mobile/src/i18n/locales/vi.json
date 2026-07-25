@@ -98,7 +98,14 @@
     "fontSizeLarge": "Lớn",
     "fontSizeXLarge": "Rất lớn",
     "fontSizePreviewLabel": "Xem trước",
-    "fontSizePreviewText": "Cần cù bù siêng năng, Ronaldo Siuuuuu"
+    "fontSizePreviewText": "Cần cù bù siêng năng, Ronaldo Siuuuuu",
+    "desktopTitle": "Campfire cho Windows",
+    "desktopDesc": "App mình làm trên máy tính sẽ có nhiều tính năng hơn nha, bạn có thể tải ứng dụng trên Microsoft Store.",
+    "desktopFeature1": "Lưu trữ ngoại tuyến & tự động lưu file offline",
+    "desktopFeature2": "Đồng bộ với nhiều thiết bị qua Google Drive",
+    "desktopStoreButton": "Tải trên Microsoft Store",
+    "desktopCopyLink": "Sao chép liên kết PC",
+    "desktopCopied": "Đã chép!"
   },
   "donate": {
     "modalTitle": "Ủng hộ Campfire",
