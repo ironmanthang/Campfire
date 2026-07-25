@@ -44,7 +44,7 @@ export function clearAuthState() {
 }
 
 // Request Access Token using Google Identity Services (GIS)
-export function requestDriveAuth(clientId: string): Promise<string> {
+export function requestDriveAuth(clientId: string, silent: boolean = false): Promise<string> {
   return new Promise((resolve, reject) => {
     if (!clientId) {
       reject(new Error('Please configure your Google OAuth Client ID in Settings first.'));
@@ -81,26 +81,45 @@ export function requestDriveAuth(clientId: string): Promise<string> {
           reject(new Error(err.message || 'OAuth error occurred'));
         }
       });
-      client.requestAccessToken({ prompt: '' });
+      // In silent mode (prompt: ''), GIS attempts silent token renewal without popup
+      client.requestAccessToken({ prompt: silent ? '' : 'select_account' });
     } catch (err: any) {
       reject(err);
     }
   });
 }
 
-// Helper to check token validity and return a valid token or throw error
+// 50 minutes threshold (token lasts 60m; trigger refresh after 50m / 10m buffer before expiry)
+const REFRESH_BUFFER_MS = 10 * 60 * 1000;
+
+// Helper to check token validity and return a valid token or perform silent refresh
 export async function getValidToken(): Promise<string> {
   const auth = getStoredAuthState();
   if (!auth.accessToken) {
     throw new Error('NOT_AUTHENTICATED');
   }
   
-  // Buffer of 5 minutes before actual expiry
-  if (Date.now() > auth.expiresAt - 5 * 60 * 1000) {
-    // Token is expired or about to expire. We must re-auth.
-    // In standard client-side PWA, we require user to click sync/login again
-    clearAuthState();
-    throw new Error('TOKEN_EXPIRED');
+  // If 50 minutes have elapsed (less than 10 minutes remaining before 60m expiry)
+  if (Date.now() >= auth.expiresAt - REFRESH_BUFFER_MS) {
+    if (auth.clientId) {
+      try {
+        // Attempt silent token refresh in background at 50-minute mark
+        const newToken = await requestDriveAuth(auth.clientId, true);
+        return newToken;
+      } catch (err) {
+        console.warn('Silent token refresh failed at 50-minute threshold:', err);
+        // If hard expired (past 60m), clear state
+        if (Date.now() >= auth.expiresAt) {
+          clearAuthState();
+          throw new Error('TOKEN_EXPIRED');
+        }
+      }
+    } else {
+      if (Date.now() >= auth.expiresAt) {
+        clearAuthState();
+        throw new Error('TOKEN_EXPIRED');
+      }
+    }
   }
   
   return auth.accessToken;
@@ -108,12 +127,33 @@ export async function getValidToken(): Promise<string> {
 
 // Drive API request wrapper
 async function driveFetch(url: string, options: RequestInit = {}): Promise<Response> {
-  const token = await getValidToken();
+  let token: string;
+  try {
+    token = await getValidToken();
+  } catch (err) {
+    throw err;
+  }
+
   const headers = new Headers(options.headers || {});
   headers.set('Authorization', `Bearer ${token}`);
   
-  const response = await fetch(url, { ...options, headers });
+  let response = await fetch(url, { ...options, headers });
+  
+  // If 401 Unauthorized occurs, attempt one silent refresh recovery
   if (response.status === 401) {
+    const auth = getStoredAuthState();
+    if (auth.clientId) {
+      try {
+        const newToken = await requestDriveAuth(auth.clientId, true);
+        headers.set('Authorization', `Bearer ${newToken}`);
+        response = await fetch(url, { ...options, headers });
+        if (response.ok) {
+          return response;
+        }
+      } catch (e) {
+        // Fallthrough to clear state
+      }
+    }
     clearAuthState();
     throw new Error('TOKEN_EXPIRED');
   }
