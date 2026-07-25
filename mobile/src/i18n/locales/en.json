@@ -49,7 +49,9 @@
     "previousDayTooltip": "Previous Day",
     "nextDayTooltip": "Next Day",
     "editButton": "Edit",
-    "previewButton": "Preview"
+    "previewButton": "Preview",
+    "undoTooltip": "Undo",
+    "redoTooltip": "Redo"
   },
   "datePicker": {
     "selectDate": "Select Date",

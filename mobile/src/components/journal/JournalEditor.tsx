@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeft, ChevronRight, Eye, Edit2, AlertTriangle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Eye, Edit2, AlertTriangle, Undo2, Redo2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { DatePicker } from '../common/DatePicker';
 import { hasConflictMarkers } from '../../services/merge';
@@ -15,6 +15,8 @@ interface JournalEditorProps {
   isLoading?: boolean;
 }
 
+const MAX_HISTORY = 20;
+
 export const JournalEditor: React.FC<JournalEditorProps> = ({
   date,
   content,
@@ -28,12 +30,35 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
   const [isPreview, setIsPreview] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  // Reset scroll position to top when switching to a different entry date
+  // Undo / Redo history state
+  const [past, setPast] = useState<string[]>([]);
+  const [future, setFuture] = useState<string[]>([]);
+  const lastCommittedRef = useRef<string>(content);
+  const isImmediateRef = useRef<boolean>(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Reset scroll position and clear history buffers when switching to a different entry date
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.scrollTop = 0;
     }
+    setPast([]);
+    setFuture([]);
+    lastCommittedRef.current = content;
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
   }, [date]);
+
+  // Clean up timer on unmount (e.g. going back to home screen)
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
 
   // Reset scroll to top when entering edit mode from preview
   useEffect(() => {
@@ -67,11 +92,137 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
     onDateChange(`${y}-${m}-${day}`);
   };
 
+  // Helper to commit a text snapshot into past stack
+  const pushSnapshot = (textToPush: string) => {
+    setPast((prevPast) => {
+      if (prevPast.length > 0 && prevPast[prevPast.length - 1] === textToPush) {
+        return prevPast;
+      }
+      const updated = [...prevPast, textToPush];
+      return updated.slice(-MAX_HISTORY);
+    });
+    setFuture([]);
+    lastCommittedRef.current = textToPush;
+  };
+
+  // Handle content edits with smart 2s inactivity & immediate triggers (space, enter, paste, cut, bulk delete)
+  const handleContentChange = (newVal: string) => {
+    const currentCommitted = lastCommittedRef.current;
+    const currentVal = content;
+    const isImmediate = isImmediateRef.current;
+    isImmediateRef.current = false;
+
+    onChange(newVal);
+
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+
+    const isBulkDelete = Math.abs(newVal.length - currentVal.length) > 3;
+
+    if (isImmediate || isBulkDelete) {
+      // Flush uncommitted typing state prior to this action
+      if (currentCommitted !== currentVal) {
+        pushSnapshot(currentVal);
+      }
+      pushSnapshot(newVal);
+    } else {
+      // Debounce 2 seconds of inactivity
+      timerRef.current = setTimeout(() => {
+        pushSnapshot(newVal);
+      }, 2000);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === ' ' || e.key === 'Enter') {
+      isImmediateRef.current = true;
+    }
+  };
+
+  const handlePaste = () => {
+    isImmediateRef.current = true;
+  };
+
+  const handleCut = () => {
+    isImmediateRef.current = true;
+  };
+
+  const handleUndo = () => {
+    if (past.length === 0) return;
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+
+    const currentVal = content;
+    const lastPast = past[past.length - 1];
+    const newPast = past.slice(0, -1);
+
+    setPast(newPast);
+    setFuture((prevFuture) => [currentVal, ...prevFuture].slice(0, MAX_HISTORY));
+    lastCommittedRef.current = lastPast;
+
+    onChange(lastPast);
+
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  };
+
+  const handleRedo = () => {
+    if (future.length === 0) return;
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+
+    const nextVal = future[0];
+    const newFuture = future.slice(1);
+    const currentVal = content;
+
+    setPast((prevPast) => [...prevPast, currentVal].slice(-MAX_HISTORY));
+    setFuture(newFuture);
+    lastCommittedRef.current = nextVal;
+
+    onChange(nextVal);
+
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  };
+
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-bg-app">
       {/* Top status bar */}
-      <div className="px-4 py-2 border-b border-border-brand bg-bg-surface flex justify-between text-xs font-semibold text-text-secondary shrink-0 select-none">
-        <span>{words === 1 ? t("journalEditor.wordCount", { count: words }) : t("journalEditor.wordCountPlural", { count: words })}</span>
+      <div className="px-3 py-1.5 border-b border-border-brand bg-bg-surface flex items-center justify-between text-xs font-semibold text-text-secondary shrink-0 select-none">
+        {/* Undo button */}
+        <button
+          onClick={handleUndo}
+          disabled={isPreview || isLoading || past.length === 0}
+          className="p-2 px-3 rounded-xl border border-border-brand/40 hover:border-accent-brand/50 hover:bg-bg-app hover:text-text-primary transition-all active:scale-95 disabled:opacity-25 disabled:pointer-events-none flex items-center gap-1 cursor-pointer"
+          title={t("journalEditor.undoTooltip")}
+          aria-label={t("journalEditor.undoTooltip")}
+        >
+          <Undo2 size={16} />
+        </button>
+
+        {/* Word count */}
+        <span className="text-center font-medium">
+          {words === 1 ? t("journalEditor.wordCount", { count: words }) : t("journalEditor.wordCountPlural", { count: words })}
+        </span>
+
+        {/* Redo button */}
+        <button
+          onClick={handleRedo}
+          disabled={isPreview || isLoading || future.length === 0}
+          className="p-2 px-3 rounded-xl border border-border-brand/40 hover:border-accent-brand/50 hover:bg-bg-app hover:text-text-primary transition-all active:scale-95 disabled:opacity-25 disabled:pointer-events-none flex items-center gap-1 cursor-pointer"
+          title={t("journalEditor.redoTooltip")}
+          aria-label={t("journalEditor.redoTooltip")}
+        >
+          <Redo2 size={16} />
+        </button>
       </div>
 
       {/* Conflict Resolution Banner */}
@@ -133,7 +284,10 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
             <textarea
               ref={textareaRef}
               value={content}
-              onChange={(e) => onChange(e.target.value)}
+              onChange={(e) => handleContentChange(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onPaste={handlePaste}
+              onCut={handleCut}
               placeholder={isLoading ? "" : t("journalEditor.placeholder", { date: formatDate(date) })}
               disabled={isLoading}
               style={{ fontSize: 'var(--editor-font-size)' }}
@@ -193,3 +347,4 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
     </div>
   );
 };
+

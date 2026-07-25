@@ -1,19 +1,30 @@
 # request feature
 
-add desktop lnk to mobile 
+Todo: 
+ 
 
+How to prevent the pwa from keep asking usser to log in, make it "remember me". 
 
+Get rid of the debug sync ui log on mobile. 
 
+On mobile, tap on the blur will make the pop up collapse (apply to all pop up like the donate, or setting), also when those pop up appear, clicking the back button wil collapse it, instead of taking user to their homescreen. 
 
+Brainstorm what you could do with pwa push notification
 
+Allow user to crop image before confirm
 
-i want to add "Feedback is always welcome via the Report Bug & Feedback form! But if you want to buy me a coffee and drop a note at the same time, donation alerts hit my phone instantly, so I'll see your message right away : D" to the support me section.
+On mobile Add a search section when user click on an entry, it will only search in that entry. This ia different fromt he aearch in home screen where it search for multiples entries
 
+Move the new date button in the mobile app a little bit up, and to the left
 
-1. make a new centralize section in the "Configuration & Onboarding", call it "heart setting" or whatever you want.
-2. in that section add a toggle that either show the heart icon or hide it. when people toggle, the app will pop up window something like: "This feature is meant for users who supported the app. If you've already donated - or plan to - feel free to turn it on!" [Yes, enable & don't ask again]    [Wait, let me donate first] (fyi some logic about hide icon is in the Show Donation Heart setting in desktop\src\components\settings\IdentitySection.tsx which you should bring it here)
-3. add a toggle when click on the heart, instead of show the pop up donate window, hearts will fall down from the top of the screen (this is a fun feature, you can be creative all you want), if they click multiple times, more hearts will fall down, and they can adjust the speed of the falling hearts in the settings page.
-4. add a toggle heart: make it dynamic user can drag it, right now the position of the heart is fixed, i want user to be able to move the heart any place on the app (which mean it overlay on top of all the ui), and they can adjust its size here.
+Move the donate buttom from the top banner to the bottom left side, like mirrror the position of the new  entry button on the right
+
+Move the toggle light to the top banner in between the heart and the gear icon. Make it simplistic
+
+Add a download button vietqr, and how to allow user to add a message while still knowing the money are from this app? 
+
+Fix the error where mobile app keep blocking user to click on the entry because it stuck on "syncing is in process" for even minutes. in fact audit the mobile code, check for all the things that could happen and how this app can be more resilience (eg. Low and sometine **no internet connection**, small screen, low battery....), so "Mobile-First Constraints, Mobile Environment Dynamics, or Device Context.". right now for this error, even if user turn of auto sync, the app still dont allow them to click, this is not good and flexible, like i said, predict the enviroment a mobile user could be in, them make the app able to handle them all.
+
 
 
 # questions

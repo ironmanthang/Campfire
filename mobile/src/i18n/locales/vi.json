@@ -49,7 +49,9 @@
     "previousDayTooltip": "Ngày trước",
     "nextDayTooltip": "Ngày sau",
     "editButton": "Sửa",
-    "previewButton": "Xem trước"
+    "previewButton": "Xem trước",
+    "undoTooltip": "Hoàn tác",
+    "redoTooltip": "Làm lại"
   },
   "datePicker": {
     "selectDate": "Chọn ngày",
