@@ -1,11 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Header } from './components/Header';
-import { JournalList } from './components/JournalList';
-import { JournalEditor } from './components/JournalEditor';
-import { SettingsModal } from './components/SettingsModal';
-import { SyncResultModal } from './components/SyncResultModal';
-import { DonateModal } from './components/DonateModal';
+import { Header } from './components/layout';
+import { JournalList, JournalEditor } from './components/journal';
+import { SettingsModal } from './components/settings';
+import { SyncResultModal, DonateModal } from './components/modals';
 
 // Hooks
 import { useTheme } from './hooks/useTheme';

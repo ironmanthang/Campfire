@@ -1,0 +1,195 @@
+import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { type LocalJournalEntry } from '../../services/db';
+import { Plus, Search, FileText, SlidersHorizontal, X } from 'lucide-react';
+import { JournalListItem } from './JournalListItem';
+import { FilterModal, type DateRangeFilter, type SortOrderFilter } from './FilterModal';
+
+interface JournalListProps {
+  entries: LocalJournalEntry[];
+  onSelectEntry: (date: string) => void;
+  onCreateToday: () => void;
+}
+
+export const JournalList: React.FC<JournalListProps> = ({
+  entries,
+  onSelectEntry,
+  onCreateToday
+}) => {
+  const { t } = useTranslation();
+  const [searchQuery, setSearchQuery] = useState(() => {
+    return localStorage.getItem('campfire_mobile_search_query') || '';
+  });
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [dateRange, setDateRange] = useState<DateRangeFilter>(() => {
+    const saved = localStorage.getItem('campfire_mobile_filter_dateRange');
+    if (saved === '30d' || saved === '3m' || saved === 'year') {
+      return saved;
+    }
+    return 'all';
+  });
+  const [sortOrder, setSortOrder] = useState<SortOrderFilter>(() => {
+    const saved = localStorage.getItem('campfire_mobile_filter_sortOrder');
+    if (saved === 'oldest') {
+      return saved;
+    }
+    return 'newest';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('campfire_mobile_search_query', searchQuery);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    localStorage.setItem('campfire_mobile_filter_dateRange', dateRange);
+  }, [dateRange]);
+
+  useEffect(() => {
+    localStorage.setItem('campfire_mobile_filter_sortOrder', sortOrder);
+  }, [sortOrder]);
+
+  const extractTags = (content: string): string[] => {
+    const tags: string[] = [];
+    const words = content.split(/\s+/);
+    for (const word of words) {
+      if (word.startsWith('#') && word.length > 1) {
+        const cleaned = word.replace(/[^a-zA-Z0-9-_]/g, '');
+        if (cleaned && !tags.includes(cleaned)) {
+          tags.push(cleaned);
+        }
+      }
+    }
+    return tags;
+  };
+
+  // Filter entries based on search query (text content or tags) and date range
+  const filteredEntries = entries.filter(entry => {
+    const query = searchQuery.toLowerCase().trim();
+    if (query) {
+      // Support searching for tags specifically (e.g. "#ideas")
+      if (query.startsWith('#')) {
+        const tagQuery = query.substring(1);
+        const tags = extractTags(entry.content).map(t => t.toLowerCase());
+        if (!tags.some(t => t.includes(tagQuery))) return false;
+      } else {
+        const matches = (
+          entry.date.includes(query) ||
+          entry.content.toLowerCase().includes(query)
+        );
+        if (!matches) return false;
+      }
+    }
+    
+    // Filter by Date Range
+    if (dateRange !== 'all') {
+      const entryDateObj = new Date(entry.date);
+      const entryTime = entryDateObj.getTime();
+      if (isNaN(entryTime)) return true;
+      
+      const now = new Date();
+      const diffTime = now.getTime() - entryTime;
+      
+      if (dateRange === '30d') {
+        const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+        if (diffTime > thirtyDaysMs) return false;
+      } else if (dateRange === '3m') {
+        const ninetyDaysMs = 90 * 24 * 60 * 60 * 1000;
+        if (diffTime > ninetyDaysMs) return false;
+      } else if (dateRange === 'year') {
+        if (entryDateObj.getFullYear() !== now.getFullYear()) return false;
+      }
+    }
+    
+    return true;
+  });
+
+  // Sort entries based on Sort Order
+  const sortedEntries = [...filteredEntries].sort((a, b) => {
+    const timeA = new Date(a.date).getTime();
+    const timeB = new Date(b.date).getTime();
+    
+    if (isNaN(timeA) || isNaN(timeB)) return 0;
+    
+    return sortOrder === 'newest' ? timeB - timeA : timeA - timeB;
+  });
+
+  return (
+    <div className="flex-1 flex flex-col min-h-0 bg-bg-app relative">
+      {/* Search Bar & Filter */}
+      <div className="px-4 py-3 bg-bg-surface border-b border-border-brand shrink-0 flex items-center gap-2 select-none">
+        <div className="relative flex-1 flex items-center">
+          <Search size={16} className="absolute left-3 text-text-secondary" />
+          <input
+            type="text"
+            placeholder={t("journalList.searchPlaceholder")}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-8 py-2 text-sm rounded-xl border border-border-brand bg-bg-input text-text-primary outline-none focus:border-accent-brand transition-all"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-2.5 p-1 rounded-lg hover:bg-bg-surface text-text-secondary hover:text-text-primary transition-all cursor-pointer"
+              title="Clear search"
+            >
+              <X size={14} />
+            </button>
+          )}
+        </div>
+        <button
+          onClick={() => setIsFilterOpen(true)}
+          className={`p-2 rounded-xl border transition-all active:scale-95 shrink-0 cursor-pointer ${
+            dateRange !== 'all' || sortOrder !== 'newest'
+              ? 'border-accent-brand bg-accent-brand/10 text-accent-brand font-bold'
+              : 'border-border-brand bg-bg-input text-text-secondary hover:text-text-primary'
+          }`}
+          title={t("journalList.filterTooltip")}
+        >
+          <SlidersHorizontal size={18} />
+        </button>
+      </div>
+
+      {/* Entries List */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0 pb-24 select-none">
+        {sortedEntries.length > 0 ? (
+          sortedEntries.map((entry) => (
+            <JournalListItem
+              key={entry.date}
+              entry={entry}
+              onSelectEntry={onSelectEntry}
+            />
+          ))
+        ) : (
+          <div className="flex flex-col items-center justify-center py-12 text-center text-text-secondary">
+            <FileText size={48} className="text-border-brand mb-3" />
+            <p className="text-sm font-medium">{t("journalList.emptyTitle")}</p>
+            {(searchQuery || dateRange !== 'all') && <p className="text-xs mt-1">{t("journalList.emptyHint")}</p>}
+          </div>
+        )}
+      </div>
+
+      {/* Floating Action Button */}
+      <button 
+        onClick={onCreateToday}
+        className="absolute bottom-6 right-6 w-14 h-14 rounded-full bg-accent-brand text-bg-app shadow-lg shadow-accent-brand/35 hover:bg-accent-brand-hover hover:scale-105 flex items-center justify-center transition-all duration-200 active:scale-95"
+      >
+        <Plus size={26} />
+      </button>
+
+      {/* Filter Modal Sheet */}
+      <FilterModal
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        dateRange={dateRange}
+        sortOrder={sortOrder}
+        onDateRangeChange={setDateRange}
+        onSortOrderChange={setSortOrder}
+        onReset={() => {
+          setSearchQuery('');
+          setDateRange('all');
+          setSortOrder('newest');
+        }}
+      />
+    </div>
+  );
+};

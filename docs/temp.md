@@ -2,7 +2,7 @@
 
 add desktop lnk to mobile 
 
-some files uses direct English text in JSX, so its content stays in English even when the app language is switched to Vietnamese. scan the whole desktop folder, make plan to ensure all ui text use en.json and vi.json to automatically switch languages.
+
 
 
 
