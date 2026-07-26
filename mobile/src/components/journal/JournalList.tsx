@@ -63,7 +63,7 @@ export const JournalList: React.FC<JournalListProps> = ({
     const updateHeartConfig = () => {
       setShowDonateHeart(localStorage.getItem('campfire_mobile_show_donate_heart') !== 'false');
       setHeartClickFalls(localStorage.getItem('campfire_mobile_heart_click_falls') === 'true');
-      setHeartSize(parseInt(localStorage.getItem('campfire_mobile_heart_size') || '100', 10));
+      setHeartSize(parseInt(localStorage.getItem('campfire_mobile_heart_size') || '80', 10));
       setHeartRainDuration(parseInt(localStorage.getItem('campfire_mobile_heart_rain_duration') || '5', 10));
       setCustomImage(localStorage.getItem('campfire_mobile_heart_custom_image'));
     };
