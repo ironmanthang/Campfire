@@ -70,14 +70,6 @@ export const GoogleDriveSection: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h3 className="font-semibold text-text-primary">{t("settings.googleSyncTitle")}</h3>
-        <p className="text-xs text-text-secondary">
-          {isLoggedIn
-            ? (userEmail ? t("settings.googleSyncDescConnected", { email: userEmail }) : t("settings.googleSyncDescConnectedShort"))
-            : t("settings.googleSyncDescDisconnected")}
-        </p>
-      </div>
       {/* Auto-Sync Toggle */}
       {isLoggedIn && (
         <div className="flex items-center justify-between py-2 border-t border-border-brand/40">

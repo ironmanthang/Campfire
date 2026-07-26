@@ -18,22 +18,21 @@ export const FontSizeSection: React.FC = () => {
       </div>
       <div className="grid grid-cols-4 gap-2">
         {[
-          { value: 'small', label: t("settings.fontSizeSmall"), sizeLabel: '14px' },
-          { value: 'medium', label: t("settings.fontSizeMedium"), sizeLabel: '16px' },
-          { value: 'large', label: t("settings.fontSizeLarge"), sizeLabel: '18px' },
-          { value: 'xlarge', label: t("settings.fontSizeXLarge"), sizeLabel: '20px' }
+          { value: 'small', label: t("settings.fontSizeSmall") },
+          { value: 'medium', label: t("settings.fontSizeMedium") },
+          { value: 'large', label: t("settings.fontSizeLarge") },
+          { value: 'xlarge', label: t("settings.fontSizeXLarge") }
         ].map((opt) => (
           <button
             key={opt.value}
             onClick={() => setFontSize(opt.value as FontSizeOption)}
-            className={`py-2 px-1 flex flex-col items-center justify-center rounded-xl border text-center transition-all cursor-pointer active:scale-95 ${
+            className={`py-2.5 px-1 flex flex-col items-center justify-center rounded-xl border text-center transition-all cursor-pointer active:scale-95 ${
               fontSize === opt.value
                 ? 'bg-accent-brand text-bg-app border-accent-brand font-bold'
                 : 'bg-bg-app text-text-secondary border-border-brand hover:text-text-primary'
             }`}
           >
             <span className="text-xs font-semibold">{opt.label}</span>
-            <span className="text-[10px] opacity-75">{opt.sizeLabel}</span>
           </button>
         ))}
       </div>

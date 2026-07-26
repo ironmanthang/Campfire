@@ -713,7 +713,7 @@
     "supportDesc": "Mình dự định giữ app miễn phí và offline. Nếu Campfire đã giúp ích bạn, thì hãy cân nhắc ủng hộ mình một cốc cà phê nha!",
     "feedbackBridge": "Bạn luôn có thể gửi góp ý miễn phí qua nút Báo lỗi & Góp ý! Nhưng nếu muốn mời mình một cốc cà phê kèm lời nhắn, thông báo donate sẽ ping về điện thoại để mình đọc được tin nhắn của bạn liền :D",
     "supportNotifyTipVietQR": "À nếu bạn muốn gửi lời nhắn nhanh cho mình, thì gõ lời nhắn ở đây rồi quét mã QR. Nội dung chuyển khoản sẽ tự động điền tin nhắn để mình thấy liền luôn.",
-    "supportNotifyTipKofi": "Donate bằng Ko-fi thì gõ trực tiếp vào ô tin nhắn trên trang luôn nha bạn.",
+    "supportNotifyTipKofi": "Nếu donate bằng Ko-fi thì bạn có thể gửi trực tiếp tin nhắn trên trang Ko-fi luôn.",
     "supportMessageLabel": "Lời nhắn kèm theo (tùy chọn, tối đa 50 ký tự)",
     "supportMessagePlaceholder": "Ví dụ: Thích app lắm",
     "donateButton": "Ủng hộ tui qua VietQR 🥀",

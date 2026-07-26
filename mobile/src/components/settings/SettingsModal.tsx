@@ -2,10 +2,8 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 import { APP_VERSION } from '../../lib/appVersion';
-import { ThemeSection } from './ThemeSection';
 import { FontSizeSection } from './FontSizeSection';
 import { LanguageSection } from './LanguageSection';
-import { BrandingSection } from './BrandingSection';
 import { GoogleDriveSection } from './GoogleDriveSection';
 import { DesktopSection } from './DesktopSection';
 import { ExportSection } from './ExportSection';
@@ -13,18 +11,10 @@ import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 
 interface SettingsModalProps {
   onClose: () => void;
-  onThemeToggle: () => void;
-  theme: 'light' | 'dark';
-  customLogo: string | null;
-  onLogoChange: (logo: string | null) => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
-  onClose,
-  onThemeToggle,
-  theme,
-  customLogo,
-  onLogoChange
+  onClose
 }) => {
   const { t } = useTranslation();
   const { handleManualClose } = useModalBackHandler(true, onClose);
@@ -48,11 +38,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
         {/* Content */}
         <div className="p-5 flex-1 overflow-y-auto space-y-6">
-          {/* Theme setting */}
-          <ThemeSection theme={theme} onThemeToggle={onThemeToggle} />
-
-          <hr className="border-border-brand" />
-
           {/* Font Size setting */}
           <FontSizeSection />
 
@@ -63,21 +48,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
           <hr className="border-border-brand" />
 
-          {/* Version badge */}
-          <div className="flex items-center justify-between text-[11px] text-text-secondary">
-            <span>{t('settings.versionLabel', { defaultValue: 'App version' })}</span>
-            <span className="font-mono">v{APP_VERSION}</span>
-          </div>
-
-          <hr className="border-border-brand" />
-
-          {/* Custom Logo setting */}
-          <BrandingSection customLogo={customLogo} onLogoChange={onLogoChange} />
-
-          <hr className="border-border-brand" />
-
           {/* Google Drive Configuration */}
           <GoogleDriveSection />
+
 
           <hr className="border-border-brand" />
 
@@ -89,7 +62,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* Export data section */}
           <ExportSection />
 
-          {/* Privacy & Terms Links */}
+          {/* Privacy & Terms & Version Links */}
           <div className="flex justify-center items-center gap-3 pt-6 border-t border-border-brand/40 text-[11px] text-text-secondary">
             <a
               href="/privacy/"
@@ -108,6 +81,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             >
               {t("settings.termsLink")}
             </a>
+            <span className="text-border-brand">•</span>
+            <span className="font-mono opacity-80">v{APP_VERSION}</span>
           </div>
         </div>
       </div>

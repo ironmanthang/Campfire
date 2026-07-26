@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Heart, ExternalLink, Download, Check } from 'lucide-react';
+import { X, Heart, ExternalLink, Download } from 'lucide-react';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 
 interface DonateModalProps {
@@ -12,7 +12,6 @@ export const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => 
   const { t } = useTranslation();
   const [donationTab, setDonationTab] = useState<'vietqr' | 'kofi'>('kofi');
   const [customMessage, setCustomMessage] = useState('');
-  const [copiedToast, setCopiedToast] = useState(false);
   const { handleManualClose } = useModalBackHandler(isOpen, onClose);
 
   if (!isOpen) return null;
@@ -33,16 +32,7 @@ export const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => 
   const addInfoText = cleanMsg ? `Donate Campfire ${cleanMsg}` : 'Donate Campfire';
   const vietQrUrl = `https://img.vietqr.io/image/vietcombank-9949420500-compact.png?addInfo=${encodeURIComponent(addInfoText)}&accountName=NGUYEN%20NHU%20THANG`;
 
-  const handleKofiClick = async () => {
-    if (customMessage.trim()) {
-      try {
-        await navigator.clipboard.writeText(`Campfire: ${customMessage.trim()}`);
-        setCopiedToast(true);
-        setTimeout(() => setCopiedToast(false), 2500);
-      } catch (e) {
-        console.error('Clipboard copy failed:', e);
-      }
-    }
+  const handleKofiClick = () => {
     window.open('https://ko-fi.com/thang504', '_blank');
   };
 
@@ -89,21 +79,6 @@ export const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => 
             {t("donate.modalBody")}
           </p>
 
-          {/* Shared Custom Message Input */}
-          <div className="space-y-1.5 bg-bg-app/30 border border-border-brand/30 rounded-xl p-3">
-            <label className="block text-[11px] font-bold text-text-secondary uppercase tracking-wider">
-              {t("donate.supportMessageLabel")}
-            </label>
-            <input
-              type="text"
-              maxLength={40}
-              value={customMessage}
-              onChange={(e) => setCustomMessage(e.target.value)}
-              placeholder={t("donate.supportMessagePlaceholder")}
-              className="w-full px-3 py-2 rounded-lg border border-border-brand/40 bg-bg-surface text-text-primary text-xs font-medium placeholder:text-text-secondary/40 focus:border-accent-brand focus:ring-1 focus:ring-accent-brand/35 outline-none transition-all"
-            />
-          </div>
-
           {/* Donation Tabs Switcher */}
           <div className="border border-border-brand/40 bg-bg-app/20 rounded-2xl p-4 space-y-4">
             <div className="flex border-b border-border-brand/20 pb-2">
@@ -134,6 +109,22 @@ export const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => 
                 <p className="text-xs text-text-secondary text-left leading-relaxed">
                   {t("donate.vietQrBody")}
                 </p>
+
+                {/* Custom Support Message Input (VietQR only) */}
+                <div className="space-y-1 text-left bg-bg-app/40 border border-border-brand/30 rounded-xl p-3">
+                  <label className="block text-[10px] font-bold text-text-secondary uppercase tracking-wider">
+                    {t("donate.supportMessageLabel")}
+                  </label>
+                  <input
+                    type="text"
+                    maxLength={25}
+                    value={customMessage}
+                    onChange={(e) => setCustomMessage(e.target.value)}
+                    placeholder={t("donate.supportMessagePlaceholder")}
+                    className="w-full px-3 py-1.5 rounded-lg border border-border-brand/40 bg-bg-surface text-text-primary text-xs font-medium placeholder:text-text-secondary/40 focus:border-accent-brand focus:ring-1 focus:ring-accent-brand/35 outline-none transition-all"
+                  />
+                </div>
+
                 <div className="inline-block p-2 bg-white rounded-xl border border-border-brand/20 relative group">
                   <img
                     src={vietQrUrl}
@@ -165,13 +156,6 @@ export const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => 
                 <p className="text-xs text-text-secondary leading-relaxed">
                   {t("donate.kofiBody")}
                 </p>
-
-                {copiedToast && (
-                  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-accent-brand/15 border border-accent-brand/30 text-accent-brand text-xs font-medium animate-fade-in">
-                    <Check size={14} />
-                    <span>{t("donate.kofiCopiedToast")}</span>
-                  </div>
-                )}
 
                 <button
                   onClick={handleKofiClick}

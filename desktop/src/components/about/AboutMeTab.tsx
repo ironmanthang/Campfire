@@ -76,12 +76,7 @@ export function AboutMeTab({
             characterLimit={50}
           />
         ) : (
-          <KofiPanel
-            customMessage={customMessage}
-            setCustomMessage={setCustomMessage}
-            onDonateClick={onKofiDonate}
-            characterLimit={50}
-          />
+          <KofiPanel onDonateClick={onKofiDonate} />
         )}
       </div>
     </div>

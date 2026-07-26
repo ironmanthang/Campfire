@@ -19,21 +19,37 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
   const { t } = useTranslation();
   const { handleManualClose } = useModalBackHandler(isOpen, onClose);
 
-  const [scale, setScale] = useState(1);
+  const [zoom, setZoom] = useState(1);
+  const [baseScale, setBaseScale] = useState(1);
   const [rotation, setRotation] = useState(0);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
   const imageRef = useRef<HTMLImageElement | null>(null);
 
+  // Calculate base scale so image fits in crop box when loaded
+  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    if (img.naturalWidth && img.naturalHeight) {
+      const cropBoxSize = 200;
+      const fitScale = cropBoxSize / Math.max(img.naturalWidth, img.naturalHeight);
+      setBaseScale(fitScale);
+      setZoom(1);
+      setOffset({ x: 0, y: 0 });
+    }
+  };
+
   // Reset transform state when a new image is loaded
   useEffect(() => {
-    setScale(1);
+    setZoom(1);
+    setBaseScale(1);
     setRotation(0);
     setOffset({ x: 0, y: 0 });
   }, [imageSrc]);
 
   if (!isOpen) return null;
+
+  const effectiveScale = baseScale * zoom;
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
@@ -98,11 +114,11 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
     ctx.rotate((rotation * Math.PI) / 180);
 
     const scaleFactor = outputSize / cropBoxSize;
-    ctx.scale(scale * scaleFactor, scale * scaleFactor);
+    ctx.scale(effectiveScale * scaleFactor, effectiveScale * scaleFactor);
 
     // Draw image centered according to pan offset
-    const drawX = (offset.x / scale) - (img.naturalWidth / 2);
-    const drawY = (offset.y / scale) - (img.naturalHeight / 2);
+    const drawX = (offset.x / effectiveScale) - (img.naturalWidth / 2);
+    const drawY = (offset.y / effectiveScale) - (img.naturalHeight / 2);
 
     ctx.drawImage(img, drawX, drawY);
     ctx.restore();
@@ -147,9 +163,10 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
           <img
             ref={imageRef}
             src={imageSrc}
+            onLoad={handleImageLoad}
             alt="Crop source"
             style={{
-              transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale}) rotate(${rotation}deg)`,
+              transform: `translate(${offset.x}px, ${offset.y}px) scale(${effectiveScale}) rotate(${rotation}deg)`,
               maxHeight: 'none',
               maxWidth: 'none',
               userSelect: 'none',
@@ -169,11 +186,11 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
             <ZoomOut size={16} className="text-text-secondary shrink-0" />
             <input
               type="range"
-              min="0.5"
-              max="3"
+              min="0.8"
+              max="4"
               step="0.05"
-              value={scale}
-              onChange={(e) => setScale(parseFloat(e.target.value))}
+              value={zoom}
+              onChange={(e) => setZoom(parseFloat(e.target.value))}
               className="flex-1 accent-accent-brand cursor-pointer h-1.5 bg-bg-app rounded-lg"
             />
             <ZoomIn size={16} className="text-text-secondary shrink-0" />

@@ -134,6 +134,7 @@ function App() {
         syncProgress={syncProgress}
         isLoggedIn={isLoggedIn}
         customLogo={customLogo}
+        onLogoChange={setCustomLogo}
       />
 
       {/* Soft Donation Reminder Banner */}
@@ -244,10 +245,6 @@ function App() {
             setIsSettingsOpen(false);
             checkAuthStatus();
           }}
-          onThemeToggle={toggleTheme}
-          theme={theme}
-          customLogo={customLogo}
-          onLogoChange={setCustomLogo}
         />
       )}
 
