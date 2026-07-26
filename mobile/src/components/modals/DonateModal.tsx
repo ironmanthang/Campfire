@@ -14,6 +14,21 @@ export const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => 
   const [customMessage, setCustomMessage] = useState('');
   const { handleManualClose } = useModalBackHandler(isOpen, onClose);
 
+  const openTimeRef = React.useRef<number>(performance.now());
+
+  React.useEffect(() => {
+    if (isOpen) {
+      openTimeRef.current = performance.now();
+    }
+  }, [isOpen]);
+
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (performance.now() - openTimeRef.current < 350) {
+      return;
+    }
+    handleManualClose();
+  };
+
   if (!isOpen) return null;
 
   // Clean Vietnamese accents & special characters for bank transfer content
@@ -55,7 +70,7 @@ export const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => 
 
   return (
     <div
-      onClick={handleManualClose}
+      onClick={handleBackdropClick}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 cursor-pointer"
     >
       <div

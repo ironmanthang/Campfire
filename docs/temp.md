@@ -2,7 +2,8 @@
 
 Todo: 
  
-add Inertial Scrolling to the two draggable buttons in mobile 
+the icon in the  "desktopStoreButton": "Tải trên Microsoft Store",
+    "desktopCopyLink": "Sao chép liên kết PC", area. does it scale ?what size is those two icon right now
 
 how is the logic croping logo work?i zoom out all the way, but still the image is too large?shoudl the app logic for zoom is take a width or height of the image to be the base for when zoom out?
 
@@ -26,7 +27,7 @@ Move the toggle light to the top banner in between the heart and the gear icon. 
 
 Add a download button vietqr, and how to allow user to add a message while still knowing the money are from this app? 
 
-Fix the error where mobile app keep blocking user to click on the entry because it stuck on "syncing is in process" for even minutes. in fact audit the mobile code, check for all the things that could happen and how this app can be more resilience (eg. Low and sometine **no internet connection**, small screen, low battery....), so "Mobile-First Constraints, Mobile Environment Dynamics, or Device Context.". right now for this error, even if user turn of auto sync, the app still dont allow them to click, this is not good and flexible, like i said, predict the enviroment a mobile user could be in, them make the app able to handle them all.
+there is an error where mobile app keep blocking user to click on the entry because it stuck on "syncing is in process" for even minutes. in fact audit the mobile code, check for all the things that could happen and how this app can be more resilience (eg. Low and sometine **no internet connection**, small screen, low battery....), search web for "Mobile-First Constraints, Mobile Environment Dynamics, or Device Context.". right now for this error, even if user turn of auto sync, the app still dont allow them to click, this is not good and flexible, like i said, predict the enviroment a mobile user could be in, them make the app able to handle them all.
 
 
 

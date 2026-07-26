@@ -58,7 +58,7 @@ export const FallingHearts: React.FC<FallingHeartsProps> = ({
           ) : (
             <Heart
               style={{ width: h.size, height: h.size }}
-              fill="currentColor"
+              className="text-red-500 fill-red-500 stroke-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.7)]"
             />
           )}
         </span>

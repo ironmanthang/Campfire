@@ -44,29 +44,29 @@ export const DesktopSection: React.FC<DesktopSectionProps> = ({
           <span>{t("settings.desktopFeature2")}</span>
         </div>
 
-        <div className="flex gap-2 pt-1">
+        <div className="grid grid-cols-2 gap-2 pt-1">
           <a
             href={storeUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold bg-accent-brand hover:bg-accent-brand-hover text-bg-app rounded-xl transition-all cursor-pointer no-underline text-center active:scale-95"
+            className="flex items-center justify-center gap-1.5 py-2.5 px-3 text-xs font-semibold bg-accent-brand hover:bg-accent-brand-hover text-bg-app rounded-xl transition-all cursor-pointer no-underline text-center active:scale-95 min-h-[44px]"
           >
-            <ExternalLink size={14} />
+            <ExternalLink size={15} className="shrink-0" />
             <span>{t("settings.desktopStoreButton")}</span>
           </a>
           <button
             onClick={handleCopyLink}
-            className="flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold bg-bg-surface border border-border-brand hover:border-accent-brand text-text-primary rounded-xl transition-all cursor-pointer active:scale-95 shrink-0"
+            className="flex items-center justify-center gap-1.5 py-2.5 px-3 text-xs font-semibold bg-bg-surface border border-border-brand hover:border-accent-brand text-text-primary rounded-xl transition-all cursor-pointer active:scale-95 min-h-[44px]"
             title={t("settings.desktopCopyLink")}
           >
             {copied ? (
               <>
-                <Check size={14} className="text-accent-brand" />
+                <Check size={15} className="text-accent-brand shrink-0" />
                 <span className="text-accent-brand">{t("settings.desktopCopied")}</span>
               </>
             ) : (
               <>
-                <Copy size={14} className="text-text-secondary" />
+                <Copy size={15} className="text-text-secondary shrink-0" />
                 <span>{t("settings.desktopCopyLink")}</span>
               </>
             )}
