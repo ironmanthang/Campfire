@@ -22,7 +22,7 @@ export const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => 
     }
   }, [isOpen]);
 
-  const handleBackdropClick = (e: React.MouseEvent) => {
+  const handleBackdropClick = () => {
     if (performance.now() - openTimeRef.current < 350) {
       return;
     }
