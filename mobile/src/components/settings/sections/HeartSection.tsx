@@ -114,6 +114,10 @@ export const HeartSection: React.FC = () => {
     setHeartClickFalls(true);
     setIsGateOpen(false);
     window.dispatchEvent(new Event('heart-config-changed'));
+    // Consume the history entry that HeartGateModal pushed via useModalBackHandler.
+    // Without this, the entry is orphaned and the next history.back() call
+    // (e.g. closing SettingsModal) pops the wrong entry, breaking tap detection.
+    window.history.back();
   };
 
   const handleGateCancel = () => {
