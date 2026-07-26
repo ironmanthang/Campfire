@@ -8,12 +8,27 @@ interface FallingHeartsProps {
   customImage: string | null;
 }
 
+const _dbgToast = (msg: string, color = '#0f0') => {
+  const el = document.createElement('div');
+  el.textContent = `[FallingHearts] ${msg}`;
+  Object.assign(el.style, {
+    position: 'fixed', top: '90px', left: '8px', right: '8px',
+    padding: '6px 10px', background: 'rgba(0,0,0,0.88)', color,
+    fontSize: '11px', fontFamily: 'monospace', borderRadius: '8px',
+    zIndex: '99999', pointerEvents: 'none', whiteSpace: 'pre-wrap',
+  });
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+};
+
 export const FallingHearts: React.FC<FallingHeartsProps> = ({
   hearts,
   onRemoveHeart,
   customImage,
 }) => {
   if (hearts.length === 0) return null;
+
+  _dbgToast(`Rendering ${hearts.length} active hearts`, '#0ff');
 
   const useImage = !!customImage;
 
@@ -40,7 +55,17 @@ export const FallingHearts: React.FC<FallingHeartsProps> = ({
             ['--fall-rotation' as any]: `${h.rotation * 6}deg`,
             animationDuration: `${h.durationMs}ms`,
           } as React.CSSProperties}
-          onAnimationEnd={() => onRemoveHeart(h.id)}
+          onAnimationStart={() => {
+            _dbgToast(`animStart id=${h.id} dur=${h.durationMs}ms x=${h.x.toFixed(0)}`);
+          }}
+          onAnimationEnd={(e) => {
+            const elapsed = e.nativeEvent.elapsedTime;
+            _dbgToast(`animEnd id=${h.id} elapsed=${elapsed.toFixed(2)}s expected=${(h.durationMs/1000).toFixed(1)}s`, elapsed < 0.5 ? '#f00' : '#0f0');
+            // If animationend fired prematurely (< 0.5s), don't kill heart instantly
+            if (elapsed >= 0.5 || !e.nativeEvent.elapsedTime) {
+              onRemoveHeart(h.id);
+            }
+          }}
         >
           {useImage ? (
             <img
