@@ -20,7 +20,7 @@ export function useFallingHearts() {
 
   const fireHearts = useCallback((count: number = 1) => {
     const speedSetting = parseInt(localStorage.getItem('campfire_mobile_heart_fall_speed') || '5', 10);
-    const sizeSetting = parseInt(localStorage.getItem('campfire_mobile_heart_size') || '48', 10);
+    const sizeSetting = parseInt(localStorage.getItem('campfire_mobile_heart_size') || '50', 10);
     
     setHearts((prev) => {
       const max = 50;
