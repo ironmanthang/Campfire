@@ -201,7 +201,7 @@ export function useDraggableButton({
 
     // Detect tap (not drag) — fire here instead of onClick because
     // mobile browsers suppress click after setPointerCapture + touch-action:none
-    if (dragInfo.current.totalDistance <= 6) {
+    if (dragInfo.current.totalDistance <= 14) {
       tapCallbackRef.current?.();
     }
 
