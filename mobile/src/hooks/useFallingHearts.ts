@@ -13,6 +13,7 @@ export interface FallingHeart {
 
 let heartRainTimeout: ReturnType<typeof setTimeout> | null = null;
 let heartRainStopTimeout: ReturnType<typeof setTimeout> | null = null;
+let heartIdCounter = 0;
 
 export function useFallingHearts() {
   const [hearts, setHearts] = useState<FallingHeart[]>([]);
@@ -32,8 +33,9 @@ export function useFallingHearts() {
       const vw = typeof window !== 'undefined' ? window.innerWidth : 375;
 
       for (let i = 0; i < toAdd; i++) {
+        heartIdCounter += 1;
         newHearts.push({
-          id: Date.now() + i + Math.floor(Math.random() * 1000),
+          id: Date.now() + heartIdCounter,
           x: Math.random() * Math.max(0, vw - sizeSetting),
           size: sizeSetting,
           speed: speedSetting,

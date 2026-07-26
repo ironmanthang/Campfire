@@ -76,7 +76,7 @@ export const HeartSection: React.FC = () => {
   });
 
   const [heartSize, setHeartSize] = useState<number>(() => {
-    return parseInt(localStorage.getItem('campfire_mobile_heart_size') || '48', 10);
+    return parseInt(localStorage.getItem('campfire_mobile_heart_size') || '50', 10);
   });
 
   const [customImage, setCustomImage] = useState<string | null>(() => {

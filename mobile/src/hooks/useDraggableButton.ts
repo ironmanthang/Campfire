@@ -119,6 +119,9 @@ export function useDraggableButton({
     return () => window.removeEventListener('resize', handleResize);
   }, [position, clampPosition]);
 
+  const wasPointerEventRef = useRef(false);
+  const tapFiredRef = useRef(false);
+
   const onPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
     if (!position) return;
     
@@ -126,7 +129,14 @@ export function useDraggableButton({
     stopInertia();
 
     // Capture pointer for continuous tracking even outside button bounds
-    e.currentTarget.setPointerCapture(e.pointerId);
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // ignore
+    }
+
+    wasPointerEventRef.current = true;
+    tapFiredRef.current = false;
 
     const now = performance.now();
     dragInfo.current = {
@@ -147,7 +157,7 @@ export function useDraggableButton({
   };
 
   const onPointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (!isDragging || dragInfo.current.activePointerId !== e.pointerId) return;
+    if (dragInfo.current.activePointerId !== e.pointerId) return;
 
     const now = performance.now();
     const dt = now - dragInfo.current.lastTime;
@@ -180,10 +190,14 @@ export function useDraggableButton({
   };
 
   const onPointerUp = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (!isDragging || dragInfo.current.activePointerId !== e.pointerId) return;
+    if (dragInfo.current.activePointerId !== e.pointerId) return;
 
-    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
-      e.currentTarget.releasePointerCapture(e.pointerId);
+    try {
+      if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      }
+    } catch {
+      // ignore
     }
 
     dragInfo.current.activePointerId = null;
@@ -192,6 +206,7 @@ export function useDraggableButton({
     // Detect tap (not drag) — fire here instead of onClick because
     // mobile browsers suppress click after setPointerCapture + touch-action:none
     if (dragInfo.current.totalDistance <= 6) {
+      tapFiredRef.current = true;
       tapCallbackRef.current?.();
     }
 
@@ -287,14 +302,18 @@ export function useDraggableButton({
   };
 
   // Register a tap callback — the actual tap is detected in onPointerUp.
-  // The returned onClick handler only prevents the browser click from
-  // double-firing or leaking through after a drag.
+  // The returned onClick handler handles keyboard click fallback and prevents
+  // double-firing if a pointer tap already handled it.
   const handleTap = (callback?: () => void) => {
     tapCallbackRef.current = callback;
     return (e: React.MouseEvent) => {
-      // Always prevent the native click; taps are handled in onPointerUp
       e.preventDefault();
       e.stopPropagation();
+      if (!wasPointerEventRef.current && !tapFiredRef.current) {
+        tapCallbackRef.current?.();
+      }
+      tapFiredRef.current = false;
+      wasPointerEventRef.current = false;
     };
   };
 
