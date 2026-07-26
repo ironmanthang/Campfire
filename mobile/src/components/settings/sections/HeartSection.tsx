@@ -76,7 +76,7 @@ export const HeartSection: React.FC = () => {
   });
 
   const [heartSize, setHeartSize] = useState<number>(() => {
-    return parseInt(localStorage.getItem('campfire_mobile_heart_size') || '38', 10);
+    return parseInt(localStorage.getItem('campfire_mobile_heart_size') || '48', 10);
   });
 
   const [customImage, setCustomImage] = useState<string | null>(() => {
@@ -193,8 +193,8 @@ export const HeartSection: React.FC = () => {
 
   const handleResetPosition = () => {
     localStorage.removeItem('campfire_mobile_donate_pos');
-    localStorage.setItem('campfire_mobile_heart_size', '38');
-    setHeartSize(38);
+    localStorage.setItem('campfire_mobile_heart_size', '48');
+    setHeartSize(48);
     window.dispatchEvent(new Event('heart-reset'));
     window.dispatchEvent(new Event('heart-config-changed'));
   };
