@@ -61,6 +61,7 @@
   },
   "settings": {
     "title": "Settings",
+    "heartRainDurationLabel": "Heart rain duration (seconds)",
     "themeTitle": "Theme Mode",
     "themeDesc": "Toggle between warm light and charcoal dark theme",
     "themeDark": "Dark",

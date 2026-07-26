@@ -5,21 +5,21 @@ import { Plus, Search, FileText, SlidersHorizontal, X, Heart } from 'lucide-reac
 import { JournalListItem } from './JournalListItem';
 import { FilterModal, type DateRangeFilter, type SortOrderFilter } from './FilterModal';
 import { useDraggableButton } from '../../hooks/useDraggableButton';
-import { useFallingHearts } from '../../hooks/useFallingHearts';
-import { FallingHearts } from '../heart';
 
 interface JournalListProps {
   entries: LocalJournalEntry[];
   onSelectEntry: (date: string) => void;
   onCreateToday: () => void;
   onDonateOpen: () => void;
+  onStartHeartRain?: (durationMs?: number) => void;
 }
 
 export const JournalList: React.FC<JournalListProps> = ({
   entries,
   onSelectEntry,
   onCreateToday,
-  onDonateOpen
+  onDonateOpen,
+  onStartHeartRain,
 }) => {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState(() => {
@@ -51,11 +51,12 @@ export const JournalList: React.FC<JournalListProps> = ({
   const [heartSize, setHeartSize] = useState<number>(() => {
     return parseInt(localStorage.getItem('campfire_mobile_heart_size') || '38', 10);
   });
+  const [heartRainDuration, setHeartRainDuration] = useState<number>(() => {
+    return parseInt(localStorage.getItem('campfire_mobile_heart_rain_duration') || '5', 10);
+  });
   const [customImage, setCustomImage] = useState<string | null>(() => {
     return localStorage.getItem('campfire_mobile_heart_custom_image');
   });
-
-  const { hearts, removeHeart, startHeartRain } = useFallingHearts();
 
   // Listen for config changes and resets
   useEffect(() => {
@@ -63,6 +64,7 @@ export const JournalList: React.FC<JournalListProps> = ({
       setShowDonateHeart(localStorage.getItem('campfire_mobile_show_donate_heart') !== 'false');
       setHeartClickFalls(localStorage.getItem('campfire_mobile_heart_click_falls') === 'true');
       setHeartSize(parseInt(localStorage.getItem('campfire_mobile_heart_size') || '38', 10));
+      setHeartRainDuration(parseInt(localStorage.getItem('campfire_mobile_heart_rain_duration') || '5', 10));
       setCustomImage(localStorage.getItem('campfire_mobile_heart_custom_image'));
     };
 
@@ -177,7 +179,7 @@ export const JournalList: React.FC<JournalListProps> = ({
 
   const handleHeartClick = () => {
     if (heartClickFalls) {
-      startHeartRain(5000);
+      onStartHeartRain?.(heartRainDuration * 1000);
     } else {
       onDonateOpen();
     }
@@ -185,13 +187,6 @@ export const JournalList: React.FC<JournalListProps> = ({
 
   return (
     <div ref={setContainerRefs} className="flex-1 flex flex-col min-h-0 bg-bg-app relative overflow-hidden">
-      {/* Falling Hearts Overlay Canvas */}
-      <FallingHearts
-        hearts={hearts}
-        onRemoveHeart={removeHeart}
-        customImage={customImage}
-      />
-
       {/* Search Bar & Filter */}
       <div className="px-4 py-3 bg-bg-surface border-b border-border-brand shrink-0 flex items-center gap-2 select-none">
         <div className="relative flex-1 flex items-center">
@@ -258,7 +253,11 @@ export const JournalList: React.FC<JournalListProps> = ({
             touchAction: 'none',
             opacity: donateBtn.position ? 1 : 0,
           }}
-          className={`absolute z-30 flex items-center justify-center text-red-500 drop-shadow-[0_0_12px_rgba(239,68,68,0.65)] hover:drop-shadow-[0_0_18px_rgba(239,68,68,0.85)] cursor-grab active:cursor-grabbing select-none ${
+          className={`absolute z-30 flex items-center justify-center cursor-grab active:cursor-grabbing select-none ${
+            customImage
+              ? ''
+              : 'text-red-500 drop-shadow-[0_0_12px_rgba(239,68,68,0.65)] hover:drop-shadow-[0_0_18px_rgba(239,68,68,0.85)]'
+          } ${
             donateBtn.isDragging || donateBtn.isInertia ? 'transition-none scale-110' : 'transition-all duration-300 ease-out hover:scale-110 active:scale-95'
           }`}
           title={t("header.donateTooltip")}

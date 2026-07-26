@@ -24,6 +24,7 @@ export interface AppConfig {
   heart_click_falls: boolean;
   heart_fall_speed: number; // 1-10
   heart_size: number; // px
+  heart_rain_duration: number; // seconds, 1-30
   heart_position: { x: number; y: number } | null;
   heart_gate_dismissed: boolean;
   /**

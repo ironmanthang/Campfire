@@ -102,14 +102,14 @@ function App() {
       if (!matchesShortcut(e, heartShortcut)) return;
       e.preventDefault();
       if (config.heart_click_falls) {
-        startHeartRain(5000);
+        startHeartRain((config.heart_rain_duration ?? 5) * 1000);
       } else {
         setIsSupportOpen(true);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [heartShortcut, config.heart_click_falls, startHeartRain]);
+  }, [heartShortcut, config.heart_click_falls, config.heart_rain_duration, startHeartRain]);
 
   // Load config on mount
   useEffect(() => {

@@ -61,6 +61,7 @@
   },
   "settings": {
     "title": "Cài đặt",
+    "heartRainDurationLabel": "Thời gian rơi",
     "themeTitle": "Chế độ giao diện",
     "themeDesc": "Chuyển đổi giữa giao diện sáng ấm và tối than",
     "themeDark": "Tối",

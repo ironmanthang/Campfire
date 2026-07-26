@@ -196,6 +196,15 @@ export function HeartSection() {
         onChange={(v) => updateConfigField("heart_fall_speed", v)}
       />
 
+      {/* Rain duration slider */}
+      <SliderRow
+        label={t("settingsView.heartRainDurationLabel", { defaultValue: "Heart rain duration (seconds)" })}
+        min={1}
+        max={30}
+        value={config.heart_rain_duration ?? 5}
+        onChange={(v) => updateConfigField("heart_rain_duration", v)}
+      />
+
       {/* Size slider */}
       <SliderRow
         label={t("settingsView.heartSizeLabel", { defaultValue: "Heart size" })}

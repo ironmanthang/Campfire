@@ -169,6 +169,7 @@
     "heartShowLabel": "Hiện trái tim ủng hộ",
     "heartClickFallsLabel": "Click để trái tim rơi thay vì mở cửa sổ ủng hộ",
     "heartSpeedLabel": "Tốc độ trái tim rơi",
+    "heartRainDurationLabel": "Thời gian rơi",
     "heartSizeLabel": "Kích thước trái tim",
     "heartResetPositionLabel": "Reset vị trí và kích thước trái tim",
     "heartResetPositionButton": "Reset",

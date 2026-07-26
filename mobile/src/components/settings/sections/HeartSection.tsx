@@ -71,6 +71,10 @@ export const HeartSection: React.FC = () => {
     return parseInt(localStorage.getItem('campfire_mobile_heart_fall_speed') || '5', 10);
   });
 
+  const [rainDuration, setRainDuration] = useState<number>(() => {
+    return parseInt(localStorage.getItem('campfire_mobile_heart_rain_duration') || '5', 10);
+  });
+
   const [heartSize, setHeartSize] = useState<number>(() => {
     return parseInt(localStorage.getItem('campfire_mobile_heart_size') || '38', 10);
   });
@@ -119,6 +123,12 @@ export const HeartSection: React.FC = () => {
   const handleSpeedChange = (val: number) => {
     setFallSpeed(val);
     localStorage.setItem('campfire_mobile_heart_fall_speed', val.toString());
+    window.dispatchEvent(new Event('heart-config-changed'));
+  };
+
+  const handleRainDurationChange = (val: number) => {
+    setRainDuration(val);
+    localStorage.setItem('campfire_mobile_heart_rain_duration', val.toString());
     window.dispatchEvent(new Event('heart-config-changed'));
   };
 
@@ -220,6 +230,15 @@ export const HeartSection: React.FC = () => {
         max={10}
         value={fallSpeed}
         onChange={handleSpeedChange}
+      />
+
+      {/* Rain duration slider */}
+      <SliderRow
+        label={t("settings.heartRainDurationLabel", { defaultValue: "Heart rain duration (seconds)" })}
+        min={1}
+        max={30}
+        value={rainDuration}
+        onChange={handleRainDurationChange}
       />
 
       {/* Size slider */}

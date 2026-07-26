@@ -31,6 +31,7 @@ export function useConfig(showNotification: (text: string, type: "success" | "er
     heart_click_falls: false,
     heart_fall_speed: 5,
     heart_size: 24,
+    heart_rain_duration: 5,
     heart_position: null,
     heart_gate_dismissed: false,
     heart_shortcut: "",

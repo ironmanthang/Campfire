@@ -169,6 +169,7 @@
     "heartShowLabel": "Show donation heart",
     "heartClickFallsLabel": "Make hearts fall on click instead of donate window",
     "heartSpeedLabel": "Falling heart speed",
+    "heartRainDurationLabel": "Heart rain duration (seconds)",
     "heartSizeLabel": "Heart size",
     "heartResetPositionLabel": "Reset heart position and size",
     "heartResetPositionButton": "Reset",

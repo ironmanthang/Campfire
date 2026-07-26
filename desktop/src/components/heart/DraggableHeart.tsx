@@ -6,11 +6,6 @@ interface DraggableHeartProps {
   onClick: () => void;
 }
 
-// Duration (ms) of the "click → rain" burst. Mirrors the keyboard-shortcut
-// behavior in App.tsx: each click restarts a 5-second rain of falling hearts
-// at randomized 300–500 ms intervals, so the screen fills with hearts
-// instead of dropping a single one.
-const CLICK_RAIN_DURATION_MS = 5000;
 
 const DRAG_THRESHOLD_PX = 5;
 const HEART_ICON_INSET = 6; // px slack so heart stays clickable near edges
@@ -218,18 +213,14 @@ export function DraggableHeart({ onClick }: DraggableHeartProps) {
       } else {
         // It was a click, not a drag
         if (clickFalls) {
-          // Start a 5-second rain of falling hearts (one spawn every
-          // 300–500 ms). Each subsequent click within the window extends
-          // the rain for another full 5 s, so the user can keep it going
-          // by tapping the heart repeatedly. Matches the keyboard-shortcut
-          // behavior in App.tsx.
-          startHeartRain(CLICK_RAIN_DURATION_MS);
+          const durationMs = (config.heart_rain_duration ?? 5) * 1000;
+          startHeartRain(durationMs);
         } else {
           onClick();
         }
       }
     },
-    [clickFalls, fireHearts, onClick, startHeartRain, updateConfigField]
+    [clickFalls, config.heart_rain_duration, fireHearts, onClick, startHeartRain, updateConfigField]
   );
 
   // Suppress the synthetic onClick that React fires after pointerup when

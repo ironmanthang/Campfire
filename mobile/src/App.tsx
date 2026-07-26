@@ -11,6 +11,8 @@ import { useFontSize } from './hooks/useFontSize';
 import { useJournalDb } from './hooks/useJournalDb';
 import { useJournalNavigation } from './hooks/useJournalNavigation';
 import { useGoogleSync } from './hooks/useGoogleSync';
+import { useFallingHearts } from './hooks/useFallingHearts';
+import { FallingHearts } from './components/heart';
 
 // Utils
 import { calculateStreak } from '@campfire/core';
@@ -23,6 +25,19 @@ function App() {
 
   const [showDonateBanner, setShowDonateBanner] = useState(false);
   const [bannerReason, setBannerReason] = useState<'count' | 'streak' | null>(null);
+
+  const { hearts, removeHeart, startHeartRain } = useFallingHearts();
+  const [customImage, setCustomImage] = useState<string | null>(() => {
+    return localStorage.getItem('campfire_mobile_heart_custom_image');
+  });
+
+  useEffect(() => {
+    const updateHeartConfig = () => {
+      setCustomImage(localStorage.getItem('campfire_mobile_heart_custom_image'));
+    };
+    window.addEventListener('heart-config-changed', updateHeartConfig);
+    return () => window.removeEventListener('heart-config-changed', updateHeartConfig);
+  }, []);
 
   // Initialize font size preference
   useFontSize();
@@ -236,8 +251,16 @@ function App() {
           onSelectEntry={handleSelectEntry}
           onCreateToday={handleCreateToday}
           onDonateOpen={() => setIsDonateOpen(true)}
+          onStartHeartRain={startHeartRain}
         />
       )}
+
+      {/* Root Falling Hearts Overlay Canvas */}
+      <FallingHearts
+        hearts={hearts}
+        onRemoveHeart={removeHeart}
+        customImage={customImage}
+      />
 
       {isSettingsOpen && (
         <SettingsModal 
