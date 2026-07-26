@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, ZoomIn, ZoomOut, Check, RotateCw } from 'lucide-react';
-import { useModalBackHandler } from '../../hooks/useModalBackHandler';
+import { useModalBackHandler } from '../../../hooks/useModalBackHandler';
 
 interface ImageCropModalProps {
   isOpen: boolean;

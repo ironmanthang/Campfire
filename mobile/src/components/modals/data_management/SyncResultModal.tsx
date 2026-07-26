@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { X, CheckCircle, BookOpen } from "lucide-react";
-import { useModalBackHandler } from "../../hooks/useModalBackHandler";
+import { useModalBackHandler } from "../../../hooks/useModalBackHandler";
 
 interface SyncResultModalProps {
   updatedDates: string[];

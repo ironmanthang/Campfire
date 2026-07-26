@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RotateCcw, Image as ImageIcon, Upload, Trash2 } from 'lucide-react';
-import { HeartGateModal } from '../../modals/HeartGateModal';
+import { HeartGateModal } from '../../modals';
 import { DEFAULT_HEART_SIZE } from '../../../constants/heart';
 
 function SliderRow({

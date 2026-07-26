@@ -1,7 +1,7 @@
 import React from "react";
 import { Heart } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useModalBackHandler } from "../../hooks/useModalBackHandler";
+import { useModalBackHandler } from "../../../hooks/useModalBackHandler";
 
 interface HeartGateModalProps {
   isOpen: boolean;

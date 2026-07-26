@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Header } from './components/layout';
 import { JournalList, JournalEditor } from './components/journal';
 import { SettingsModal } from './components/settings';
-import { SyncResultModal, DonateModal } from './components/modals';
+import { SyncResultModal, SupportModal } from './components/modals';
 
 // Hooks
 import { useTheme } from './hooks/useTheme';
@@ -271,7 +271,7 @@ function App() {
         />
       )}
 
-      <DonateModal 
+      <SupportModal 
         isOpen={isDonateOpen}
         onClose={() => setIsDonateOpen(false)}
       />

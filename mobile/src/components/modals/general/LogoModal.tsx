@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Upload, RotateCcw } from 'lucide-react';
 import { ImageCropModal } from './ImageCropModal';
-import { useModalBackHandler } from '../../hooks/useModalBackHandler';
+import { useModalBackHandler } from '../../../hooks/useModalBackHandler';
 
 interface LogoModalProps {
   isOpen: boolean;

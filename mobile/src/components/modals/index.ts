@@ -1,8 +1,11 @@
-export * from './DonateModal';
-export * from './SyncResultModal';
-export * from './ImageCropModal';
-export * from './LogoModal';
-export * from './HeartGateModal';
+export * from './general/SupportModal';
+export * from './general/HeartGateModal';
+export * from './general/LogoModal';
+export * from './general/ImageCropModal';
+export * from './data_management/SyncResultModal';
+
+// Alias for backwards compatibility
+export { SupportModal as DonateModal } from './general/SupportModal';
 
 
 

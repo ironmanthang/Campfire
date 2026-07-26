@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Heart, ExternalLink, Download } from 'lucide-react';
-import { useModalBackHandler } from '../../hooks/useModalBackHandler';
+import { useModalBackHandler } from '../../../hooks/useModalBackHandler';
 
-interface DonateModalProps {
+interface SupportModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose }) => {
+export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) => {
   const { t } = useTranslation();
   const [donationTab, setDonationTab] = useState<'vietqr' | 'kofi'>('kofi');
   const [customMessage, setCustomMessage] = useState('');

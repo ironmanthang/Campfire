@@ -84,7 +84,7 @@ export const JournalList: React.FC<JournalListProps> = ({
   const addBtn = useDraggableButton({
     storageKey: 'campfire_mobile_add_pos',
     defaultCorner: 'bottom-right',
-    buffer: 20,
+    buffer: 30,
   });
 
   // Listen for position reset event

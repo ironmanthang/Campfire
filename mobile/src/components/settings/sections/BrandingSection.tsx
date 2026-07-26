@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ImageCropModal } from '../../modals/ImageCropModal';
+import { ImageCropModal } from '../../modals';
 
 interface BrandingSectionProps {
   customLogo: string | null;
