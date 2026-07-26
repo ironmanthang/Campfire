@@ -12,4 +12,11 @@ export {
   defaultExportFilename,
   type ExportableEntry,
   type ExportedJsonEntry,
+  parseJsonImport,
+  parseMdImport,
+  parseImportContent,
+  appendImportedContent,
+  type ImportReport,
+  type ImportSkippedEntry,
+  type ImportError,
 } from '@campfire/core';

@@ -6,3 +6,4 @@ export * from './merge';
 export * from './exportJournal';
 export * from './sync';
 export * from './streak';
+export * from './importJournal';

@@ -84,7 +84,9 @@ export const JournalList: React.FC<JournalListProps> = ({
   const addBtn = useDraggableButton({
     storageKey: 'campfire_mobile_add_pos',
     defaultCorner: 'bottom-right',
-    buffer: 30,
+    buttonWidth: 56,
+    buttonHeight: 56,
+    buffer: 20,
   });
 
   // Listen for position reset event
@@ -283,10 +285,12 @@ export const JournalList: React.FC<JournalListProps> = ({
         style={{
           left: addBtn.position ? `${addBtn.position.x}px` : undefined,
           top: addBtn.position ? `${addBtn.position.y}px` : undefined,
+          width: '56px',
+          height: '56px',
           touchAction: 'none',
           opacity: addBtn.position ? 1 : 0,
         }}
-        className={`absolute z-30 w-14 h-14 rounded-full bg-accent-brand text-bg-app shadow-[0_0_16px] shadow-accent-brand/45 hover:shadow-[0_0_22px] hover:shadow-accent-brand/65 hover:bg-accent-brand-hover flex items-center justify-center cursor-grab active:cursor-grabbing select-none ${
+        className={`absolute z-30 w-[56px] h-[56px] rounded-full bg-accent-brand text-bg-app shadow-[0_0_16px] shadow-accent-brand/45 hover:shadow-[0_0_22px] hover:shadow-accent-brand/65 hover:bg-accent-brand-hover flex items-center justify-center cursor-grab active:cursor-grabbing select-none ${
           addBtn.isDragging || addBtn.isInertia ? 'transition-none scale-110' : 'transition-all duration-300 ease-out hover:scale-105 active:scale-95'
         }`}
       >

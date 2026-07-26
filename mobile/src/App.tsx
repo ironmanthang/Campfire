@@ -268,6 +268,9 @@ function App() {
             setIsSettingsOpen(false);
             checkAuthStatus();
           }}
+          onImportComplete={() => {
+            loadEntries();
+          }}
         />
       )}
 

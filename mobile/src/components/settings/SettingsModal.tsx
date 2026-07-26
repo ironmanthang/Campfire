@@ -15,10 +15,12 @@ import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 
 interface SettingsModalProps {
   onClose: () => void;
+  onImportComplete?: () => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
-  onClose
+  onClose,
+  onImportComplete,
 }) => {
   const { t } = useTranslation();
   const { handleManualClose } = useModalBackHandler(true, onClose);
@@ -69,7 +71,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <hr className="border-border-brand" />
 
           {/* Export data section */}
-          <ExportSection />
+          <ExportSection onImportComplete={onImportComplete} />
 
 
           {/* Privacy & Terms & Version Links */}
