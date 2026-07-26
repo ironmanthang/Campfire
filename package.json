@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "prepush": "node scripts/prepush.mjs",
     "tauri": "tauri",
-    "i18n:check": "node scripts/i18n-check.js",
+    "i18n:check": "pnpm --filter desktop --filter mobile i18n:check",
+
     "test": "vitest run"
   },
   "dependencies": {
