@@ -41,6 +41,7 @@ export function useDraggableButton({
 
   const animFrameRef = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const tapCallbackRef = useRef<(() => void) | undefined>(undefined);
 
   const stopInertia = useCallback(() => {
     if (animFrameRef.current !== null) {
@@ -188,6 +189,12 @@ export function useDraggableButton({
     dragInfo.current.activePointerId = null;
     setIsDragging(false);
 
+    // Detect tap (not drag) — fire here instead of onClick because
+    // mobile browsers suppress click after setPointerCapture + touch-action:none
+    if (dragInfo.current.totalDistance <= 6) {
+      tapCallbackRef.current?.();
+    }
+
     const width = containerRef.current?.clientWidth || window.innerWidth;
     const height = containerRef.current?.clientHeight || window.innerHeight;
 
@@ -279,15 +286,15 @@ export function useDraggableButton({
     }
   };
 
-  // Helper to wrap click handlers to ignore clicks that were actually drags (> 6px movement)
+  // Register a tap callback — the actual tap is detected in onPointerUp.
+  // The returned onClick handler only prevents the browser click from
+  // double-firing or leaking through after a drag.
   const handleTap = (callback?: () => void) => {
+    tapCallbackRef.current = callback;
     return (e: React.MouseEvent) => {
-      if (dragInfo.current.totalDistance > 6) {
-        e.preventDefault();
-        e.stopPropagation();
-        return;
-      }
-      callback?.();
+      // Always prevent the native click; taps are handled in onPointerUp
+      e.preventDefault();
+      e.stopPropagation();
     };
   };
 
