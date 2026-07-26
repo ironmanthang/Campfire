@@ -66,7 +66,7 @@ export function useDraggableButton({
 
   // Compute default position based on container size and default corner preference
   const getDefaultPosition = useCallback((containerWidth: number, containerHeight: number): Position => {
-    const y = Math.max(buffer, containerHeight - buttonHeight - 32);
+    const y = Math.max(buffer, containerHeight - buttonHeight - buffer);
     if (defaultCorner === 'bottom-left') {
       return { x: buffer, y };
     } else {

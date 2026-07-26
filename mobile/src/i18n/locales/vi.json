@@ -117,7 +117,7 @@
   },
   "donate": {
     "modalTitle": "Ủng hộ Campfire",
-    "modalBody": "Mình dự định giữ Campfire hoàn toàn miễn phí, ngoại tuyến và độc lập. Nếu ứng dụng mang lại giá trị cho ngày của bạn, hãy cân nhắc ủng hộ quá trình phát triển nhé!",
+    "modalBody": "Mình dự định giữ Campfire hoàn toàn miễn phí, ngoại tuyến và độc lập. Nếu ứng dụng mang lại giá trị cho ngày của bạn, hãy cân nhắc ủng hộ mình nhé!",
     "tabVietQr": "VietQR (VND)",
     "tabKofi": "Ko-fi (USD)",
     "vietQrBody": "Quét mã QR bên dưới bằng bất kỳ ứng dụng ngân hàng Việt Nam nào để ủng hộ:",
@@ -135,8 +135,8 @@
     "kofiCopiedToast": "Đã chép lời nhắn! Bạn có thể dán vào Ko-fi."
   },
   "donateBanner": {
-    "count": "Bạn đã viết 10 mục nhật ký trong Campfire! Nếu ứng dụng mang lại giá trị cho ngày của bạn, hãy cân nhắc ủng hộ quá trình phát triển.",
-    "streak": "Bạn đã đạt chuỗi viết 30 ngày trong Campfire! Nếu ứng dụng mang lại giá trị cho ngày của bạn, hãy cân nhắc ủng hộ quá trình phát triển.",
+    "count": "Bạn đã viết 10 mục nhật ký trong Campfire! Nếu ứng dụng mang lại giá trị cho ngày của bạn, hãy cân nhắc ủng hộ mình nha.",
+    "streak": "Bạn đã đạt chuỗi viết 30 ngày trong Campfire! Nếu ứng dụng mang lại giá trị cho ngày của bạn, hãy cân nhắc ủng hộ mình nhe.",
     "supportButton": "Ủng hộ Campfire",
     "maybeLater": "Để sau",
     "dontAskAgain": "Không hỏi lại"
