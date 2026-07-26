@@ -210,8 +210,7 @@ export function useDraggableButton({
 
     // Detect tap (not drag) — fire here instead of onClick because
     // mobile browsers suppress click after setPointerCapture + touch-action:none
-    if (dragInfo.current.totalDistance <= 14) {
-      tapFiredRef.current = true;
+    if (dragInfo.current.totalDistance <= 6) {
       tapCallbackRef.current?.();
     }
 
@@ -307,20 +306,14 @@ export function useDraggableButton({
   };
 
   // Register a tap callback — the actual tap is detected in onPointerUp.
-  // The returned onClick handler handles keyboard click fallback and prevents
-  // double-firing if a pointer tap already handled it.
+  // The returned onClick handler only prevents the browser click from
+  // double-firing or leaking through after a drag.
   const handleTap = (callback?: () => void) => {
     tapCallbackRef.current = callback;
     return (e: React.MouseEvent) => {
+      // Always prevent the native click; taps are handled in onPointerUp
       e.preventDefault();
       e.stopPropagation();
-      if (!tapFiredRef.current && !wasDraggedRef.current) {
-        tapFiredRef.current = true;
-        tapCallbackRef.current?.();
-      }
-      tapFiredRef.current = false;
-      wasPointerEventRef.current = false;
-      wasDraggedRef.current = false;
     };
   };
 
