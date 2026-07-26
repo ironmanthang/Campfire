@@ -42,6 +42,42 @@ export function useDraggableButton({
   const animFrameRef = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const tapCallbackRef = useRef<(() => void) | undefined>(undefined);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+
+  // ── DEBUG HELPER ─────────────────────────────────────────────────
+  const _dbg = (msg: string, color = '#0f0') => {
+    const key = storageKey.replace('campfire_mobile_', '');
+    console.log(`[DragBtn:${key}]`, msg);
+    const el = document.createElement('div');
+    el.textContent = `[${key}] ${msg}`;
+    Object.assign(el.style, {
+      position: 'fixed', bottom: '8px', left: '8px', right: '8px',
+      padding: '6px 10px', background: `rgba(0,0,0,0.9)`, color,
+      fontSize: '11px', fontFamily: 'monospace', borderRadius: '8px',
+      zIndex: '99999', pointerEvents: 'none',
+      marginBottom: `${document.querySelectorAll('[data-dbg]').length * 36}px`,
+    });
+    el.setAttribute('data-dbg', '1');
+    document.body.appendChild(el);
+    setTimeout(() => { el.remove(); }, 4000);
+  };
+  // ─────────────────────────────────────────────────────────────────
+
+  // Attach raw touchstart directly on the button to bypass React/pointer event issues
+  useEffect(() => {
+    const btn = buttonRef.current;
+    if (!btn) {
+      _dbg('no buttonRef on mount!', '#f00');
+      return;
+    }
+    const onTouch = (e: TouchEvent) => {
+      _dbg(`RAW touchstart! touches=${e.touches.length} pos=${position ? JSON.stringify(position) : 'null'}`, '#ff0');
+    };
+    btn.addEventListener('touchstart', onTouch, { passive: true });
+    _dbg(`buttonRef mounted, pos=${position ? JSON.stringify(position) : 'null'}`, '#0af');
+    return () => btn.removeEventListener('touchstart', onTouch);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [position]);
 
   const stopInertia = useCallback(() => {
     if (animFrameRef.current !== null) {
@@ -122,8 +158,11 @@ export function useDraggableButton({
 
 
   const onPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (!position) return;
-    
+    if (!position) {
+      _dbg('pointerDown BLOCKED: pos=null', '#f00');
+      return;
+    }
+    _dbg(`pointerDown OK pid=${e.pointerId} pos=${JSON.stringify(position)}`);
     // Stop any ongoing inertia motion on touch/press
     stopInertia();
 
@@ -201,7 +240,10 @@ export function useDraggableButton({
 
     // Detect tap (not drag) — fire here instead of onClick because
     // mobile browsers suppress click after setPointerCapture + touch-action:none
-    if (dragInfo.current.totalDistance <= 6) {
+    const dist = dragInfo.current.totalDistance;
+    const hasCb = !!tapCallbackRef.current;
+    _dbg(`pointerUp dist=${dist.toFixed(1)} hasCb=${hasCb} isTap=${dist <= 6}`);
+    if (dist <= 6) {
       tapCallbackRef.current?.();
     }
 
@@ -329,5 +371,6 @@ export function useDraggableButton({
       onPointerCancel: onPointerUp,
     },
     handleTap,
+    buttonRef,
   };
 }

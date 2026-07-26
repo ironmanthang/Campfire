@@ -178,6 +178,18 @@ export const JournalList: React.FC<JournalListProps> = ({
   });
 
   const handleHeartClick = () => {
+    // DEBUG
+    const _d = document.createElement('div');
+    _d.textContent = `❤️ handleHeartClick! falls=${heartClickFalls} rain=${heartRainDuration}s hasFn=${!!onStartHeartRain}`;
+    Object.assign(_d.style, {
+      position: 'fixed', top: '40px', left: '8px', right: '8px',
+      padding: '8px', background: 'rgba(200,0,0,0.92)', color: '#fff',
+      fontSize: '12px', fontFamily: 'monospace', borderRadius: '8px',
+      zIndex: '99999', pointerEvents: 'none',
+    });
+    document.body.appendChild(_d);
+    setTimeout(() => _d.remove(), 4000);
+
     if (heartClickFalls) {
       onStartHeartRain?.(heartRainDuration * 1000);
     } else {
@@ -243,6 +255,7 @@ export const JournalList: React.FC<JournalListProps> = ({
       {/* Floating Donate Heart Button */}
       {showDonateHeart && (
         <button 
+          ref={donateBtn.buttonRef}
           {...donateBtn.bind}
           onClick={donateBtn.handleTap(handleHeartClick)}
           style={{
