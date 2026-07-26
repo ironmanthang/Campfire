@@ -121,6 +121,7 @@ export function useDraggableButton({
 
   const wasPointerEventRef = useRef(false);
   const tapFiredRef = useRef(false);
+  const wasDraggedRef = useRef(false);
 
   const onPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
     if (!position) return;
@@ -137,6 +138,7 @@ export function useDraggableButton({
 
     wasPointerEventRef.current = true;
     tapFiredRef.current = false;
+    wasDraggedRef.current = false;
 
     const now = performance.now();
     dragInfo.current = {
@@ -166,6 +168,9 @@ export function useDraggableButton({
     const deltaY = e.clientY - dragInfo.current.startY;
 
     dragInfo.current.totalDistance = Math.hypot(deltaX, deltaY);
+    if (dragInfo.current.totalDistance > 14) {
+      wasDraggedRef.current = true;
+    }
 
     if (dt > 0 && dt < 100) {
       const instVx = (e.clientX - dragInfo.current.lastClientX) / dt;
@@ -205,7 +210,7 @@ export function useDraggableButton({
 
     // Detect tap (not drag) — fire here instead of onClick because
     // mobile browsers suppress click after setPointerCapture + touch-action:none
-    if (dragInfo.current.totalDistance <= 6) {
+    if (dragInfo.current.totalDistance <= 14) {
       tapFiredRef.current = true;
       tapCallbackRef.current?.();
     }
@@ -309,11 +314,13 @@ export function useDraggableButton({
     return (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      if (!wasPointerEventRef.current && !tapFiredRef.current) {
+      if (!tapFiredRef.current && !wasDraggedRef.current) {
+        tapFiredRef.current = true;
         tapCallbackRef.current?.();
       }
       tapFiredRef.current = false;
       wasPointerEventRef.current = false;
+      wasDraggedRef.current = false;
     };
   };
 

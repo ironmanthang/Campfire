@@ -37,7 +37,7 @@ export const FallingHearts: React.FC<FallingHeartsProps> = ({
             width: `${h.size}px`,
             height: `${h.size}px`,
             ['--fall-drift' as any]: `${h.driftX}px`,
-            ['--fall-rotation' as any]: `${h.rotation}deg`,
+            ['--fall-rotation' as any]: `${h.rotation * 6}deg`,
             animationDuration: `${h.durationMs}ms`,
           } as React.CSSProperties}
           onAnimationEnd={() => onRemoveHeart(h.id)}
