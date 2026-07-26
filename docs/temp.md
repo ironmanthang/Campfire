@@ -2,6 +2,9 @@
 
 Todo: 
  
+add Inertial Scrolling to the two draggable buttons in mobile 
+
+how is the logic croping logo work?i zoom out all the way, but still the image is too large?shoudl the app logic for zoom is take a width or height of the image to be the base for when zoom out?
 
 How to prevent the pwa from keep asking usser to log in, make it "remember me". 
 

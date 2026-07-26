@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ImageCropModal } from '../modals/ImageCropModal';
+import { ImageCropModal } from '../../modals/ImageCropModal';
 
 interface BrandingSectionProps {
   customLogo: string | null;
@@ -20,7 +20,6 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({ customLogo, on
       setCropImageSrc(reader.result as string);
     };
     reader.readAsDataURL(file);
-    // Reset target value so selecting the same file again triggers onChange
     e.target.value = '';
   };
 
@@ -79,4 +78,3 @@ export const BrandingSection: React.FC<BrandingSectionProps> = ({ customLogo, on
     </div>
   );
 };
-

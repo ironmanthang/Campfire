@@ -159,3 +159,57 @@ body {
   -moz-user-select: none;
   -ms-user-select: none;
 }
+
+/* Donation Heart Animations & Styles */
+@keyframes heartbeat {
+  0% { transform: scale(1); }
+  5% { transform: scale(1.15); }
+  10% { transform: scale(1); }
+  15% { transform: scale(1.15); }
+  25% { transform: scale(1); }
+  100% { transform: scale(1); }
+}
+
+.animate-heartbeat {
+  animation: heartbeat 10s infinite ease-in-out;
+}
+
+/* Falling hearts animation */
+@keyframes falling-heart {
+  0% {
+    transform: translate3d(0, -40px, 0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--fall-drift, 0px), 110vh, 0) rotate(calc(var(--fall-rotation, 0deg) * 15));
+    opacity: 0;
+  }
+}
+
+.falling-heart {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  color: #ef4444;
+  fill: #ef4444;
+  filter:
+    drop-shadow(0 0 3px rgba(239, 68, 68, 0.85))
+    drop-shadow(0 0 8px rgba(244, 63, 94, 0.6))
+    drop-shadow(0 0 18px rgba(239, 68, 68, 0.35));
+  animation: falling-heart linear forwards;
+  will-change: transform, opacity;
+}
+
+.falling-heart--image {
+  filter: none !important;
+  color: inherit !important;
+  fill: none !important;
+}
+

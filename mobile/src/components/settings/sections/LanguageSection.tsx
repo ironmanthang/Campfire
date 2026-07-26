@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SUPPORTED_LANGUAGES } from '../../i18n/languages';
-import { LANGUAGE_STORAGE_KEY } from '../../i18n';
-import i18n from '../../i18n';
+import { SUPPORTED_LANGUAGES } from '../../../i18n/languages';
+import { LANGUAGE_STORAGE_KEY } from '../../../i18n';
+import i18n from '../../../i18n';
 
 export const LanguageSection: React.FC = () => {
   const { t } = useTranslation();

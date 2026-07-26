@@ -6,7 +6,7 @@ import {
   requestDriveAuth,
   clearAuthState,
   getGoogleUserInfo
-} from '../../services/googleDrive';
+} from '../../../services/googleDrive';
 
 export const GoogleDriveSection: React.FC = () => {
   const { t } = useTranslation();

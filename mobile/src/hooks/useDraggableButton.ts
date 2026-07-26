@@ -22,8 +22,9 @@ export function useDraggableButton({
 }: UseDraggableButtonOptions) {
   const [position, setPosition] = useState<Position | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isInertia, setIsInertia] = useState(false);
   
-  // Track pointer start and drag distance to differentiate tap vs drag
+  // Track pointer start, drag distance, velocity & animation state
   const dragInfo = useRef({
     startX: 0,
     startY: 0,
@@ -31,9 +32,23 @@ export function useDraggableButton({
     initialY: 0,
     totalDistance: 0,
     activePointerId: null as number | null,
+    lastClientX: 0,
+    lastClientY: 0,
+    lastTime: 0,
+    vx: 0,
+    vy: 0,
   });
 
+  const animFrameRef = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const stopInertia = useCallback(() => {
+    if (animFrameRef.current !== null) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
+    }
+    setIsInertia(false);
+  }, []);
 
   // Helper to clamp position inside container/viewport bounds with buffer
   const clampPosition = useCallback((pos: Position, containerWidth: number, containerHeight: number): Position => {
@@ -57,6 +72,13 @@ export function useDraggableButton({
       return { x: Math.max(buffer, containerWidth - buttonWidth - buffer), y };
     }
   }, [defaultCorner, buttonWidth, buttonHeight, buffer]);
+
+  // Cleanup inertia animation on unmount
+  useEffect(() => {
+    return () => {
+      stopInertia();
+    };
+  }, [stopInertia]);
 
   // Initialize position from localStorage or default position on mount
   useEffect(() => {
@@ -99,9 +121,13 @@ export function useDraggableButton({
   const onPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
     if (!position) return;
     
+    // Stop any ongoing inertia motion on touch/press
+    stopInertia();
+
     // Capture pointer for continuous tracking even outside button bounds
     e.currentTarget.setPointerCapture(e.pointerId);
 
+    const now = performance.now();
     dragInfo.current = {
       startX: e.clientX,
       startY: e.clientY,
@@ -109,6 +135,11 @@ export function useDraggableButton({
       initialY: position.y,
       totalDistance: 0,
       activePointerId: e.pointerId,
+      lastClientX: e.clientX,
+      lastClientY: e.clientY,
+      lastTime: now,
+      vx: 0,
+      vy: 0,
     };
 
     setIsDragging(true);
@@ -117,10 +148,29 @@ export function useDraggableButton({
   const onPointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
     if (!isDragging || dragInfo.current.activePointerId !== e.pointerId) return;
 
+    const now = performance.now();
+    const dt = now - dragInfo.current.lastTime;
+
     const deltaX = e.clientX - dragInfo.current.startX;
     const deltaY = e.clientY - dragInfo.current.startY;
 
     dragInfo.current.totalDistance = Math.hypot(deltaX, deltaY);
+
+    if (dt > 0 && dt < 100) {
+      const instVx = (e.clientX - dragInfo.current.lastClientX) / dt;
+      const instVy = (e.clientY - dragInfo.current.lastClientY) / dt;
+      // Exponential moving average for smooth velocity estimation
+      dragInfo.current.vx = dragInfo.current.vx * 0.3 + instVx * 0.7;
+      dragInfo.current.vy = dragInfo.current.vy * 0.3 + instVy * 0.7;
+    } else if (dt >= 100) {
+      // Stopped moving before release
+      dragInfo.current.vx = 0;
+      dragInfo.current.vy = 0;
+    }
+
+    dragInfo.current.lastClientX = e.clientX;
+    dragInfo.current.lastClientY = e.clientY;
+    dragInfo.current.lastTime = now;
 
     const newX = dragInfo.current.initialX + deltaX;
     const newY = dragInfo.current.initialY + deltaY;
@@ -138,20 +188,95 @@ export function useDraggableButton({
     dragInfo.current.activePointerId = null;
     setIsDragging(false);
 
-    // Apply buffer clamping on release (pushback to safe area with buffer padding)
     const width = containerRef.current?.clientWidth || window.innerWidth;
     const height = containerRef.current?.clientHeight || window.innerHeight;
 
-    setPosition((currentPos) => {
-      if (!currentPos) return null;
-      const clamped = clampPosition(currentPos, width, height);
-      try {
-        localStorage.setItem(storageKey, JSON.stringify(clamped));
-      } catch {
-        // Ignore localStorage write errors
-      }
-      return clamped;
-    });
+    const minX = buffer;
+    const maxX = Math.max(buffer, width - buttonWidth - buffer);
+    const minY = buffer;
+    const maxY = Math.max(buffer, height - buttonHeight - buffer);
+
+    const now = performance.now();
+    const timeSinceLastMove = now - dragInfo.current.lastTime;
+
+    // Reset velocity if user held the pointer still before releasing
+    let vx = timeSinceLastMove > 60 ? 0 : dragInfo.current.vx;
+    let vy = timeSinceLastMove > 60 ? 0 : dragInfo.current.vy;
+
+    const speed = Math.hypot(vx, vy);
+
+    // If speed is above threshold (0.15 px/ms), start inertial scrolling loop
+    if (speed > 0.15 && position) {
+      setIsInertia(true);
+
+      let currentX = position.x;
+      let currentY = position.y;
+      let lastFrameTime = performance.now();
+
+      const runInertia = (frameTime: number) => {
+        const frameDt = Math.min(frameTime - lastFrameTime, 32);
+        lastFrameTime = frameTime;
+
+        // Apply position delta
+        currentX += vx * frameDt;
+        currentY += vy * frameDt;
+
+        // Apply friction decay (0.92 per 16.6ms)
+        const frictionFactor = Math.pow(0.92, frameDt / 16.6);
+        vx *= frictionFactor;
+        vy *= frictionFactor;
+
+        // Soft bounce off boundaries
+        if (currentX < minX) {
+          currentX = minX;
+          vx = -vx * 0.35;
+        } else if (currentX > maxX) {
+          currentX = maxX;
+          vx = -vx * 0.35;
+        }
+
+        if (currentY < minY) {
+          currentY = minY;
+          vy = -vy * 0.35;
+        } else if (currentY > maxY) {
+          currentY = maxY;
+          vy = -vy * 0.35;
+        }
+
+        const currentSpeed = Math.hypot(vx, vy);
+        const clamped = { x: currentX, y: currentY };
+        setPosition(clamped);
+
+        if (currentSpeed > 0.02) {
+          animFrameRef.current = requestAnimationFrame(runInertia);
+        } else {
+          // Inertia complete - clamp & save final position
+          setIsInertia(false);
+          animFrameRef.current = null;
+          const finalClamped = clampPosition(clamped, width, height);
+          setPosition(finalClamped);
+          try {
+            localStorage.setItem(storageKey, JSON.stringify(finalClamped));
+          } catch {
+            // Ignore storage errors
+          }
+        }
+      };
+
+      animFrameRef.current = requestAnimationFrame(runInertia);
+    } else {
+      // Immediate release without flick momentum
+      setPosition((currentPos) => {
+        if (!currentPos) return null;
+        const clamped = clampPosition(currentPos, width, height);
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(clamped));
+        } catch {
+          // Ignore localStorage write errors
+        }
+        return clamped;
+      });
+    }
   };
 
   // Helper to wrap click handlers to ignore clicks that were actually drags (> 6px movement)
@@ -166,10 +291,20 @@ export function useDraggableButton({
     };
   };
 
+  const resetPosition = useCallback(() => {
+    stopInertia();
+    localStorage.removeItem(storageKey);
+    const width = containerRef.current?.clientWidth || window.innerWidth;
+    const height = containerRef.current?.clientHeight || window.innerHeight;
+    setPosition(getDefaultPosition(width, height));
+  }, [storageKey, getDefaultPosition, stopInertia]);
+
   return {
     position,
     isDragging,
+    isInertia,
     containerRef,
+    resetPosition,
     bind: {
       onPointerDown,
       onPointerMove,

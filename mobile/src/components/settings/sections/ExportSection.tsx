@@ -1,13 +1,13 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Download } from 'lucide-react';
-import { listLocalEntries } from '../../services/db';
+import { listLocalEntries } from '../../../services/db';
 import {
   exportAsJson,
   exportAsMarkdown,
   downloadBlob,
   defaultExportFilename,
-} from '../../lib/exportJournal';
+} from '../../../lib/exportJournal';
 
 export const ExportSection: React.FC = () => {
   const { t } = useTranslation();

@@ -28,28 +28,38 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
   const imageRef = useRef<HTMLImageElement | null>(null);
 
   // Calculate base scale so image fits in crop box when loaded
-  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const img = e.currentTarget;
+  const updateBaseScale = (img: HTMLImageElement) => {
     if (img.naturalWidth && img.naturalHeight) {
       const cropBoxSize = 200;
+      // Use Math.max so the entire image fits within the 200px crop box by default
       const fitScale = cropBoxSize / Math.max(img.naturalWidth, img.naturalHeight);
       setBaseScale(fitScale);
-      setZoom(1);
-      setOffset({ x: 0, y: 0 });
     }
   };
 
-  // Reset transform state when a new image is loaded
+  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    updateBaseScale(e.currentTarget);
+    setZoom(1);
+    setOffset({ x: 0, y: 0 });
+  };
+
+  // Reset transform state & compute base scale immediately for cached base64 images
   useEffect(() => {
     setZoom(1);
-    setBaseScale(1);
     setRotation(0);
     setOffset({ x: 0, y: 0 });
+
+    if (imageRef.current && imageRef.current.complete && imageRef.current.naturalWidth) {
+      updateBaseScale(imageRef.current);
+    } else {
+      setBaseScale(1);
+    }
   }, [imageSrc]);
 
   if (!isOpen) return null;
 
   const effectiveScale = baseScale * zoom;
+
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
@@ -186,13 +196,14 @@ export const ImageCropModal: React.FC<ImageCropModalProps> = ({
             <ZoomOut size={16} className="text-text-secondary shrink-0" />
             <input
               type="range"
-              min="0.8"
+              min="0.2"
               max="4"
               step="0.05"
               value={zoom}
               onChange={(e) => setZoom(parseFloat(e.target.value))}
               className="flex-1 accent-accent-brand cursor-pointer h-1.5 bg-bg-app rounded-lg"
             />
+
             <ZoomIn size={16} className="text-text-secondary shrink-0" />
           </div>
 

@@ -2,12 +2,16 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 import { APP_VERSION } from '../../lib/appVersion';
-import { FontSizeSection } from './FontSizeSection';
-import { LanguageSection } from './LanguageSection';
-import { GoogleDriveSection } from './GoogleDriveSection';
-import { DesktopSection } from './DesktopSection';
-import { ExportSection } from './ExportSection';
+import {
+  FontSizeSection,
+  LanguageSection,
+  GoogleDriveSection,
+  DesktopSection,
+  ExportSection,
+  HeartSection,
+} from './sections';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
+
 
 interface SettingsModalProps {
   onClose: () => void;
@@ -48,6 +52,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
           <hr className="border-border-brand" />
 
+          {/* Heart Customization setting */}
+          <HeartSection />
+
+          <hr className="border-border-brand" />
+
           {/* Google Drive Configuration */}
           <GoogleDriveSection />
 
@@ -61,6 +70,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
           {/* Export data section */}
           <ExportSection />
+
 
           {/* Privacy & Terms & Version Links */}
           <div className="flex justify-center items-center gap-3 pt-6 border-t border-border-brand/40 text-[11px] text-text-secondary">

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Type } from 'lucide-react';
-import { useFontSize, type FontSizeOption } from '../../hooks/useFontSize';
+import { useFontSize, type FontSizeOption } from '../../../hooks/useFontSize';
 
 export const FontSizeSection: React.FC = () => {
   const { t } = useTranslation();
