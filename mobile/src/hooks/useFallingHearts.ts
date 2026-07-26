@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { DEFAULT_HEART_SIZE } from '../constants/heart';
 
 
 export interface FallingHeart {
@@ -20,7 +21,7 @@ export function useFallingHearts() {
 
   const fireHearts = useCallback((count: number = 1) => {
     const speedSetting = parseInt(localStorage.getItem('campfire_mobile_heart_fall_speed') || '5', 10);
-    const sizeSetting = parseInt(localStorage.getItem('campfire_mobile_heart_size') || '80', 10);
+    const sizeSetting = parseInt(localStorage.getItem('campfire_mobile_heart_size') || String(DEFAULT_HEART_SIZE), 10);
     
     setHearts((prev) => {
       const max = 50;

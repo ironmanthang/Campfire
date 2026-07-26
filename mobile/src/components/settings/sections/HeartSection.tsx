@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RotateCcw, Image as ImageIcon, Upload, Trash2 } from 'lucide-react';
 import { HeartGateModal } from '../../modals/HeartGateModal';
+import { DEFAULT_HEART_SIZE } from '../../../constants/heart';
 
 function SliderRow({
   label,
@@ -76,7 +77,7 @@ export const HeartSection: React.FC = () => {
   });
 
   const [heartSize, setHeartSize] = useState<number>(() => {
-    return parseInt(localStorage.getItem('campfire_mobile_heart_size') || '80', 10);
+    return parseInt(localStorage.getItem('campfire_mobile_heart_size') || String(DEFAULT_HEART_SIZE), 10);
   });
 
   const [customImage, setCustomImage] = useState<string | null>(() => {
@@ -197,8 +198,8 @@ export const HeartSection: React.FC = () => {
 
   const handleResetPosition = () => {
     localStorage.removeItem('campfire_mobile_donate_pos');
-    localStorage.setItem('campfire_mobile_heart_size', '80');
-    setHeartSize(80);
+    localStorage.setItem('campfire_mobile_heart_size', String(DEFAULT_HEART_SIZE));
+    setHeartSize(DEFAULT_HEART_SIZE);
     window.dispatchEvent(new Event('heart-reset'));
     window.dispatchEvent(new Event('heart-config-changed'));
   };
