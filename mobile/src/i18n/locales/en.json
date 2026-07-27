@@ -16,6 +16,8 @@
     "wordCountPlural": "{{count}} words",
     "unsyncedTooltip": "Unsynced edits",
     "syncedTooltip": "Synced",
+    "unsyncedBadge": "Local",
+    "syncedBadge": "Synced",
     "emptyTitle": "No journal entries found",
     "emptyHint": "Try clearing your filters or search query",
     "emptyPreview": "Empty entry",
@@ -123,7 +125,8 @@
     "desktopCopyLink": "Copy PC Link",
     "desktopCopied": "Copied!",
     "googleClientIdMissing": "Google OAuth Client ID is not configured in the environment.",
-    "googleLoginFailed": "Login failed"
+    "googleLoginFailed": "Login failed",
+    "storageQuotaError": "Unable to save custom image because browser storage quota is full. Please try a smaller image."
   },
   "donate": {
     "modalTitle": "Support Campfire",
@@ -159,7 +162,9 @@
     "resultTitle": "Sync Completed",
     "resultBody": "The following diaries were updated/downloaded on this device:",
     "resultOpenEntry": "Open entry",
-    "resultClose": "Close"
+    "resultClose": "Close",
+    "errorGeneric": "Sync failed. Please check your connection.",
+    "timeoutError": "Network request timed out. Please check your connection."
   },
   "common": {
     "campfire": "Campfire"

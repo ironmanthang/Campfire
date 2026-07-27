@@ -162,7 +162,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
                 <div className="text-[10px] text-left text-text-secondary space-y-1 bg-bg-app/40 p-3 rounded-lg border border-border-brand/10 font-mono">
                   <div><strong>{t("donate.vietQrBank")}:</strong> Vietcombank</div>
                   <div><strong>{t("donate.vietQrAccount")}:</strong> 9949420500</div>
-                  <div><strong>{t("donate.vietQrOwner")}:</strong> optimus prime</div>
+                  <div><strong>{t("donate.vietQrOwner")}:</strong> NGUYEN NHU THANG</div>
                   <div><strong>{t("donate.vietQrContent")}:</strong> {addInfoText}</div>
                 </div>
               </div>

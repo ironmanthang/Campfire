@@ -16,6 +16,8 @@
     "wordCountPlural": "{{count}} từ",
     "unsyncedTooltip": "Chưa đồng bộ",
     "syncedTooltip": "Đã đồng bộ",
+    "unsyncedBadge": "Cục bộ",
+    "syncedBadge": "Đã đồng bộ",
     "emptyTitle": "Không tìm thấy mục nhật ký nào",
     "emptyHint": "Thử xóa bộ lọc hoặc từ khóa tìm kiếm",
     "emptyPreview": "Mục trống",
@@ -123,7 +125,8 @@
     "desktopCopyLink": "Sao chép liên kết PC",
     "desktopCopied": "Đã chép!",
     "googleClientIdMissing": "Chưa cấu hình Google OAuth Client ID trong môi trường.",
-    "googleLoginFailed": "Đăng nhập thất bại"
+    "googleLoginFailed": "Đăng nhập thất bại",
+    "storageQuotaError": "Không thể lưu ảnh vì bộ nhớ trình duyệt đã đầy. Vui lòng thử ảnh có dung lượng nhỏ hơn."
   },
   "donate": {
     "modalTitle": "Ủng hộ Campfire",
@@ -159,7 +162,9 @@
     "resultTitle": "Đồng bộ hoàn tất",
     "resultBody": "Các nhật ký sau đã được cập nhật/tải xuống trên thiết bị này:",
     "resultOpenEntry": "Mở mục",
-    "resultClose": "Đóng"
+    "resultClose": "Đóng",
+    "errorGeneric": "Đồng bộ thất bại. Vui lòng kiểm tra kết nối của bạn.",
+    "timeoutError": "Yêu cầu mạng quá thời gian. Vui lòng kiểm tra kết nối của bạn."
   },
   "common": {
     "campfire": "Campfire"

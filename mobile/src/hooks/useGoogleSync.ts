@@ -122,7 +122,9 @@ export function useGoogleSync({
       if (err.message === 'TOKEN_EXPIRED' || err.message === 'NOT_AUTHENTICATED') {
         setIsLoggedIn(false);
       } else {
-        const errorMsg = err.message || t("sync.errorGeneric", "Sync failed. Please check your connection.");
+        const errorMsg = err.message === 'NETWORK_TIMEOUT'
+          ? t("sync.timeoutError", "Network request timed out. Please check your connection.")
+          : (err.message || t("sync.errorGeneric", "Sync failed. Please check your connection."));
         setSyncProgress({
           status: 'error',
           message: errorMsg,

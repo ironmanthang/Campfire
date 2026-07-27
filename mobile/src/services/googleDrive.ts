@@ -179,7 +179,7 @@ async function driveFetch(url: string, options: RequestInit = {}, timeoutMs = 15
   } catch (err: any) {
     clearTimeout(timeoutId);
     if (err.name === 'AbortError') {
-      throw new Error('Network request timed out. Please check your connection.');
+      throw new Error('NETWORK_TIMEOUT');
     }
     throw err;
   }
