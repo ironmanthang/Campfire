@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && pnpm exec javascript-obfuscator dist/assets --output dist/assets --compact true --control-flow-flattening true --string-array true --string-array-encoding base64",
+    "build": "tsc -b && vite build && pnpm exec javascript-obfuscator dist/assets --output dist/assets --compact true --string-array true --string-array-encoding base64",
     "i18n:check": "node scripts/i18n-check.js",
     "lint": "oxlint",
     "preview": "vite preview",
