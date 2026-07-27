@@ -121,28 +121,10 @@ export function useDraggableButton({
 
 
 
-  // ── DEBUG HELPER (remove after debugging) ──────────────────────
-  const _dbg = (msg: string) => {
-    console.log(`[DragBtn:${storageKey}]`, msg);
-    // Visual toast so we can see on phone without DevTools
-    const el = document.createElement('div');
-    el.textContent = `[${storageKey.replace('campfire_mobile_','')}] ${msg}`;
-    Object.assign(el.style, {
-      position: 'fixed', bottom: '40px', left: '8px', right: '8px',
-      padding: '6px 10px', background: 'rgba(0,0,0,0.85)', color: '#0f0',
-      fontSize: '11px', fontFamily: 'monospace', borderRadius: '8px',
-      zIndex: '9999', pointerEvents: 'none', whiteSpace: 'pre-wrap',
-    });
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 3000);
-  };
-  // ───────────────────────────────────────────────────────────────
+
 
   const onPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (!position) {
-      _dbg('pointerDown BLOCKED: position is null');
-      return;
-    }
+    if (!position) return;
     
     // Stop any ongoing inertia motion on touch/press
     stopInertia();
@@ -169,7 +151,6 @@ export function useDraggableButton({
       vy: 0,
     };
 
-    _dbg(`pointerDown OK pid=${e.pointerId}`);
     setIsDragging(true);
   };
 
@@ -222,10 +203,7 @@ export function useDraggableButton({
 
     // Detect tap (not drag) — fire here instead of onClick because
     // mobile browsers suppress click after setPointerCapture + touch-action:none
-    const dist = dragInfo.current.totalDistance;
-    const hasCb = !!tapCallbackRef.current;
-    _dbg(`pointerUp dist=${dist.toFixed(1)} hasCb=${hasCb} isTap=${dist <= 14}`);
-    if (dist <= 14) {
+    if (dragInfo.current.totalDistance <= 6) {
       tapCallbackRef.current?.();
     }
 

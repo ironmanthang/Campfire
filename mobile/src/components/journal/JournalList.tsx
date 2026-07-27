@@ -181,18 +181,6 @@ export const JournalList: React.FC<JournalListProps> = ({
   });
 
   const handleHeartClick = () => {
-    // DEBUG: visual toast on phone
-    const _d = document.createElement('div');
-    _d.textContent = `❤️ handleHeartClick: falls=${heartClickFalls} rain=${heartRainDuration}s hasRainFn=${!!onStartHeartRain}`;
-    Object.assign(_d.style, {
-      position: 'fixed', top: '40px', left: '8px', right: '8px',
-      padding: '8px 12px', background: 'rgba(180,0,0,0.9)', color: '#fff',
-      fontSize: '12px', fontFamily: 'monospace', borderRadius: '8px',
-      zIndex: '9999', pointerEvents: 'none',
-    });
-    document.body.appendChild(_d);
-    setTimeout(() => _d.remove(), 4000);
-
     if (heartClickFalls) {
       onStartHeartRain?.(heartRainDuration * 1000);
     } else {
