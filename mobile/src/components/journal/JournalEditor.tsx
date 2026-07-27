@@ -183,11 +183,11 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
         <button
           onClick={handleUndo}
           disabled={isPreview || isLoading || !canUndo}
-          className="p-2 px-3 rounded-xl border border-border-brand/40 hover:border-accent-brand/50 hover:bg-bg-app hover:text-text-primary transition-all active:scale-95 disabled:opacity-25 disabled:pointer-events-none flex items-center gap-1 cursor-pointer"
+          className="min-w-[44px] min-h-[44px] rounded-xl border border-border-brand/40 hover:border-accent-brand/50 hover:bg-bg-app hover:text-text-primary transition-all active:scale-95 disabled:opacity-25 disabled:pointer-events-none flex items-center justify-center cursor-pointer"
           title={t("journalEditor.undoTooltip")}
           aria-label={t("journalEditor.undoTooltip")}
         >
-          <Undo2 size={16} />
+          <Undo2 size={18} />
         </button>
 
         {/* Word count */}
@@ -199,11 +199,11 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
         <button
           onClick={handleRedo}
           disabled={isPreview || isLoading || !canRedo}
-          className="p-2 px-3 rounded-xl border border-border-brand/40 hover:border-accent-brand/50 hover:bg-bg-app hover:text-text-primary transition-all active:scale-95 disabled:opacity-25 disabled:pointer-events-none flex items-center gap-1 cursor-pointer"
+          className="min-w-[44px] min-h-[44px] rounded-xl border border-border-brand/40 hover:border-accent-brand/50 hover:bg-bg-app hover:text-text-primary transition-all active:scale-95 disabled:opacity-25 disabled:pointer-events-none flex items-center justify-center cursor-pointer"
           title={t("journalEditor.redoTooltip")}
           aria-label={t("journalEditor.redoTooltip")}
         >
-          <Redo2 size={16} />
+          <Redo2 size={18} />
         </button>
       </div>
 
@@ -277,10 +277,11 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
       </div>
 
       {/* Bottom Sub-Header Banner */}
-      <div className="px-4 py-2 bg-bg-surface border-t border-border-brand flex items-center justify-between shrink-0 select-none">
+      <div className="px-4 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] bg-bg-surface border-t border-border-brand flex items-center justify-between shrink-0 select-none">
         <button
           onClick={onBack}
-          className="flex items-center gap-1 -ml-2 text-sm font-semibold text-text-secondary hover:text-text-primary px-2 py-1.5 rounded-xl hover:bg-bg-app transition-colors"
+          className="flex items-center gap-1 -ml-2 text-sm font-semibold text-text-secondary hover:text-text-primary px-3 py-2 min-h-[44px] rounded-xl hover:bg-bg-app transition-colors"
+          aria-label={t("journalEditor.backButton")}
         >
           <ChevronLeft size={20} />
           <span>{t("journalEditor.backButton")}</span>
@@ -289,35 +290,38 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
         <div className="flex items-center gap-1">
           <button
             onClick={() => handleStepDate(-1)}
-            className="p-1.5 hover:bg-bg-app rounded-xl transition-colors text-text-secondary cursor-pointer"
+            className="min-w-[44px] min-h-[44px] hover:bg-bg-app rounded-xl transition-colors text-text-secondary cursor-pointer flex items-center justify-center"
             title={t("journalEditor.previousDayTooltip")}
+            aria-label={t("journalEditor.previousDayTooltip")}
           >
-            <ChevronLeft size={16} />
+            <ChevronLeft size={18} />
           </button>
 
           <DatePicker value={date} onChange={onDateChange} />
 
           <button
             onClick={() => handleStepDate(1)}
-            className="p-1.5 hover:bg-bg-app rounded-xl transition-colors text-text-secondary cursor-pointer"
+            className="min-w-[44px] min-h-[44px] hover:bg-bg-app rounded-xl transition-colors text-text-secondary cursor-pointer flex items-center justify-center"
             title={t("journalEditor.nextDayTooltip")}
+            aria-label={t("journalEditor.nextDayTooltip")}
           >
-            <ChevronRight size={16} />
+            <ChevronRight size={18} />
           </button>
         </div>
 
         <button
           onClick={() => setIsPreview(!isPreview)}
-          className="flex items-center gap-1 text-xs font-semibold text-accent-brand border border-accent-brand/20 bg-accent-brand/5 hover:bg-accent-brand/10 px-3 py-1.5 rounded-xl transition-all"
+          className="flex items-center gap-1 text-xs font-semibold text-accent-brand border border-accent-brand/20 bg-accent-brand/5 hover:bg-accent-brand/10 px-3 py-2 min-h-[44px] rounded-xl transition-all cursor-pointer"
+          aria-label={isPreview ? t("journalEditor.editButton") : t("journalEditor.previewButton")}
         >
           {isPreview ? (
             <>
-              <Edit2 size={13} />
+              <Edit2 size={15} />
               <span>{t("journalEditor.editButton")}</span>
             </>
           ) : (
             <>
-              <Eye size={13} />
+              <Eye size={15} />
               <span>{t("journalEditor.previewButton")}</span>
             </>
           )}

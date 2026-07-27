@@ -5,15 +5,15 @@ import { getLocalYYYYMMDD } from '../lib/dateUtils';
 interface UseJournalNavigationOptions {
   loadEntries: () => Promise<void> | void;
   onSyncTrigger?: () => void;
-  syncProgressStatus: string;
-  setToastMessage: (msg: string | null) => void;
+  syncProgressStatus?: string;
+  setToastMessage?: (msg: string | null) => void;
 }
 
 export function useJournalNavigation({
   loadEntries,
   onSyncTrigger,
-  syncProgressStatus,
-  setToastMessage
+  syncProgressStatus: _syncProgressStatus,
+  setToastMessage: _setToastMessage
 }: UseJournalNavigationOptions) {
   const [activeDate, setActiveDate] = useState<string | null>(null);
   const [editorContent, setEditorContent] = useState('');
@@ -142,11 +142,6 @@ export function useJournalNavigation({
   };
 
   const handleSelectEntry = async (date: string) => {
-    if (syncProgressStatus === 'connecting' || syncProgressStatus === 'syncing') {
-      setToastMessage("Syncing in progress. Please wait...");
-      setTimeout(() => setToastMessage(null), 2000);
-      return;
-    }
     setEditorLoading(true);
     if (window.history.state?.activeDate !== date) {
       window.history.pushState({ activeDate: date }, '');

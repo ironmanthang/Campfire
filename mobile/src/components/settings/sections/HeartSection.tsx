@@ -178,10 +178,15 @@ export const HeartSection: React.FC = () => {
           const compressedBase64 = canvas.toDataURL('image/png');
           
           // Delete old image explicitly from storage first
-          localStorage.removeItem('campfire_mobile_heart_custom_image');
-          localStorage.setItem('campfire_mobile_heart_custom_image', compressedBase64);
-          setCustomImage(compressedBase64);
-          window.dispatchEvent(new Event('heart-config-changed'));
+          try {
+            localStorage.removeItem('campfire_mobile_heart_custom_image');
+            localStorage.setItem('campfire_mobile_heart_custom_image', compressedBase64);
+            setCustomImage(compressedBase64);
+            window.dispatchEvent(new Event('heart-config-changed'));
+          } catch (storageErr) {
+            console.error('Failed to save image to localStorage due to quota limits:', storageErr);
+            alert(t("settings.storageQuotaError", "Unable to save custom image because browser storage quota is full. Please try a smaller image."));
+          }
         }
       };
       img.src = imgSrc;

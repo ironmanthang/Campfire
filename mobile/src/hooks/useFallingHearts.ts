@@ -20,6 +20,9 @@ export function useFallingHearts() {
   const [hearts, setHearts] = useState<FallingHeart[]>([]);
 
   const fireHearts = useCallback((count: number = 1) => {
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
     const speedSetting = parseInt(localStorage.getItem('campfire_mobile_heart_fall_speed') || '5', 10);
     const sizeSetting = parseInt(localStorage.getItem('campfire_mobile_heart_size') || String(DEFAULT_HEART_SIZE), 10);
     

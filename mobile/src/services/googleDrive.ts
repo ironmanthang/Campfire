@@ -126,7 +126,7 @@ export async function getValidToken(): Promise<string> {
 }
 
 // Drive API request wrapper
-async function driveFetch(url: string, options: RequestInit = {}): Promise<Response> {
+async function driveFetch(url: string, options: RequestInit = {}, timeoutMs = 15000): Promise<Response> {
   let token: string;
   try {
     token = await getValidToken();
@@ -137,27 +137,52 @@ async function driveFetch(url: string, options: RequestInit = {}): Promise<Respo
   const headers = new Headers(options.headers || {});
   headers.set('Authorization', `Bearer ${token}`);
   
-  let response = await fetch(url, { ...options, headers });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
   
-  // If 401 Unauthorized occurs, attempt one silent refresh recovery
-  if (response.status === 401) {
-    const auth = getStoredAuthState();
-    if (auth.clientId) {
-      try {
-        const newToken = await requestDriveAuth(auth.clientId, true);
-        headers.set('Authorization', `Bearer ${newToken}`);
-        response = await fetch(url, { ...options, headers });
-        if (response.ok) {
-          return response;
+  try {
+    let response = await fetch(url, {
+      ...options,
+      headers,
+      signal: options.signal || controller.signal
+    });
+    clearTimeout(timeoutId);
+    
+    // If 401 Unauthorized occurs, attempt one silent refresh recovery
+    if (response.status === 401) {
+      const auth = getStoredAuthState();
+      if (auth.clientId) {
+        try {
+          const newToken = await requestDriveAuth(auth.clientId, true);
+          headers.set('Authorization', `Bearer ${newToken}`);
+          
+          const retryController = new AbortController();
+          const retryTimeoutId = setTimeout(() => retryController.abort(), timeoutMs);
+          
+          response = await fetch(url, {
+            ...options,
+            headers,
+            signal: options.signal || retryController.signal
+          });
+          clearTimeout(retryTimeoutId);
+          if (response.ok) {
+            return response;
+          }
+        } catch (e) {
+          // Fallthrough to clear state
         }
-      } catch (e) {
-        // Fallthrough to clear state
       }
+      clearAuthState();
+      throw new Error('TOKEN_EXPIRED');
     }
-    clearAuthState();
-    throw new Error('TOKEN_EXPIRED');
+    return response;
+  } catch (err: any) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      throw new Error('Network request timed out. Please check your connection.');
+    }
+    throw err;
   }
-  return response;
 }
 
 // Search or create CampfireJournal folder in Google Drive Root

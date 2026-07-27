@@ -70,15 +70,29 @@ export const JournalListItem: React.FC<JournalListItemProps> = ({
           <span>{formatDate(entry.date)}</span>
         </div>
         
-        {/* Sync status dot */}
-        <div className="flex items-center gap-1.5 shrink-0">
+        {/* Sync status dot & word count */}
+        <div className="flex items-center gap-2 shrink-0">
           <span className="text-[10px] text-text-secondary flex items-center gap-0.5">
             <FileText size={10} /> {words === 1 ? t("journalList.wordCount", { count: words }) : t("journalList.wordCountPlural", { count: words })}
           </span>
           {!entry.synced ? (
-            <span className="w-2 h-2 rounded-full bg-yellow-500" title={t("journalList.unsyncedTooltip")} />
+            <span
+              className="flex items-center gap-1 text-[10px] font-medium text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded-full"
+              title={t("journalList.unsyncedTooltip")}
+              aria-label={t("journalList.unsyncedTooltip")}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+              <span>{t("journalList.unsyncedBadge", "Local")}</span>
+            </span>
           ) : (
-            <span className="w-2 h-2 rounded-full bg-green-500/80" title={t("journalList.syncedTooltip")} />
+            <span
+              className="flex items-center gap-1 text-[10px] font-medium text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded-full"
+              title={t("journalList.syncedTooltip")}
+              aria-label={t("journalList.syncedTooltip")}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span>{t("journalList.syncedBadge", "Synced")}</span>
+            </span>
           )}
         </div>
       </div>

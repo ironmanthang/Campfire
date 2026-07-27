@@ -59,10 +59,10 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-      <header className="flex items-center justify-between px-4 py-3 border-b border-border-brand bg-bg-surface shrink-0 select-none">
+      <header className="flex items-center justify-between px-4 py-3 pt-[calc(0.75rem+env(safe-area-inset-top))] border-b border-border-brand bg-bg-surface shrink-0 select-none">
         <div
           onClick={() => setIsLogoModalOpen(true)}
-          className="flex items-center gap-2 cursor-pointer group hover:opacity-80 transition-opacity"
+          className="flex items-center gap-2 cursor-pointer group hover:opacity-80 transition-opacity min-h-[44px]"
           title={t("settings.logoTitle", "App Logo")}
         >
           <img
@@ -73,13 +73,14 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="font-bold text-lg text-text-primary tracking-tight">{t("common.campfire")}</span>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           {/* Sync Indicator & Trigger */}
           <button
             onClick={onSync}
             disabled={syncProgress.status === 'syncing' || syncProgress.status === 'connecting'}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-bg-app border border-border-brand hover:border-accent-brand transition-all duration-200 active:scale-95 disabled:opacity-80"
+            className="flex items-center gap-1.5 px-3 py-2 min-h-[44px] rounded-xl bg-bg-app border border-border-brand hover:border-accent-brand transition-all duration-200 active:scale-95 disabled:opacity-80 cursor-pointer"
             title={getSyncTooltip()}
+            aria-label={getSyncTooltip()}
           >
             {getSyncIcon()}
             <span className="text-xs font-semibold text-text-secondary hidden xs:inline">
@@ -90,8 +91,9 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Theme Toggle */}
           <button
             onClick={onThemeToggle}
-            className="p-2 rounded-xl bg-bg-app border border-border-brand hover:border-accent-brand text-text-secondary hover:text-text-primary transition-all active:scale-95 flex items-center justify-center"
+            className="min-w-[44px] min-h-[44px] rounded-xl bg-bg-app border border-border-brand hover:border-accent-brand text-text-secondary hover:text-text-primary transition-all active:scale-95 flex items-center justify-center cursor-pointer"
             title={theme === 'dark' ? t("common.themeLight", "Switch to Light Mode") : t("common.themeDark", "Switch to Dark Mode")}
+            aria-label={theme === 'dark' ? t("common.themeLight", "Switch to Light Mode") : t("common.themeDark", "Switch to Dark Mode")}
           >
             {theme === 'dark' ? <Sun size={18} className="text-accent-brand" /> : <Moon size={18} className="text-accent-brand" />}
           </button>
@@ -99,7 +101,9 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Settings Trigger */}
           <button
             onClick={onSettingsOpen}
-            className="p-2 rounded-xl bg-bg-app border border-border-brand hover:border-accent-brand text-text-secondary hover:text-text-primary transition-all active:scale-95"
+            className="min-w-[44px] min-h-[44px] rounded-xl bg-bg-app border border-border-brand hover:border-accent-brand text-text-secondary hover:text-text-primary transition-all active:scale-95 flex items-center justify-center cursor-pointer"
+            title={t("settings.title", "Settings")}
+            aria-label={t("settings.title", "Settings")}
           >
             <Settings size={18} />
           </button>
