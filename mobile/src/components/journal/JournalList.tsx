@@ -178,6 +178,22 @@ export const JournalList: React.FC<JournalListProps> = ({
   });
 
   const handleHeartClick = () => {
+    // DEBUG: trace callback execution
+    const msg = `handleHeartClick: falls=${heartClickFalls} dur=${heartRainDuration} hasRainFn=${!!onStartHeartRain}`;
+    console.log(msg);
+    // Show debug toast if available
+    const tc = document.querySelector('[style*="z-index: 99999"]') as HTMLDivElement | null;
+    if (tc) {
+      const el = document.createElement('div');
+      Object.assign(el.style, {
+        background: 'rgba(0,0,0,0.85)', color: '#ff0', padding: '6px 10px',
+        borderRadius: '6px', fontSize: '11px', fontFamily: 'monospace',
+        wordBreak: 'break-all', pointerEvents: 'none',
+      });
+      el.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+      tc.appendChild(el);
+      setTimeout(() => { el.remove(); }, 8000);
+    }
     if (heartClickFalls) {
       onStartHeartRain?.(heartRainDuration * 1000);
     } else {

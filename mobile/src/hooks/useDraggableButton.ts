@@ -1,5 +1,29 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
+// ========== DEBUG TOAST (remove after debugging) ==========
+let debugToastContainer: HTMLDivElement | null = null;
+function debugToast(msg: string) {
+  if (!debugToastContainer) {
+    debugToastContainer = document.createElement('div');
+    Object.assign(debugToastContainer.style, {
+      position: 'fixed', top: '8px', left: '8px', right: '8px',
+      zIndex: '99999', display: 'flex', flexDirection: 'column', gap: '4px',
+      pointerEvents: 'none',
+    });
+    document.body.appendChild(debugToastContainer);
+  }
+  const el = document.createElement('div');
+  Object.assign(el.style, {
+    background: 'rgba(0,0,0,0.85)', color: '#0f0', padding: '6px 10px',
+    borderRadius: '6px', fontSize: '11px', fontFamily: 'monospace',
+    wordBreak: 'break-all', pointerEvents: 'none',
+  });
+  el.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  debugToastContainer.appendChild(el);
+  setTimeout(() => { el.remove(); }, 8000);
+}
+// ==========================================================
+
 interface Position {
   x: number;
   y: number;
@@ -122,17 +146,21 @@ export function useDraggableButton({
 
 
   const onPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+    debugToast(`DOWN pos=${position ? `${Math.round(position.x)},${Math.round(position.y)}` : 'null'} ptr=${e.pointerId} type=${e.pointerType} btnW=${buttonWidth}`);
     if (!position) return;
     
     // Stop any ongoing inertia motion on touch/press
     stopInertia();
 
     // Capture pointer for continuous tracking even outside button bounds
+    let captured = false;
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
-    } catch {
-      // ignore
+      captured = true;
+    } catch (err) {
+      debugToast(`CAPTURE FAILED: ${err}`);
     }
+    debugToast(`CAPTURED=${captured}`);
 
     const now = performance.now();
     dragInfo.current = {
@@ -186,7 +214,11 @@ export function useDraggableButton({
   };
 
   const onPointerUp = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (dragInfo.current.activePointerId !== e.pointerId) return;
+    debugToast(`UP ptr=${e.pointerId} active=${dragInfo.current.activePointerId} dist=${dragInfo.current.totalDistance.toFixed(2)}`);
+    if (dragInfo.current.activePointerId !== e.pointerId) {
+      debugToast(`UP IGNORED: pointerId mismatch (active=${dragInfo.current.activePointerId} event=${e.pointerId})`);
+      return;
+    }
 
     try {
       if (e.currentTarget.hasPointerCapture(e.pointerId)) {
@@ -201,7 +233,10 @@ export function useDraggableButton({
 
     // Detect tap (not drag) — fire here instead of onClick because
     // mobile browsers suppress click after setPointerCapture + touch-action:none
+    const hasCb = !!tapCallbackRef.current;
+    debugToast(`TAP CHECK: dist=${dragInfo.current.totalDistance.toFixed(2)} <=6? ${dragInfo.current.totalDistance <= 6} hasCb=${hasCb}`);
     if (dragInfo.current.totalDistance <= 6) {
+      debugToast(`FIRING TAP CALLBACK`);
       tapCallbackRef.current?.();
     }
 
@@ -302,6 +337,7 @@ export function useDraggableButton({
   const handleTap = (callback?: () => void) => {
     tapCallbackRef.current = callback;
     return (e: React.MouseEvent) => {
+      debugToast(`CLICK (native) prevented — taps handled in onPointerUp`);
       // Always prevent the native click; taps are handled in onPointerUp
       e.preventDefault();
       e.stopPropagation();
