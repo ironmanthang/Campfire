@@ -238,7 +238,8 @@ If no garbage is found, reply exactly with: "No potential garbage lines found."`
             { role: 'system', content: systemPrompt },
             { role: 'user', content: res }
           ],
-          stream: false
+          stream: false,
+          timeout_secs: 600
         };
 
         if (isTauri()) {

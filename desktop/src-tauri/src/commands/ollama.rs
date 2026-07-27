@@ -114,6 +114,49 @@ pub async fn get_ollama_ps(base_url: Option<String>) -> Result<Value, String> {
     Ok(val)
 }
 
+fn format_reqwest_error(e: reqwest::Error, base_url: &str, model_name: Option<&str>) -> String {
+    let target_model = model_name.unwrap_or("");
+    if e.is_connect() {
+        format!(
+            "Could not connect to Ollama at {}. Please check if the Ollama service is running.",
+            base_url
+        )
+    } else if e.is_timeout() {
+        if !target_model.is_empty() {
+            format!(
+                "Ollama request timed out. Model '{}' took too long to respond.",
+                target_model
+            )
+        } else {
+            format!("Ollama request timed out at {}.", base_url)
+        }
+    } else {
+        format!("Failed to send Ollama request to {}: {}", base_url, e)
+    }
+}
+
+async fn format_http_response_error(res: reqwest::Response, model_name: Option<&str>) -> String {
+    let status_code = res.status().as_u16();
+    let err_text = res.text().await.unwrap_or_default();
+    let target_model = model_name.unwrap_or("");
+
+    match status_code {
+        404 => {
+            if !target_model.is_empty() {
+                format!(
+                    "Ollama model '{}' not found (404). Please run 'ollama pull {}' to install it.",
+                    target_model, target_model
+                )
+            } else {
+                format!("Ollama resource not found (404): {}", err_text)
+            }
+        }
+        400 => format!("Ollama returned Bad Request (400): {}", err_text),
+        500 => format!("Ollama server error (500): {}", err_text),
+        _ => format!("Ollama API returned status HTTP {}: {}", status_code, err_text),
+    }
+}
+
 #[tauri::command]
 pub async fn proxy_ollama_embed(
     base_url: Option<String>,
@@ -121,6 +164,7 @@ pub async fn proxy_ollama_embed(
 ) -> Result<Value, String> {
     let base = get_base_url(base_url);
     let url = format!("{}/api/embed", base);
+    let model_name = payload.get("model").and_then(|m| m.as_str());
 
     let client = reqwest::Client::builder()
         .timeout(Duration::from_secs(60))
@@ -132,11 +176,10 @@ pub async fn proxy_ollama_embed(
         .json(&payload)
         .send()
         .await
-        .map_err(|e| format!("Failed to send Ollama embed request: {}", e))?;
+        .map_err(|e| format_reqwest_error(e, &base, model_name))?;
 
     if !res.status().is_success() {
-        let err_text = res.text().await.unwrap_or_default();
-        return Err(format!("Ollama embed error: {}", err_text));
+        return Err(format_http_response_error(res, model_name).await);
     }
 
     let val = res
@@ -165,11 +208,10 @@ pub async fn proxy_ollama_tokenize(
         .json(&payload)
         .send()
         .await
-        .map_err(|e| format!("Failed to send Ollama tokenize request: {}", e))?;
+        .map_err(|e| format_reqwest_error(e, &base, None))?;
 
     if !res.status().is_success() {
-        let err_text = res.text().await.unwrap_or_default();
-        return Err(format!("Ollama tokenize error: {}", err_text));
+        return Err(format_http_response_error(res, None).await);
     }
 
     let val = res
@@ -183,13 +225,20 @@ pub async fn proxy_ollama_tokenize(
 #[tauri::command]
 pub async fn proxy_ollama_chat(
     base_url: Option<String>,
-    payload: Value,
+    mut payload: Value,
 ) -> Result<Value, String> {
     let base = get_base_url(base_url);
     let url = format!("{}/api/chat", base);
+    let model_name = payload.get("model").and_then(|m| m.as_str()).map(|s| s.to_string());
+
+    let timeout_secs = payload
+        .as_object_mut()
+        .and_then(|obj| obj.remove("timeout_secs"))
+        .and_then(|v| v.as_u64())
+        .unwrap_or(180);
 
     let client = reqwest::Client::builder()
-        .timeout(Duration::from_secs(180))
+        .timeout(Duration::from_secs(timeout_secs))
         .build()
         .map_err(|e| format!("Failed to build HTTP client: {}", e))?;
 
@@ -198,11 +247,10 @@ pub async fn proxy_ollama_chat(
         .json(&payload)
         .send()
         .await
-        .map_err(|e| format!("Failed to send Ollama chat request: {}", e))?;
+        .map_err(|e| format_reqwest_error(e, &base, model_name.as_deref()))?;
 
     if !res.status().is_success() {
-        let err_text = res.text().await.unwrap_or_default();
-        return Err(format!("Ollama chat error: {}", err_text));
+        return Err(format_http_response_error(res, model_name.as_deref()).await);
     }
 
     let val = res
@@ -221,6 +269,7 @@ pub async fn proxy_ollama_chat_stream(
 ) -> Result<(), String> {
     let base = get_base_url(base_url);
     let url = format!("{}/api/chat", base);
+    let model_name = payload.get("model").and_then(|m| m.as_str());
 
     let client = reqwest::Client::new();
     let res = client
@@ -228,11 +277,10 @@ pub async fn proxy_ollama_chat_stream(
         .json(&payload)
         .send()
         .await
-        .map_err(|e| format!("Failed to connect to Ollama: {}", e))?;
+        .map_err(|e| format_reqwest_error(e, &base, model_name))?;
 
     if !res.status().is_success() {
-        let err_text = res.text().await.unwrap_or_default();
-        return Err(format!("Ollama API error: {}", err_text));
+        return Err(format_http_response_error(res, model_name).await);
     }
 
     let mut stream = res.bytes_stream();
