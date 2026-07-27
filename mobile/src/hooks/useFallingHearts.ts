@@ -1,28 +1,5 @@
 import { useState, useCallback } from 'react';
 
-// ========== DEBUG TOAST (reuse from useDraggableButton) ==========
-function debugToast(msg: string) {
-  let tc = document.querySelector('[style*="z-index: 99999"]') as HTMLDivElement | null;
-  if (!tc) {
-    tc = document.createElement('div');
-    Object.assign(tc.style, {
-      position: 'fixed', top: '8px', left: '8px', right: '8px',
-      zIndex: '99999', display: 'flex', flexDirection: 'column', gap: '4px',
-      pointerEvents: 'none',
-    });
-    document.body.appendChild(tc);
-  }
-  const el = document.createElement('div');
-  Object.assign(el.style, {
-    background: 'rgba(0,0,0,0.85)', color: '#0ff', padding: '6px 10px',
-    borderRadius: '6px', fontSize: '11px', fontFamily: 'monospace',
-    wordBreak: 'break-all', pointerEvents: 'none',
-  });
-  el.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-  tc.appendChild(el);
-  setTimeout(() => { el.remove(); }, 8000);
-}
-// ==========================================================
 
 export interface FallingHeart {
   id: number;
@@ -41,20 +18,14 @@ let heartIdCounter = 0;
 export function useFallingHearts() {
   const [hearts, setHearts] = useState<FallingHeart[]>([]);
 
-  // DEBUG: log hearts count on every render
-  debugToast(`[useFallingHearts RENDER] hearts.length=${hearts.length}`);
-
   const fireHearts = useCallback((count: number = 1) => {
     const speedSetting = parseInt(localStorage.getItem('campfire_mobile_heart_fall_speed') || '5', 10);
     const sizeSetting = parseInt(localStorage.getItem('campfire_mobile_heart_size') || '48', 10);
-    
-    debugToast(`fireHearts(${count}) speed=${speedSetting} size=${sizeSetting}`);
     
     setHearts((prev) => {
       const max = 50;
       const room = Math.max(0, max - prev.length);
       const toAdd = Math.min(count, room);
-      debugToast(`fireHearts updater: prev=${prev.length} room=${room} toAdd=${toAdd}`);
       if (toAdd <= 0) return prev;
 
       const newHearts: FallingHeart[] = [];
@@ -73,7 +44,6 @@ export function useFallingHearts() {
           rotation: (Math.random() - 0.5) * 120,
         });
       }
-      debugToast(`fireHearts: adding ${newHearts.length} hearts, new total=${prev.length + newHearts.length}, dur=${durationMs}ms`);
       return [...prev, ...newHearts];
     });
   }, []);
@@ -83,7 +53,6 @@ export function useFallingHearts() {
   }, []);
 
   const startHeartRain = useCallback((durationMs: number = 5000) => {
-    debugToast(`startHeartRain(${durationMs})`);
     if (durationMs <= 0) return;
 
     if (heartRainTimeout) {
@@ -123,4 +92,3 @@ export function useFallingHearts() {
     startHeartRain,
   };
 }
-
