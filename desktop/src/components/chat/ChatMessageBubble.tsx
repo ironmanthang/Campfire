@@ -169,8 +169,8 @@ export function ChatMessageBubble({
 
             {msg.content ? (
               <ReactMarkdown>{msg.content}</ReactMarkdown>
-            ) : !msg.thinking && isCurrentlyStreaming ? (
-              <div className="flex items-center gap-2 text-text-secondary py-1 italic font-mono text-xs">
+            ) : isCurrentlyStreaming ? (
+              <div className="flex items-center gap-2 text-text-secondary py-1 italic font-mono text-xs mt-2">
                 <Loader2 className="h-3.5 w-3.5 animate-spin text-accent-brand" />
                 <span>
                   {(() => {
@@ -180,6 +180,8 @@ export function ChatMessageBubble({
                       ? t("chatView.statusReadingHistory")
                       : activeToolName === "navigate_to_journal_date"
                       ? t("chatView.statusNavigatingDate")
+                      : activeToolName === "scan_for_garbage"
+                      ? t("chatView.statusScanningGarbage")
                       : activeToolName === "web_search"
                       ? t("chatView.searchingWebStatus")
                       : t("chatView.waitingResponse");

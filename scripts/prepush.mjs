@@ -34,6 +34,8 @@ async function runPrepush() {
       runCommand('pnpm', ['--filter', '*', 'test'], 'Tests'),
       runCommand('pnpm', ['--filter', '*', 'typecheck'], 'Typecheck'),
       runCommand('pnpm', ['--filter', 'desktop', '--filter', 'mobile', 'i18n:check'], 'i18n Check'),
+      runCommand('pnpm', ['--filter', 'mobile', 'lint'], 'Oxlint Check'),
+      runCommand('cargo', ['check', '--manifest-path', 'desktop/src-tauri/Cargo.toml'], 'Rust Cargo Check'),
     ]);
 
 

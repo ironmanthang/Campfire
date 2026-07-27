@@ -1,4 +1,4 @@
-export const OLLAMA_BASE_URL = 'http://localhost:11434';
+export const OLLAMA_BASE_URL = 'http://127.0.0.1:11434';
 
 export function isTauri(): boolean {
   return typeof window !== 'undefined' && ('__TAURI_INTERNALS__' in window || '__TAURI__' in window);

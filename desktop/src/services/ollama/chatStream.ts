@@ -28,6 +28,7 @@ export async function streamAIResponse(
     const collectedToolCalls: OllamaToolCall[] = [];
 
     channel.onmessage = (parsed) => {
+      if (signal?.aborted) return;
       if (parsed.error) throw new Error(parsed.error);
       const content = parsed.message?.content || "";
       const thinking = parsed.message?.thinking || "";
@@ -37,11 +38,33 @@ export async function streamAIResponse(
       }
     };
 
-    await invoke("proxy_ollama_chat_stream", {
+    const invokePromise = invoke("proxy_ollama_chat_stream", {
       baseUrl: OLLAMA_BASE_URL,
       payload: chatBody,
       onChunk: channel,
     });
+
+    if (signal) {
+      if (signal.aborted) {
+        throw new DOMException("Aborted", "AbortError");
+      }
+
+      await new Promise<void>((resolve, reject) => {
+        const onAbort = () => {
+          reject(new DOMException("Aborted", "AbortError"));
+        };
+        signal.addEventListener("abort", onAbort, { once: true });
+
+        invokePromise
+          .then(() => resolve())
+          .catch((err) => reject(err))
+          .finally(() => {
+            signal.removeEventListener("abort", onAbort);
+          });
+      });
+    } else {
+      await invokePromise;
+    }
 
     return collectedToolCalls.length > 0 ? collectedToolCalls : null;
   }

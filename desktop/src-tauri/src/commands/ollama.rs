@@ -5,10 +5,11 @@ use tauri::ipc::Channel;
 
 fn get_base_url(base_url: Option<String>) -> String {
     let url = base_url.unwrap_or_default();
-    if url.trim().is_empty() {
+    let trimmed = url.trim().trim_end_matches('/');
+    if trimmed.is_empty() {
         "http://127.0.0.1:11434".to_string()
     } else {
-        url.trim_end_matches('/').to_string()
+        trimmed.replace("localhost", "127.0.0.1")
     }
 }
 
@@ -248,7 +249,9 @@ pub async fn proxy_ollama_chat_stream(
 
             if !line.is_empty() {
                 if let Ok(parsed) = serde_json::from_str::<Value>(&line) {
-                    let _ = on_chunk.send(parsed);
+                    if on_chunk.send(parsed).is_err() {
+                        return Ok(());
+                    }
                 }
             }
         }

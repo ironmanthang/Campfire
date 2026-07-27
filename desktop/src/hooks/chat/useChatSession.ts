@@ -300,6 +300,7 @@ export function useChatSession({ visible }: { visible: boolean }) {
 
         // Execute tool calls sequentially
         for (const tc of toolCalls) {
+          if (controller.signal.aborted) break;
           setActiveToolName(tc.function.name);
           try {
             const toolMsg = await executeToolCall(tc, {
@@ -312,6 +313,7 @@ export function useChatSession({ visible }: { visible: boolean }) {
                 navigateToView("journal");
               },
             });
+            if (controller.signal.aborted) break;
             setChatMessages((prev) => [...prev, toolMsg]);
             conversationMessages = [...conversationMessages, toolMsg];
           } catch (err: any) {
@@ -322,7 +324,13 @@ export function useChatSession({ visible }: { visible: boolean }) {
         }
       }
     } catch (err: any) {
-      if (err?.name === "AbortError" || err === "AbortError") {
+      const isAbort =
+        err?.name === "AbortError" ||
+        err === "AbortError" ||
+        err?.message === "Aborted" ||
+        controller.signal.aborted;
+
+      if (isAbort) {
         console.log("Chat stream aborted by user");
       } else {
         console.error(err);
