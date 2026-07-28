@@ -1,8 +1,7 @@
-import { Sparkles, X, Check, Copy, Terminal, ExternalLink } from "lucide-react";
+import { Sparkles, X, Check, Copy, Terminal } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useRef, useState } from "react";
 import { useResizer } from "../../hooks/useResizer";
-import { openUrl } from "@tauri-apps/plugin-opener";
 
 interface SearchHelpModalProps {
   onClose: () => void;
@@ -115,7 +114,7 @@ export function SearchHelpModal({ onClose, embeddingModel }: SearchHelpModalProp
             </div>
             <p className="text-xs text-text-secondary leading-relaxed">
               {t("searchView.helpModal.pullGuideDesc", {
-                defaultValue: "Semantic search requires an embedding model in Ollama. Open your Terminal (CMD or Terminal) and run a command to download one, or browse the Ollama Library:"
+                defaultValue: "Semantic search requires an embedding model in Ollama. Open your Terminal (CMD or Terminal) and run a command to download one:"
               })}
             </p>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
@@ -136,15 +135,6 @@ export function SearchHelpModal({ onClose, embeddingModel }: SearchHelpModalProp
                   )}
                 </button>
               </div>
-
-              <button
-                type="button"
-                onClick={() => openUrl("https://ollama.com/search?c=embedding")}
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-accent-brand text-bg-app rounded-lg font-semibold text-xs hover:opacity-90 transition-opacity shrink-0 cursor-pointer"
-              >
-                <ExternalLink className="h-3.5 w-3.5" />
-                <span>{t("settingsView.browseOllamaLibrary")}</span>
-              </button>
             </div>
           </div>
 

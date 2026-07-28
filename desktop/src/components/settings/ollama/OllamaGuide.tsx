@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { openUrl } from "@tauri-apps/plugin-opener";
 
 export function OllamaGuide() {
   const { t } = useTranslation();
@@ -21,12 +20,12 @@ export function OllamaGuide() {
           <span className="shrink-0 mt-0.5 h-5 w-5 rounded-full bg-accent-brand/15 text-accent-brand text-xs font-bold flex items-center justify-center">1</span>
           <div className="space-y-0.5">
             <p className="font-semibold text-text-primary text-sm">
-              {t("settingsView.ollamaStep1Title", { defaultValue: "Install Ollama" })}
+              {t("settingsView.ollamaStep1Title", { defaultValue: "Ensure Ollama is Running" })}
             </p>
             <p>
               {t("settingsView.ollamaStep1Desc", {
                 defaultValue:
-                  "Click the Download Ollama button above. Run the installer like any other program. On macOS/Linux it's a single command in Terminal.",
+                  "Make sure the Ollama application is running on your machine so the local service (http://localhost:11434) is active.",
               })}
             </p>
           </div>
@@ -115,13 +114,6 @@ export function OllamaGuide() {
           </p>
         </div>
       </div>
-      <button
-        type="button"
-        onClick={() => openUrl("https://ollama.com/search")}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-accent-brand text-bg-app rounded-md font-semibold hover:bg-accent-brand-hover transition-colors w-fit text-center cursor-pointer"
-      >
-        {t("settingsView.browseOllamaLibrary")}
-      </button>
     </div>
   );
 }

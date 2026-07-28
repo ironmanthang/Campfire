@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { AlertCircle, Info, Download } from "lucide-react";
+import { AlertCircle, Info } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { openUrl } from "@tauri-apps/plugin-opener";
 import { useOllamaStore } from "../../store/useOllamaStore";
 import { OllamaGuide } from "./ollama/OllamaGuide";
 import { OllamaDiagnostics } from "./ollama/OllamaDiagnostics";
@@ -27,21 +26,11 @@ export function OllamaSection() {
             <p className="text-xs text-text-secondary leading-relaxed">
               {t("settingsView.ollamaIntroDesc", {
                 defaultValue:
-                  "Ollama is a free, small app that lets this journal use local AI. Without it installed and running, the AI features (chat, summaries, etc.) will not work. Everything runs privately on your machine — nothing is sent to a server unless you pick a Cloud model.",
+                  "Ollama is a free local AI service that lets this journal use AI features. Everything runs privately on your machine (http://localhost:11434) — nothing is sent to a server unless you pick a Cloud model.",
               })}
             </p>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={() => openUrl("https://ollama.com/download")}
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-accent-brand text-bg-app hover:bg-accent-brand-hover rounded-lg text-xs font-semibold transition-colors cursor-pointer"
-        >
-          <Download className="h-3.5 w-3.5" />
-          {t("settingsView.ollamaIntroDownload", {
-            defaultValue: "Download Ollama (free)",
-          })}
-        </button>
       </div>
 
       {/* Guide & Controls Header */}
@@ -64,12 +53,10 @@ export function OllamaSection() {
           <div>
             <p className="font-semibold">{t("settingsView.ollamaNotDetected")}</p>
             <p className="mt-1 leading-relaxed opacity-80">
-              {t("settingsView.ollamaNotDetectedDesc")}
-              <a href="https://ollama.com/download" target="_blank" rel="noopener noreferrer" className="underline font-medium hover:text-white">
-                {t("settingsView.ollamaIntroDownload", {
-                  defaultValue: "Download Ollama (free)",
-                })}
-              </a>.
+              {t("settingsView.ollamaNotDetectedDesc", {
+                defaultValue:
+                  "Please start the local Ollama service on your machine (default: http://localhost:11434).",
+              })}
             </p>
           </div>
         </div>

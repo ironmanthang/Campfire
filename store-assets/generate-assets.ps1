@@ -101,6 +101,52 @@ $icon300.Save($icon300Path, [System.Drawing.Imaging.ImageFormat]::Png)
 $g3.Dispose(); $icon300.Dispose()
 Write-Host "Wrote: $icon300Path"
 
+# --- 310x150 Wide Tile (Wide310x150Logo.png) for Start Menu & Windows Store ---
+$wideTilePath = Join-Path $outDir "Wide310x150Logo.png"
+$wideTile = New-Object System.Drawing.Bitmap 310, 150
+$gw = [System.Drawing.Graphics]::FromImage($wideTile)
+$gw.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::HighQuality
+$gw.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+
+# Dark background matching theme
+$bg = [System.Drawing.Color]::FromArgb(255, 24, 16, 12)
+$gw.FillRectangle((New-Object System.Drawing.SolidBrush($bg)), 0, 0, 310, 150)
+
+# Icon on the left
+$wideIconSize = 110
+$gw.DrawImage($src, 20, 20, $wideIconSize, $wideIconSize)
+
+# Title & Subtitle on the right
+$fontWideTitle = New-Object System.Drawing.Font("Segoe UI", 26, [System.Drawing.FontStyle]::Bold)
+$textBrushWide = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(255, 255, 200, 120))
+$fontWideTag = New-Object System.Drawing.Font("Segoe UI Light", 14, [System.Drawing.FontStyle]::Regular)
+$tagBrushWide = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(255, 200, 180, 150))
+
+$gw.DrawString("Campfire", $fontWideTitle, $textBrushWide, 140, 42)
+$gw.DrawString("Journal by the fire", $fontWideTag, $tagBrushWide, 140, 85)
+
+$wideTile.Save($wideTilePath, [System.Drawing.Imaging.ImageFormat]::Png)
+$gw.Dispose(); $wideTile.Dispose()
+Write-Host "Wrote: $wideTilePath"
+
+# --- Sync generated visual assets to Tauri MSIX bundle gen Assets directory ---
+$msixAssetsDir = Join-Path $repo "desktop\src-tauri\gen\windows\Assets"
+if (Test-Path $msixAssetsDir) {
+    Copy-Item $wideTilePath (Join-Path $msixAssetsDir "Wide310x150Logo.png") -Force
+    
+    $square150 = Join-Path $repo "desktop\src-tauri\icons\Square150x150Logo.png"
+    if (Test-Path $square150) { Copy-Item $square150 (Join-Path $msixAssetsDir "Square150x150Logo.png") -Force }
+    
+    $square44 = Join-Path $repo "desktop\src-tauri\icons\Square44x44Logo.png"
+    if (Test-Path $square44) { Copy-Item $square44 (Join-Path $msixAssetsDir "Square44x44Logo.png") -Force }
+    
+    $storeLogo = Join-Path $repo "desktop\src-tauri\icons\StoreLogo.png"
+    if (Test-Path $storeLogo) { Copy-Item $storeLogo (Join-Path $msixAssetsDir "StoreLogo.png") -Force }
+    
+    Write-Host "Synced visual assets to: $msixAssetsDir" -ForegroundColor Green
+}
+
+
 # --- Resize screenshots to 1366x768 (or keep 1366x768 if already that) ---
 # Looks for any PNG in the store-assets/screenshots folder (case-insensitive)
 $shots = Get-ChildItem $screensDir -Filter "*.png" -ErrorAction SilentlyContinue
