@@ -27,7 +27,7 @@ export function getStoredAuthState(): DriveAuthState {
         expiresAt: parsed.expiresAt || 0,
         clientId: parsed.clientId || ''
       };
-    } catch (e) {
+    } catch {
       // fallback
     }
   }
@@ -127,12 +127,7 @@ export async function getValidToken(): Promise<string> {
 
 // Drive API request wrapper
 async function driveFetch(url: string, options: RequestInit = {}, timeoutMs = 15000): Promise<Response> {
-  let token: string;
-  try {
-    token = await getValidToken();
-  } catch (err) {
-    throw err;
-  }
+  const token = await getValidToken();
 
   const headers = new Headers(options.headers || {});
   headers.set('Authorization', `Bearer ${token}`);
@@ -168,7 +163,7 @@ async function driveFetch(url: string, options: RequestInit = {}, timeoutMs = 15
           if (response.ok) {
             return response;
           }
-        } catch (e) {
+        } catch {
           // Fallthrough to clear state
         }
       }

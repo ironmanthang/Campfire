@@ -48,6 +48,7 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date]);
 
   // Sync baseline snapshot when content loads asynchronously and history is empty
@@ -55,7 +56,7 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
     if (past.length === 0 && future.length === 0 && !timerRef.current) {
       lastSavedRef.current = content;
     }
-  }, [content]);
+  }, [content, past.length, future.length]);
 
   // Clean up timer on unmount (e.g. going back to home screen)
   useEffect(() => {

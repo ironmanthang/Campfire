@@ -41,7 +41,7 @@ export const JournalListItem: React.FC<JournalListItemProps> = ({
 
   const getPreview = (content: string) => {
     const clean = content
-      .replace(/[#*`_~\[\]]/g, '') // remove markdown symbols
+      .replace(/[#*`_~[\]]/g, '') // remove markdown symbols
       .replace(/\s+/g, ' ')
       .trim();
     if (clean.length > 90) {

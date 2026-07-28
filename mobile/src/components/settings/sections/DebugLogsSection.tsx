@@ -10,7 +10,7 @@ export const DebugLogsSection: React.FC = () => {
     if (storedLogs) {
       try {
         setLogs(JSON.parse(storedLogs));
-      } catch (e) {}
+      } catch {}
     }
   }, []);
 

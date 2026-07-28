@@ -42,7 +42,7 @@ export function useGoogleSync({
         await requestDriveAuth(auth.clientId, true);
         setIsLoggedIn(true);
         return;
-      } catch (err) {
+      } catch {
         if (Date.now() >= auth.expiresAt) {
           setIsLoggedIn(false);
           return;
@@ -61,6 +61,7 @@ export function useGoogleSync({
         handleSync();
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSync = async () => {
@@ -76,7 +77,7 @@ export function useGoogleSync({
           const isSilent = !!auth.accessToken;
           await requestDriveAuth(clientId, isSilent);
           setIsLoggedIn(true);
-        } catch (err: any) {
+        } catch {
           // If silent failed, fallback to interactive login
           try {
             await requestDriveAuth(clientId, false);

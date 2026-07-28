@@ -204,7 +204,8 @@ export async function executeToolCall(
           };
         }
 
-        let systemPrompt = `You are a careful editor reviewing {userName}'s private
+        const userName = context.config.user_name?.trim() || "the user";
+        let systemPrompt = `You are a careful editor reviewing ${userName}'s private
 journal. Your job is to find lines that are clearly *unintentional* noise — text that was almost certainly not meant to be there — so the user can decide whether to delete them.
 
 Garbage includes:
@@ -221,11 +222,12 @@ Analyze the entries and list any garbage lines. If you find any garbage, output 
 - Line numbers (e.g. "lines 3-5" or "entire entry")
 - Trash snippet
 - Reason
+- Suggested Fix: Proposed fix, correction, or "Delete line" if pure noise
 
-If no garbage is found, reply exactly with: "No potential garbage lines found."`;
+If no garbage is found, reply with: "No potential garbage lines found."`;
 
         if (userInstruction && userInstruction.trim() !== "") {
-          systemPrompt += `\n\n### CRITICAL ADDITIONAL INSTRUCTION / FOCUS FROM USER:\n${userInstruction.trim()}\nPlease pay close attention to this directive when identifying garbage or candidate sections for removal.`;
+          systemPrompt += `\n\n### CRITICAL ADDITIONAL INSTRUCTION:\n${userInstruction.trim()}\nPlease pay close attention to this directive when identifying garbage or candidate sections for removal.`;
         }
 
         const savedSubModel = localStorage.getItem("chat_tool_garbage_model") || "default";

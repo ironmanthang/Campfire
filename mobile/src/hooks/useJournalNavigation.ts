@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { getLocalEntry, saveLocalEntry } from '../services/db';
 import { getLocalYYYYMMDD } from '../lib/dateUtils';
 
@@ -60,12 +60,12 @@ export function useJournalNavigation({
     });
   };
 
-  const saveCurrentEntry = async () => {
+  const saveCurrentEntry = useCallback(async () => {
     if (editorLoadedDateRef.current) {
       await saveLocalEntry(editorLoadedDateRef.current, editorContentRef.current);
       await loadEntries();
     }
-  };
+  }, [loadEntries]);
 
   useEffect(() => {
     const handlePopState = async (e: PopStateEvent) => {
@@ -114,7 +114,7 @@ export function useJournalNavigation({
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [loadEntries, onSyncTrigger]);
+  }, [saveCurrentEntry, loadEntries, onSyncTrigger]);
 
   const loadEntryForEditor = async (date: string) => {
     activeDateRef.current = date;
