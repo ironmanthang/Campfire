@@ -82,7 +82,7 @@ export function getWebSearchTool(): OllamaTool {
     type: "function",
     function: {
       name: "web_search",
-      description: "Search the web for real-time information, news, weather, facts, or any queries requiring current search engine results. For complex questions, **make multiple distinct queries in parallel**.",
+      description: "Search the web for real-time information, news, weather, facts, or any queries requiring current search engine results. For complex, difficult questions, **you must make multiple distinct queries**.",
       parameters: {
         type: "object",
         properties: {
