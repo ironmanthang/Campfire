@@ -40,15 +40,27 @@ export function saveAuthState(state: DriveAuthState) {
   localStorage.setItem(GOOGLE_DRIVE_AUTH_KEY, JSON.stringify(state));
 }
 
+export function getWorkerUrl(): string {
+  const url = import.meta.env.VITE_WORKER_AUTH_URL;
+  if (!url || typeof url !== 'string' || !url.trim()) {
+    throw new Error('Google Auth Worker URL is not configured. Please set VITE_WORKER_AUTH_URL environment variable.');
+  }
+  return url.trim().replace(/\/$/, '');
+}
+
 export function clearAuthState() {
   const current = getStoredAuthState();
   if (current.sessionId) {
-    const workerUrl = import.meta.env.VITE_WORKER_AUTH_URL || 'https://campfire-auth.your-subdomain.workers.dev';
-    fetch(`${workerUrl.replace(/\/$/, '')}/auth/revoke`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ session_id: current.sessionId }),
-    }).catch(() => {});
+    try {
+      const workerUrl = getWorkerUrl();
+      fetch(`${workerUrl}/auth/revoke`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: current.sessionId }),
+      }).catch(() => {});
+    } catch {
+      // Ignore worker URL missing error during local logout cleanup
+    }
   }
   localStorage.removeItem(GOOGLE_DRIVE_AUTH_KEY);
 }
@@ -114,9 +126,9 @@ export async function handleAuthCallback(): Promise<boolean> {
   window.history.replaceState({}, document.title, cleanUrl);
 
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
-  const workerUrl = import.meta.env.VITE_WORKER_AUTH_URL || 'https://campfire-auth.your-subdomain.workers.dev';
+  const workerUrl = getWorkerUrl();
 
-  const res = await fetch(`${workerUrl.replace(/\/$/, '')}/auth/exchange`, {
+  const res = await fetch(`${workerUrl}/auth/exchange`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -152,9 +164,9 @@ export async function refreshAccessToken(): Promise<string> {
   }
 
   const clientId = auth.clientId || import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
-  const workerUrl = import.meta.env.VITE_WORKER_AUTH_URL || 'https://campfire-auth.your-subdomain.workers.dev';
+  const workerUrl = getWorkerUrl();
 
-  const res = await fetch(`${workerUrl.replace(/\/$/, '')}/auth/refresh`, {
+  const res = await fetch(`${workerUrl}/auth/refresh`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
