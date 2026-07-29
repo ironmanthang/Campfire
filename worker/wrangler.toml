@@ -1,0 +1,9 @@
+name = "campfire-auth"
+main = "src/index.ts"
+compatibility_date = "2025-02-24"
+
+# KV Namespace binding for storing Google OAuth refresh tokens by session_id
+[[kv_namespaces]]
+binding = "REFRESH_TOKENS"
+id = "afdf2878d7ea47eaaaec57fb56c4acc7"
+

@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getStoredAuthState, requestDriveAuth } from '../services/googleDrive';
+import {
+  getStoredAuthState,
+  refreshAccessToken,
+  handleAuthCallback,
+} from '../services/googleDrive';
 import { runSync, type SyncProgress } from '../services/sync';
 import { getLocalEntry } from '../services/db';
 
@@ -31,25 +35,41 @@ export function useGoogleSync({
   const [syncResultDates, setSyncResultDates] = useState<string[] | null>(null);
 
   const checkAuthStatus = async () => {
+    // Check if coming back from Google OAuth redirect (?code=...)
+    try {
+      const handled = await handleAuthCallback();
+      if (handled) {
+        setIsLoggedIn(true);
+        return;
+      }
+    } catch (err: any) {
+      console.error('Failed to complete OAuth callback:', err);
+    }
+
     const auth = getStoredAuthState();
-    if (!auth.accessToken) {
+    if (!auth.accessToken && !auth.sessionId) {
       setIsLoggedIn(false);
       return;
     }
-    // If past 50 minutes (10 minutes remaining before 60m expiry), attempt silent refresh
-    if (Date.now() >= auth.expiresAt - 10 * 60 * 1000 && auth.clientId) {
-      try {
-        await requestDriveAuth(auth.clientId, true);
-        setIsLoggedIn(true);
-        return;
-      } catch {
-        if (Date.now() >= auth.expiresAt) {
+
+    // If near expiry or missing token, attempt Worker token refresh
+    if (!auth.accessToken || Date.now() >= auth.expiresAt - 10 * 60 * 1000) {
+      if (auth.sessionId) {
+        try {
+          await refreshAccessToken();
+          setIsLoggedIn(true);
+          return;
+        } catch {
           setIsLoggedIn(false);
           return;
         }
+      } else if (Date.now() >= auth.expiresAt) {
+        setIsLoggedIn(false);
+        return;
       }
     }
-    setIsLoggedIn(Date.now() < auth.expiresAt);
+
+    setIsLoggedIn(true);
   };
 
   // Initial load sync
@@ -57,7 +77,7 @@ export function useGoogleSync({
     checkAuthStatus().then(() => {
       const auth = getStoredAuthState();
       const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';
-      if (autoSync && auth.accessToken && Date.now() < auth.expiresAt) {
+      if (autoSync && (auth.accessToken || auth.sessionId)) {
         handleSync();
       }
     });
@@ -69,30 +89,24 @@ export function useGoogleSync({
     const needsRefresh = !auth.accessToken || Date.now() >= auth.expiresAt - 10 * 60 * 1000;
     
     if (needsRefresh) {
-      const clientId = auth.clientId || import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
-      if (clientId) {
+      if (auth.sessionId) {
         setSyncProgress({ status: 'authenticating', message: t("sync.authenticating"), filesProcessed: 0, totalFiles: 0 });
         try {
-          // Attempt silent refresh first if we already have a token
-          const isSilent = !!auth.accessToken;
-          await requestDriveAuth(clientId, isSilent);
+          await refreshAccessToken();
           setIsLoggedIn(true);
-        } catch {
-          // If silent failed, fallback to interactive login
-          try {
-            await requestDriveAuth(clientId, false);
-            setIsLoggedIn(true);
-          } catch (loginErr: any) {
-            setSyncProgress({ status: 'error', message: loginErr.message || t("sync.authFailed"), filesProcessed: 0, totalFiles: 0 });
-            return;
-          }
+        } catch (refreshErr: any) {
+          setIsLoggedIn(false);
+          setSyncProgress({ status: 'error', message: refreshErr.message || t("sync.authFailed"), filesProcessed: 0, totalFiles: 0 });
+          return;
         }
       } else {
+        setIsLoggedIn(false);
         if (onOpenSettings) onOpenSettings();
-        setSyncProgress({ status: 'error', message: t("sync.clientIdMissing"), filesProcessed: 0, totalFiles: 0 });
+        setSyncProgress({ status: 'error', message: t("sync.authFailed"), filesProcessed: 0, totalFiles: 0 });
         return;
       }
     }
+
 
     try {
       const { modifiedDates, conflictedDates } = await runSync((progress) => {

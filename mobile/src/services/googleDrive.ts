@@ -11,6 +11,7 @@ export interface DriveFileInfo {
 export interface DriveAuthState {
   accessToken: string | null;
   expiresAt: number; // timestamp
+  sessionId: string | null; // Cloudflare Worker session ID
   clientId: string;
 }
 
@@ -25,13 +26,14 @@ export function getStoredAuthState(): DriveAuthState {
       return {
         accessToken: parsed.accessToken || null,
         expiresAt: parsed.expiresAt || 0,
-        clientId: parsed.clientId || ''
+        sessionId: parsed.sessionId || null,
+        clientId: parsed.clientId || '',
       };
     } catch {
       // fallback
     }
   }
-  return { accessToken: null, expiresAt: 0, clientId: '' };
+  return { accessToken: null, expiresAt: 0, sessionId: null, clientId: '' };
 }
 
 export function saveAuthState(state: DriveAuthState) {
@@ -40,89 +42,169 @@ export function saveAuthState(state: DriveAuthState) {
 
 export function clearAuthState() {
   const current = getStoredAuthState();
-  saveAuthState({ ...current, accessToken: null, expiresAt: 0 });
+  if (current.sessionId) {
+    const workerUrl = import.meta.env.VITE_WORKER_AUTH_URL || 'https://campfire-auth.your-subdomain.workers.dev';
+    fetch(`${workerUrl.replace(/\/$/, '')}/auth/revoke`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_id: current.sessionId }),
+    }).catch(() => {});
+  }
+  localStorage.removeItem(GOOGLE_DRIVE_AUTH_KEY);
 }
 
-// Request Access Token using Google Identity Services (GIS)
-export function requestDriveAuth(clientId: string, silent: boolean = false): Promise<string> {
-  return new Promise((resolve, reject) => {
-    if (!clientId) {
-      reject(new Error('Please configure your Google OAuth Client ID in Settings first.'));
-      return;
-    }
+// Helper to generate PKCE verifier and challenge
+async function generatePkce(): Promise<{ verifier: string; challenge: string }> {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  const verifier = Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('');
 
-    if (!(window as any).google?.accounts?.oauth2) {
-      reject(new Error('Google Identity Services SDK not loaded yet. Check your connection.'));
-      return;
-    }
+  const encoder = new TextEncoder();
+  const data = encoder.encode(verifier);
+  const digest = await crypto.subtle.digest('SHA-256', data);
 
-    try {
-      const client = (window as any).google.accounts.oauth2.initTokenClient({
-        client_id: clientId,
-        scope: 'https://www.googleapis.com/auth/drive.file',
-        callback: (response: any) => {
-          if (response.error) {
-            reject(new Error(response.error_description || response.error));
-            return;
-          }
-          if (response.access_token) {
-            const expiresAt = Date.now() + (response.expires_in || 3600) * 1000;
-            saveAuthState({
-              accessToken: response.access_token,
-              expiresAt,
-              clientId
-            });
-            resolve(response.access_token);
-          } else {
-            reject(new Error('No access token returned from Google.'));
-          }
-        },
-        error_callback: (err: any) => {
-          reject(new Error(err.message || 'OAuth error occurred'));
-        }
-      });
-      // In silent mode (prompt: ''), GIS attempts silent token renewal without popup
-      client.requestAccessToken({ prompt: silent ? '' : 'select_account' });
-    } catch (err: any) {
-      reject(err);
-    }
+  const base64Digest = btoa(String.fromCharCode(...new Uint8Array(digest)))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+
+  return { verifier, challenge: base64Digest };
+}
+
+// Initiate PKCE authorization flow (redirects user to Google OAuth)
+export async function startAuthFlow(clientId?: string): Promise<void> {
+  const targetClientId = clientId || import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+  if (!targetClientId) {
+    throw new Error('Please configure your Google OAuth Client ID first.');
+  }
+
+  const { verifier, challenge } = await generatePkce();
+  sessionStorage.setItem('oauth_code_verifier', verifier);
+
+  const redirectUri = window.location.origin + window.location.pathname;
+  const params = new URLSearchParams({
+    client_id: targetClientId,
+    redirect_uri: redirectUri,
+    response_type: 'code',
+    scope: 'https://www.googleapis.com/auth/drive.file',
+    code_challenge: challenge,
+    code_challenge_method: 'S256',
+    access_type: 'offline',
+    prompt: 'consent',
   });
+
+  window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+}
+
+// Handle Google redirect back to PWA with code
+export async function handleAuthCallback(): Promise<boolean> {
+  const urlParams = new URLSearchParams(window.location.search);
+  const code = urlParams.get('code');
+  if (!code) return false;
+
+  const codeVerifier = sessionStorage.getItem('oauth_code_verifier');
+  sessionStorage.removeItem('oauth_code_verifier');
+
+  if (!codeVerifier) {
+    console.error('OAuth code verifier missing from session storage.');
+    return false;
+  }
+
+  const cleanUrl = window.location.origin + window.location.pathname;
+  window.history.replaceState({}, document.title, cleanUrl);
+
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+  const workerUrl = import.meta.env.VITE_WORKER_AUTH_URL || 'https://campfire-auth.your-subdomain.workers.dev';
+
+  const res = await fetch(`${workerUrl.replace(/\/$/, '')}/auth/exchange`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      code,
+      code_verifier: codeVerifier,
+      redirect_uri: cleanUrl,
+      client_id: clientId,
+    }),
+  });
+
+  if (!res.ok) {
+    const errData = (await res.json().catch(() => ({}))) as { message?: string };
+    throw new Error(errData.message || 'Failed to exchange authorization code');
+  }
+
+  const data = (await res.json()) as { access_token: string; expires_in?: number; session_id?: string };
+  const expiresAt = Date.now() + (data.expires_in || 3600) * 1000;
+  saveAuthState({
+    accessToken: data.access_token,
+    expiresAt,
+    sessionId: data.session_id || null,
+    clientId,
+  });
+
+  return true;
+}
+
+// Refresh access token via Cloudflare Worker
+export async function refreshAccessToken(): Promise<string> {
+  const auth = getStoredAuthState();
+  if (!auth.sessionId) {
+    throw new Error('NOT_AUTHENTICATED');
+  }
+
+  const clientId = auth.clientId || import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+  const workerUrl = import.meta.env.VITE_WORKER_AUTH_URL || 'https://campfire-auth.your-subdomain.workers.dev';
+
+  const res = await fetch(`${workerUrl.replace(/\/$/, '')}/auth/refresh`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      session_id: auth.sessionId,
+      client_id: clientId,
+    }),
+  });
+
+  if (!res.ok) {
+    clearAuthState();
+    throw new Error('TOKEN_EXPIRED');
+  }
+
+  const data = (await res.json()) as { access_token: string; expires_in?: number };
+  const expiresAt = Date.now() + (data.expires_in || 3600) * 1000;
+  saveAuthState({
+    ...auth,
+    accessToken: data.access_token,
+    expiresAt,
+  });
+
+  return data.access_token;
 }
 
 // 50 minutes threshold (token lasts 60m; trigger refresh after 50m / 10m buffer before expiry)
 const REFRESH_BUFFER_MS = 10 * 60 * 1000;
 
-// Helper to check token validity and return a valid token or perform silent refresh
+// Helper to check token validity and return a valid token or perform worker token refresh
 export async function getValidToken(): Promise<string> {
   const auth = getStoredAuthState();
-  if (!auth.accessToken) {
+  if (!auth.accessToken && !auth.sessionId) {
     throw new Error('NOT_AUTHENTICATED');
   }
-  
-  // If 50 minutes have elapsed (less than 10 minutes remaining before 60m expiry)
-  if (Date.now() >= auth.expiresAt - REFRESH_BUFFER_MS) {
-    if (auth.clientId) {
+
+  // Refresh if missing token or within 10 minutes of expiry
+  if (!auth.accessToken || Date.now() >= auth.expiresAt - REFRESH_BUFFER_MS) {
+    if (auth.sessionId) {
       try {
-        // Attempt silent token refresh in background at 50-minute mark
-        const newToken = await requestDriveAuth(auth.clientId, true);
-        return newToken;
-      } catch (err) {
-        console.warn('Silent token refresh failed at 50-minute threshold:', err);
-        // If hard expired (past 60m), clear state
-        if (Date.now() >= auth.expiresAt) {
-          clearAuthState();
-          throw new Error('TOKEN_EXPIRED');
-        }
-      }
-    } else {
-      if (Date.now() >= auth.expiresAt) {
+        return await refreshAccessToken();
+      } catch {
         clearAuthState();
         throw new Error('TOKEN_EXPIRED');
       }
+    } else if (Date.now() >= auth.expiresAt) {
+      clearAuthState();
+      throw new Error('TOKEN_EXPIRED');
     }
   }
-  
-  return auth.accessToken;
+
+  return auth.accessToken!;
 }
 
 // Drive API request wrapper
@@ -131,33 +213,33 @@ async function driveFetch(url: string, options: RequestInit = {}, timeoutMs = 15
 
   const headers = new Headers(options.headers || {});
   headers.set('Authorization', `Bearer ${token}`);
-  
+
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-  
+
   try {
     let response = await fetch(url, {
       ...options,
       headers,
-      signal: options.signal || controller.signal
+      signal: options.signal || controller.signal,
     });
     clearTimeout(timeoutId);
-    
-    // If 401 Unauthorized occurs, attempt one silent refresh recovery
+
+    // If 401 Unauthorized occurs, attempt one token refresh recovery
     if (response.status === 401) {
       const auth = getStoredAuthState();
-      if (auth.clientId) {
+      if (auth.sessionId) {
         try {
-          const newToken = await requestDriveAuth(auth.clientId, true);
+          const newToken = await refreshAccessToken();
           headers.set('Authorization', `Bearer ${newToken}`);
-          
+
           const retryController = new AbortController();
           const retryTimeoutId = setTimeout(() => retryController.abort(), timeoutMs);
-          
+
           response = await fetch(url, {
             ...options,
             headers,
-            signal: options.signal || retryController.signal
+            signal: options.signal || retryController.signal,
           });
           clearTimeout(retryTimeoutId);
           if (response.ok) {
@@ -179,6 +261,7 @@ async function driveFetch(url: string, options: RequestInit = {}, timeoutMs = 15
     throw err;
   }
 }
+
 
 // Search or create CampfireJournal folder in Google Drive Root
 export async function getOrCreateFolderId(): Promise<string> {

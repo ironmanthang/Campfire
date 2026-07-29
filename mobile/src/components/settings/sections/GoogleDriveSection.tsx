@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { LogIn, LogOut, AlertCircle } from 'lucide-react';
 import {
   getStoredAuthState,
-  requestDriveAuth,
+  startAuthFlow,
   clearAuthState,
   getGoogleUserInfo
 } from '../../../services/googleDrive';
@@ -19,7 +19,7 @@ export const GoogleDriveSection: React.FC = () => {
 
   useEffect(() => {
     const auth = getStoredAuthState();
-    const connected = !!auth.accessToken && Date.now() < auth.expiresAt;
+    const connected = (!!auth.accessToken || !!auth.sessionId) && Date.now() < auth.expiresAt;
     setIsLoggedIn(connected);
 
     if (connected) {
@@ -48,19 +48,13 @@ export const GoogleDriveSection: React.FC = () => {
       if (!clientId.trim()) {
         throw new Error(t("settings.googleClientIdMissing"));
       }
-      await requestDriveAuth(clientId.trim());
-      setIsLoggedIn(true);
-      getGoogleUserInfo().then((info) => {
-        if (info?.emailAddress) {
-          setUserEmail(info.emailAddress);
-        }
-      }).catch(console.error);
+      await startAuthFlow(clientId.trim());
     } catch (err: any) {
       setAuthError(err.message || t("settings.googleLoginFailed"));
-    } finally {
       setAuthLoading(false);
     }
   };
+
 
   const handleLogout = () => {
     clearAuthState();
