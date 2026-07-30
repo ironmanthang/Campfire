@@ -5,7 +5,8 @@
   "app": {
     "windows": [
       {
-        "title": "(DEV) Campfire Journal"
+        "title": "(DEV) Campfire Journal",
+        "maximized": true
       }
     ]
   }

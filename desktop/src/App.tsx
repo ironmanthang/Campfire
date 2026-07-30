@@ -8,7 +8,7 @@ import { ErrorModal } from "./components/modals/general/ErrorModal";
 import { HeartGateModal } from "./components/modals/general/HeartGateModal";
 import { DraggableHeart } from "./components/heart/DraggableHeart";
 import { FallingHearts } from "./components/heart/FallingHearts";
-import { HelpModal } from "./components/common";
+import { HelpModal, FullscreenHoverExit } from "./components/common";
 import { ToolExecutorTestPanel } from "./services/toolExecutorPanel";
 import { SyncResultModal } from "./components/modals/data_management/SyncResultModal";
 import { SettingsView } from "./views/SettingsView";
@@ -262,6 +262,9 @@ function App() {
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-bg-app text-text-primary">
+      {/* Top Hover Exit Button in Fullscreen Mode */}
+      <FullscreenHoverExit />
+
       {/* Sidebar Navigation */}
       <Sidebar
         onOpenAbout={() => setIsAboutOpen(true)}
