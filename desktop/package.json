@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:tauri": "tauri dev --config src-tauri/tauri.dev.conf.json",
     "build": "tsc && vite build && pnpm exec javascript-obfuscator dist/assets --output dist/assets --compact true --control-flow-flattening true --string-array true --string-array-encoding base64",
     "release": "tauri build",
     "preview": "vite preview",

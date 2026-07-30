@@ -1,0 +1,12 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Campfire Journal (Dev)",
+  "identifier": "happyKnight.CampfireJournal.dev",
+  "app": {
+    "windows": [
+      {
+        "title": "(DEV) Campfire Journal"
+      }
+    ]
+  }
+}

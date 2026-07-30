@@ -76,17 +76,24 @@ export function SidebarBrandHeader({ isCollapsed, onToggle }: SidebarBrandHeader
 
         {/* Editable Title & Subtitle */}
         <div className="flex-1 min-w-0 pr-1 flex flex-col justify-center">
-          <input
-            ref={localTitleRef}
-            type="text"
-            defaultValue={localTitle}
-            onBlur={handleSaveTitle}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") e.currentTarget.blur();
-            }}
-            className="font-bold tracking-tight text-md bg-transparent border-0 p-0.5 m-0 focus:outline-none focus:ring-1 focus:ring-accent-brand/40 rounded hover:bg-bg-app/40 w-full cursor-pointer focus:cursor-text text-text-primary truncate"
-            title={t("sidebar.editTitleTooltip") || "Click to edit title"}
-          />
+          <div className="flex items-center gap-1.5 min-w-0">
+            <input
+              ref={localTitleRef}
+              type="text"
+              defaultValue={localTitle}
+              onBlur={handleSaveTitle}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") e.currentTarget.blur();
+              }}
+              className="font-bold tracking-tight text-md bg-transparent border-0 p-0.5 m-0 focus:outline-none focus:ring-1 focus:ring-accent-brand/40 rounded hover:bg-bg-app/40 w-full cursor-pointer focus:cursor-text text-text-primary truncate"
+              title={t("sidebar.editTitleTooltip") || "Click to edit title"}
+            />
+            {import.meta.env.DEV && (
+              <span className="shrink-0 px-1.5 py-0.5 text-[10px] font-extrabold rounded bg-amber-500/25 text-amber-400 border border-amber-500/40 uppercase tracking-widest" title="Development Environment (Isolated AppData)">
+                DEV
+              </span>
+            )}
+          </div>
           <input
             ref={localSubtitleRef}
             type="text"
