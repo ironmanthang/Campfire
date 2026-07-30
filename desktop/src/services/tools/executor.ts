@@ -81,6 +81,25 @@ export async function executeToolCall(
       }
     }
 
+    case "read_web_page": {
+      const targetUrl = args.url;
+      try {
+        const content = await invoke<string>("fetch_web_page", { url: targetUrl });
+        return {
+          role: "tool",
+          content: `### Page Content for: ${targetUrl}\n\n${content}`,
+          name: "read_web_page"
+        };
+      } catch (err: any) {
+        console.error("Failed to run read_web_page tool:", err);
+        return {
+          role: "tool",
+          content: `Error fetching URL content for ${targetUrl}: ${err.message || err}`,
+          name: "read_web_page"
+        };
+      }
+    }
+
     case "get_system_resources": {
       try {
         const res = await invoke<SystemResources>("get_system_resources");

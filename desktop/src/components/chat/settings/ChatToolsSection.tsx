@@ -42,7 +42,9 @@ export function ChatToolsSection() {
     "get_system_resources",
     "read_journal_entries",
     "navigate_to_journal_date",
-    "scan_for_garbage"
+    "scan_for_garbage",
+    "web_search",
+    "read_web_page"
   ];
 
   return (
@@ -94,8 +96,8 @@ export function ChatToolsSection() {
             {
               id: "web-search",
               name: "web-search",
-              label: t("chatView.webSearchToggle", "Web Search"),
-              desc: t("chatView.toolWebSearchDesc", "Allow AI to search the web for real-time information."),
+              label: t("chatView.webAccessToggle", "Web Access"),
+              desc: t("chatView.toolWebAccessDesc", "Master switch to enable web search engine queries and page content fetching."),
               icon: Globe,
               hasSubSettings: true
             },
@@ -167,6 +169,14 @@ export function ChatToolsSection() {
                           const val = e.target.checked;
                           if (tool.id === "web-search") {
                             updateConfigField("web_search_enabled", val);
+                            if (val) {
+                              const set = new Set(enabledTools);
+                              set.add("web_search");
+                              set.add("read_web_page");
+                              setEnabledTools(Array.from(set));
+                            } else {
+                              setEnabledTools(enabledTools.filter((t) => t !== "web_search" && t !== "read_web_page"));
+                            }
                           } else {
                             setEnabledTools(
                               val ? [...enabledTools, tool.name] : enabledTools.filter((t) => t !== tool.name)
@@ -235,6 +245,71 @@ export function ChatToolsSection() {
 
                 {tool.id === "web-search" && isExpanded && (
                   <div className="px-10 pb-4 pt-2 border-t border-border-brand/10 bg-bg-app/10 animate-fade-in flex flex-col gap-4">
+                    {/* Child web tools checkboxes */}
+                    <div className="flex flex-col gap-2.5 pb-2 border-b border-border-brand/10">
+                      <label className="text-xs font-semibold text-text-primary">
+                        {t("chatView.webToolsCapabilities", "Web Capabilities")}
+                      </label>
+
+                      {/* Sub-tool 1: Web Search */}
+                      <div className="flex items-start gap-2.5">
+                        <input
+                          id="child-tool-web-search"
+                          type="checkbox"
+                          checked={enabledTools.includes("web_search")}
+                          disabled={isStreamingChat || !config.web_search_enabled}
+                          onChange={(e) => {
+                            const val = e.target.checked;
+                            const next = val
+                              ? [...enabledTools, "web_search"]
+                              : enabledTools.filter((t) => t !== "web_search");
+                            setEnabledTools(next);
+                            if (val && !config.web_search_enabled) {
+                              updateConfigField("web_search_enabled", true);
+                            }
+                          }}
+                          className="rounded border-border-brand text-accent-brand focus:ring-accent-brand bg-bg-input cursor-pointer disabled:opacity-50 h-3.5 w-3.5 mt-0.5"
+                        />
+                        <div className="flex flex-col gap-0.5">
+                          <label htmlFor="child-tool-web-search" className="text-xs font-medium text-text-primary cursor-pointer">
+                            {t("chatView.webSearchChild", "Web Search")}
+                          </label>
+                          <span className="text-[11px] text-text-secondary">
+                            {t("chatView.webSearchChildDesc", "Allow search engine query execution.")}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Sub-tool 2: Web Page Reader */}
+                      <div className="flex items-start gap-2.5">
+                        <input
+                          id="child-tool-read-web-page"
+                          type="checkbox"
+                          checked={enabledTools.includes("read_web_page")}
+                          disabled={isStreamingChat || !config.web_search_enabled}
+                          onChange={(e) => {
+                            const val = e.target.checked;
+                            const next = val
+                              ? [...enabledTools, "read_web_page"]
+                              : enabledTools.filter((t) => t !== "read_web_page");
+                            setEnabledTools(next);
+                            if (val && !config.web_search_enabled) {
+                              updateConfigField("web_search_enabled", true);
+                            }
+                          }}
+                          className="rounded border-border-brand text-accent-brand focus:ring-accent-brand bg-bg-input cursor-pointer disabled:opacity-50 h-3.5 w-3.5 mt-0.5"
+                        />
+                        <div className="flex flex-col gap-0.5">
+                          <label htmlFor="child-tool-read-web-page" className="text-xs font-medium text-text-primary cursor-pointer">
+                            {t("chatView.webPageReaderChild", "Web Page Reader")}
+                          </label>
+                          <span className="text-[11px] text-text-secondary">
+                            {t("chatView.webPageReaderChildDesc", "Allow fetching and reading full page content from URLs.")}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
                     <div className="flex flex-col gap-1.5 max-w-sm">
                       <label className="text-xs font-semibold text-text-primary">
                         {t("settingsView.webSearchProvider")}

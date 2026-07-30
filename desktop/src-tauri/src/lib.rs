@@ -31,6 +31,7 @@ pub fn run() {
             commands::system::stop_ollama_model,
             commands::feedback::submit_feedback,
             commands::web_search::search_web,
+            commands::web_search::fetch_web_page,
             commands::journal::list_local_entries_for_sync,
             commands::journal::write_entry_with_timestamp,
             commands::journal::set_file_timestamp,

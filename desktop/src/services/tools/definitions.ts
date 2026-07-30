@@ -82,7 +82,7 @@ export function getWebSearchTool(): OllamaTool {
     type: "function",
     function: {
       name: "web_search",
-      description: "Search the web for real-time information, news, weather, facts, or any queries requiring current search engine results. For complex, difficult questions, **you must make multiple distinct queries**.",
+      description: "Search the web for real-time information, news, or topics. Returns search engine index results with page titles, URLs, and short summary snippets. Note: Search snippets are brief summaries, NOT full page content.",
       parameters: {
         type: "object",
         properties: {
@@ -96,3 +96,24 @@ export function getWebSearchTool(): OllamaTool {
     }
   };
 }
+
+export function getReadWebPageTool(): OllamaTool {
+  return {
+    type: "function",
+    function: {
+      name: "read_web_page",
+      description: "Fetch and read the raw text or Markdown content of a specific HTTP/HTTPS URL. Use this tool whenever you have a target web URL (whether provided directly by the user or discovered during research) and need or want to read its full, detailed page content.",
+      parameters: {
+        type: "object",
+        properties: {
+          url: {
+            type: "string",
+            description: "The full target URL to fetch (must start with http:// or https://)."
+          }
+        },
+        required: ["url"]
+      }
+    }
+  };
+}
+

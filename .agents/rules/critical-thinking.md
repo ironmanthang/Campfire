@@ -29,6 +29,7 @@ Before touching any code, think through (and share) these checks:
 - **Alternatives:** Is there a simpler or more maintainable way to get the same result?
 - **Tech debt cost:** What does this change make harder to do later? Would a quick
   version now create cleanup work in a month?
+- **No Hypothetical Phrasing in Plans:** During the planning and investigation phase, read and deep-scan the codebase first before writing a plan. Never use hand-wavy or tentative phrasing like "if X exists..." or "if our codebase supports...". Verify the actual implementation in the files, state exact concrete facts, and deliver deterministic recommendations.
 
 ## Flagging Issues
 If any check above raises a concern — including "this works but there's a cleaner way"
