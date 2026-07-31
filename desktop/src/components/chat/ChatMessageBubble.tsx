@@ -184,7 +184,7 @@ export function ChatMessageBubble({
                       ? t("chatView.statusScanningGarbage")
                       : activeToolName === "web_search"
                       ? t("chatView.searchingWebStatus")
-                      : activeToolName === "read_web_page"
+                      : activeToolName === "web_fetch"
                       ? t("chatView.statusReadingWebPage", "Reading web page...")
                       : t("chatView.waitingResponse");
 

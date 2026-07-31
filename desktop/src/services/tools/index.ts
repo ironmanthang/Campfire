@@ -3,6 +3,6 @@
 // the runtime executor — the previous split into `chatTools.ts` and
 // `toolExecutor.ts` is preserved inside as `./definitions` and `./executor`.
 
-export { LOCAL_TOOLS, getWebSearchTool, getReadWebPageTool } from "./definitions";
+export { LOCAL_TOOLS, getWebSearchTool, getWebFetchTool } from "./definitions";
 export { executeToolCall, findToolCallInput } from "./executor";
 export type { ToolExecutionContext } from "./executor";

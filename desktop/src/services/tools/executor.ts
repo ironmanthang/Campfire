@@ -81,21 +81,21 @@ export async function executeToolCall(
       }
     }
 
-    case "read_web_page": {
+    case "web_fetch": {
       const targetUrl = args.url;
       try {
         const content = await invoke<string>("fetch_web_page", { url: targetUrl });
         return {
           role: "tool",
           content: `### Page Content for: ${targetUrl}\n\n${content}`,
-          name: "read_web_page"
+          name: "web_fetch"
         };
       } catch (err: any) {
-        console.error("Failed to run read_web_page tool:", err);
+        console.error("Failed to run web_fetch tool:", err);
         return {
           role: "tool",
           content: `Error fetching URL content for ${targetUrl}: ${err.message || err}`,
-          name: "read_web_page"
+          name: "web_fetch"
         };
       }
     }

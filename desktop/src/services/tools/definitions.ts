@@ -16,7 +16,7 @@ export const LOCAL_TOOLS: OllamaTool[] = [
     type: "function",
     function: {
       name: "read_journal_entries",
-      description: "Retrieve raw journal entries by the user within a specific date range. Use this tool whenever you need to recall, double-check, verify, or Reexamine the journal logs to avoid hallucinating details. If you only need to read a single specific date, set both start_date and end_date to that same date. IMPORTANT: You are only allowed to query date ranges within your memory range.",
+      description: "Retrieve raw journal entries by the user within a specific date range. Use this tool whenever you need to recall, double-check, verify, or re-read the journal logs. If you only need to read a single specific date, set both start_date and end_date to that same date. IMPORTANT: You are only allowed to query date ranges within your memory range.",
       parameters: {
         type: "object",
         properties: {
@@ -82,13 +82,13 @@ export function getWebSearchTool(): OllamaTool {
     type: "function",
     function: {
       name: "web_search",
-      description: "Search the web for real-time information, news, or topics. Returns search engine index results with page titles, URLs, and short summary snippets. Note: Search snippets are brief summaries, NOT full page content.",
+      description: "Search the web for real-time information, news, or topics. Returns search engine index results with page titles, URLs, and short summary snippets. Note: Search snippets are brief summaries, NOT full page content. If you need to run multiple searches, return multiple web_search tool calls in parallel within a single turn.",
       parameters: {
         type: "object",
         properties: {
           query: {
             type: "string",
-            description: "The search query to run on the search engine."
+            description: "The search query to run on the search engine. Keep query concise using 3-6 key terms. NEVER pass full sentences, long questions, or entire paragraphs."
           }
         },
         required: ["query"]
@@ -97,12 +97,12 @@ export function getWebSearchTool(): OllamaTool {
   };
 }
 
-export function getReadWebPageTool(): OllamaTool {
+export function getWebFetchTool(): OllamaTool {
   return {
     type: "function",
     function: {
-      name: "read_web_page",
-      description: "Fetch and read the raw text or Markdown content of a specific HTTP/HTTPS URL. Use this tool whenever you have a target web URL (whether provided directly by the user or discovered during research) and need or want to read its full, detailed page content.",
+      name: "web_fetch",
+      description: "Fetch and read the raw text or Markdown content of a specific HTTP/HTTPS URL. Use this tool whenever you have a target web URL (whether provided directly by the user or discovered during research) and need or want to read its full, detailed page content. If you have multiple target URLs to read, return multiple web_fetch tool calls in parallel within a single turn instead of calling them sequentially.",
       parameters: {
         type: "object",
         properties: {

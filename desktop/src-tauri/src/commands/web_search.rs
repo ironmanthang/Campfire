@@ -321,9 +321,25 @@ pub async fn search_web(
     api_key: String,
     google_cx: String,
 ) -> Result<Vec<WebSearchResult>, String> {
-    if query.trim().is_empty() {
+    let trimmed = query.trim();
+    if trimmed.is_empty() {
         return Ok(Vec::new());
     }
+
+    let clean_query = if trimmed.len() > 150 {
+        let sliced = get_safe_slice(trimmed, 0, 150);
+        if let Some(last_space) = sliced.rfind(' ') {
+            if last_space > 30 {
+                sliced[..last_space].trim().to_string()
+            } else {
+                sliced.trim().to_string()
+            }
+        } else {
+            sliced.trim().to_string()
+        }
+    } else {
+        trimmed.to_string()
+    };
 
     match provider.as_str() {
         "tavily" => {
@@ -332,7 +348,7 @@ pub async fn search_web(
             }
             let payload = TavilyPayload {
                 api_key,
-                query: query.clone(),
+                query: clean_query.clone(),
                 search_depth: "basic".to_string(),
                 include_answer: false,
                 max_results: 5,
@@ -378,7 +394,7 @@ pub async fn search_web(
                 .query(&[
                     ("key", api_key.as_str()),
                     ("cx", google_cx.as_str()),
-                    ("q", query.as_str()),
+                    ("q", clean_query.as_str()),
                 ])
                 .send()
                 .await
@@ -413,7 +429,7 @@ pub async fn search_web(
 
             // 1. Try DuckDuckGo HTML (Option A - No API key)
             let ddg_res = client.post("https://html.duckduckgo.com/html/")
-                .form(&[("q", query.as_str())])
+                .form(&[("q", clean_query.as_str())])
                 .send()
                 .await;
 
@@ -430,7 +446,7 @@ pub async fn search_web(
 
             // 2. Try DuckDuckGo HTML GET fallback
             let ddg_get_res = client.get("https://html.duckduckgo.com/html/")
-                .query(&[("q", query.as_str())])
+                .query(&[("q", clean_query.as_str())])
                 .send()
                 .await;
 
@@ -447,7 +463,7 @@ pub async fn search_web(
 
             // 3. Fallback to Brave Search if DDG returns empty
             let res = client.get("https://search.brave.com/search")
-                .query(&[("q", query.as_str())])
+                .query(&[("q", clean_query.as_str())])
                 .send()
                 .await
                 .map_err(|e| format!("Search request failed: {}", e))?;
@@ -464,8 +480,8 @@ pub async fn search_web(
 
             if results.is_empty() {
                 results.push(WebSearchResult {
-                    title: format!("Search: {}", query),
-                    url: format!("https://duckduckgo.com/?q={}", query.replace(" ", "+")),
+                    title: format!("Search: {}", clean_query),
+                    url: format!("https://duckduckgo.com/?q={}", clean_query.replace(" ", "+")),
                     snippet: "No search results could be retrieved. Please check your internet connection.".to_string(),
                 });
             }

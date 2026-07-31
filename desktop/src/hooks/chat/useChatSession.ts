@@ -10,7 +10,7 @@ import {
   OllamaTool,
   streamAIResponse,
 } from "../../services/ollama";
-import { LOCAL_TOOLS, getWebSearchTool, getReadWebPageTool } from "../../services/tools";
+import { LOCAL_TOOLS, getWebSearchTool, getWebFetchTool } from "../../services/tools";
 import { executeToolCall } from "../../services/tools";
 import { useAppStore } from "../../store/useAppStore";
 import { useOllamaStore } from "../../store/useOllamaStore";
@@ -39,7 +39,7 @@ export function useChatSession({ visible }: { visible: boolean }) {
     "navigate_to_journal_date",
     "scan_for_garbage",
     "web_search",
-    "read_web_page"
+    "web_fetch"
   ]);
   const [showThinking, setShowThinking] = usePersistedState("chat_show_thinking", true);
   const [collapseToolResponse, setCollapseToolResponse] = usePersistedState("chat_collapse_tool_response", true);
@@ -247,12 +247,12 @@ export function useChatSession({ visible }: { visible: boolean }) {
     }
 
     if (config.web_search_enabled) {
-      const hasExplicitWebToolsConfig = enabledTools.includes("web_search") || enabledTools.includes("read_web_page");
+      const hasExplicitWebToolsConfig = enabledTools.includes("web_search") || enabledTools.includes("web_fetch");
       if (!hasExplicitWebToolsConfig || enabledTools.includes("web_search")) {
         activeTools.push(getWebSearchTool());
       }
-      if (!hasExplicitWebToolsConfig || enabledTools.includes("read_web_page")) {
-        activeTools.push(getReadWebPageTool());
+      if (!hasExplicitWebToolsConfig || enabledTools.includes("web_fetch")) {
+        activeTools.push(getWebFetchTool());
       }
     }
 

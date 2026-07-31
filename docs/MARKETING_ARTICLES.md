@@ -7,7 +7,7 @@ This document serves as the master execution guide for promoting **Campfire Jour
 ## 🔗 Official Product Links
 
 * 🌐 **Web PWA (Instant Trial):** [https://app-campfire.pages.dev/](https://app-campfire.pages.dev/)
-* 💻 **Microsoft Store (Windows Native App):** [https://apps.microsoft.com/detail/9P40G2GTC6GG?hl=en-us&gl=VN&ocid=pdpshare](https://apps.microsoft.com/detail/9P40G2GTC6GG?hl=en-us&gl=VN&ocid=pdpshare)
+* 💻 **Microsoft Store (Windows Native App):** [https://apps.microsoft.com/detail/9p40g2gtc6gg](https://apps.microsoft.com/detail/9p40g2gtc6gg)
 
 ---
 
@@ -26,16 +26,18 @@ Before submitting posts to any platform, gather the following visual assets:
 
 ### Step 2: Target Platform Matrix (Where to Post)
 
-| Platform | Target Audience / Subreddits | Core Angle to Highlight | Best Time to Post |
+| Platform | Target Audience / Subreddits | Core Angle to Highlight | Best Time to Post (Vietnam Time - ICT) |
 | :--- | :--- | :--- | :--- |
-| **Reddit** | `r/SelfHosted`, `r/Privacy` | 100% Local storage, Google Drive backup, Zero server tracking. | Mon-Thu, 8 AM - 11 AM EST (US Time) |
-| **Reddit** | `r/LocalLLaMA` | Local AI / Ollama integration, privacy for personal journal. | Tue-Thu, 9 AM EST |
-| **Reddit** | `r/Journaling`, `r/Productivity` | Overcoming writer's block, AI prompts, dark mode UI. | Weekend mornings (EST) |
-| **Reddit** | `r/apps`, `r/Tauri`, `r/ReactJS` | Tech stack showcase (Tauri + Rust + React 19 + PWA). | Wed-Fri, 10 AM EST |
-| **Hacker News** | `Show HN` | "Show HN: Campfire – Local-first AI journal built with Tauri" | Tue-Thu, 8 AM EST |
-| **FB Groups (VN)** | J2TEAM Community, Viblo, DevVN | Story behind building local-first app + Microsoft Store approval. | Tue-Thu, 8 PM - 10 PM ICT (VN Time) |
-| **FB Groups (VN)** | Nhóm Viết Lách, Sách & Nhật Ký, Productivity | AI trợ lý cá nhân, bảo mật nhật ký, không sợ bị lộ suy nghĩ. | Sat-Sun, 8 PM ICT |
-| **Launch Outlets** | Product Hunt, Dev.to, Hashnode | Long-form developer story & product release. | Tuesday 12:01 AM PST |
+| **Reddit (Local-First & Tech)** | `r/localfirst`, `r/SelfHosted` | 100% Local storage, Google Drive backup, Zero server tracking & offline architecture. | Mon-Thu, 7 PM - 10 PM ICT (Tối T2-T5) |
+| **Reddit (Maker & Showcase)** | `r/SideProject`, `r/buildinpublic`, `r/IndieHackers` | Dedicated showcase subs: Share origin story, developer journey, and request feedback. | Mon-Thu, 7 PM - 10 PM ICT (Tối T2-T5) |
+| **Reddit (Beta & Testing)** | `r/alphaandbetausers`, `r/RoastMyStartUp` | Recruit early testers and gather feedback on PWA & Windows desktop app. | Mon-Thu, 7 PM - 10 PM ICT (Tối T2-T5) |
+| **Reddit (AI & Local LLM)** | `r/LocalLLaMA` | Local AI / Ollama integration, privacy for personal journal (Use `Project` flair). | Tue-Thu, 8 PM - 9 PM ICT (Tối T3-T5) |
+| **Reddit (App Discovery)** | `r/apps`, `r/windowsapps`, `r/PWA` | App showcase & Windows Store release (Use `[Developer]` flair). | Wed-Fri, 9 PM - 10 PM ICT (Tối T4-T6) |
+| **Reddit (Tech Stack)** | `r/Tauri`, `r/ReactJS`, `r/webdev` | Tech stack showcase (Tauri + Rust + React 19 + PWA). *Note: Use Showoff Saturday / Threads.* | Wed-Fri, 9 PM - 10 PM ICT (Tối T4-T6) |
+| **Hacker News** | `Show HN` | "Show HN: Campfire – Local-first AI journal built with Tauri" | Tue-Thu, 7 PM - 8 PM ICT (Tối T3-T5) |
+| **FB Groups (VN)** | J2TEAM Community, Viblo, DevVN | Story behind building local-first app + Microsoft Store approval. | Tue-Thu, 8 PM - 10 PM ICT (Tối T3-T5) |
+| **FB Groups (VN)** | Nhóm Viết Lách, Sách & Nhật Ký | AI trợ lý cá nhân, bảo mật nhật ký, không sợ bị lộ suy nghĩ. | Sat-Sun, 8 PM - 10 PM ICT (Tối T7-CN) |
+| **Launch Outlets** | Product Hunt, Dev.to, Hashnode | Long-form developer story & product release. | Tuesday 2:01 PM ICT (Chiều T3) |
 
 ---
 
@@ -66,7 +68,7 @@ Before submitting posts to any platform, gather the following visual assets:
 # 🇬🇧 PART 2: ENGLISH POST TEMPLATES
 
 ### Option 1: Story & Privacy-First Post
-> **Best for:** Reddit (`r/SelfHosted`, `r/Privacy`, `r/LocalLLaMA`, `r/apps`), Hacker News (`Show HN`), Dev.to
+> **Best for:** Reddit (`r/localfirst`, `r/SideProject`, `r/SelfHosted`, `r/LocalLLaMA`, `r/buildinpublic`, `r/apps`), Hacker News (`Show HN`), Dev.to
 
 **Title:** I built a local-first AI journal app because I was tired of cloud apps harvesting my personal thoughts
 
@@ -96,7 +98,7 @@ I’d love to hear your feedback, thoughts on privacy-first AI workflows, or fea
 ---
 
 ### Option 2: Feature-Focused & Cozy Post
-> **Best for:** Reddit (`r/Journaling`, `r/Productivity`), Facebook English Groups, Indie Hackers
+> **Best for:** Reddit (`r/SideProject`, `r/alphaandbetausers`, `r/apps`, `r/windowsapps`, `r/PWA`), Facebook English Groups
 
 **Title:** Meet Campfire — A cozy digital journal with AI reflection & 100% private local storage
 

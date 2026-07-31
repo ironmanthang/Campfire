@@ -44,7 +44,7 @@ export function ChatToolsSection() {
     "navigate_to_journal_date",
     "scan_for_garbage",
     "web_search",
-    "read_web_page"
+    "web_fetch"
   ];
 
   return (
@@ -172,10 +172,10 @@ export function ChatToolsSection() {
                             if (val) {
                               const set = new Set(enabledTools);
                               set.add("web_search");
-                              set.add("read_web_page");
+                              set.add("web_fetch");
                               setEnabledTools(Array.from(set));
                             } else {
-                              setEnabledTools(enabledTools.filter((t) => t !== "web_search" && t !== "read_web_page"));
+                              setEnabledTools(enabledTools.filter((t) => t !== "web_search" && t !== "web_fetch"));
                             }
                           } else {
                             setEnabledTools(
@@ -280,18 +280,18 @@ export function ChatToolsSection() {
                         </div>
                       </div>
 
-                      {/* Sub-tool 2: Web Page Reader */}
+                      {/* Sub-tool 2: Web Fetch */}
                       <div className="flex items-start gap-2.5">
                         <input
                           id="child-tool-read-web-page"
                           type="checkbox"
-                          checked={enabledTools.includes("read_web_page")}
+                          checked={enabledTools.includes("web_fetch")}
                           disabled={isStreamingChat || !config.web_search_enabled}
                           onChange={(e) => {
                             const val = e.target.checked;
                             const next = val
-                              ? [...enabledTools, "read_web_page"]
-                              : enabledTools.filter((t) => t !== "read_web_page");
+                              ? [...enabledTools, "web_fetch"]
+                              : enabledTools.filter((t) => t !== "web_fetch");
                             setEnabledTools(next);
                             if (val && !config.web_search_enabled) {
                               updateConfigField("web_search_enabled", true);
@@ -301,7 +301,7 @@ export function ChatToolsSection() {
                         />
                         <div className="flex flex-col gap-0.5">
                           <label htmlFor="child-tool-read-web-page" className="text-xs font-medium text-text-primary cursor-pointer">
-                            {t("chatView.webPageReaderChild", "Web Page Reader")}
+                            {t("chatView.webPageReaderChild", "Web Fetch")}
                           </label>
                           <span className="text-[11px] text-text-secondary">
                             {t("chatView.webPageReaderChildDesc", "Allow fetching and reading full page content from URLs.")}
