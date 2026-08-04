@@ -2,16 +2,16 @@
   "name": "tauri-app",
   "private": true,
   "license": "UNLICENSED",
-  "version": "0.1.0",
+  "version": "0.1.6",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "prepush": "node scripts/prepush.mjs",
+    "version:bump": "node scripts/bump-version.mjs",
     "tauri": "tauri",
     "i18n:check": "pnpm --filter desktop --filter mobile i18n:check",
-
     "test": "vitest run"
   },
   "dependencies": {
