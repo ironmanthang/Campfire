@@ -3,6 +3,7 @@ import { X, StickyNote, Plus, Trash2, CheckSquare, Square, Edit3, ListChecks } f
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { useAppStore } from "../../store/useAppStore";
+import { useResizer } from "../../hooks/useResizer";
 
 interface ScratchpadDrawerProps {
   isOpen: boolean;
@@ -27,7 +28,20 @@ export function ScratchpadDrawer({ isOpen, onClose }: ScratchpadDrawerProps) {
   const [isRawMode, setIsRawMode] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
+  const [modalWidth, startResize, resetModalWidth] = useResizer({
+    key: "scratchpad-modal-width",
+    defaultVal: 512,
+    mode: "px",
+    min: 480,
+    max: 1400,
+    multiplier: 1,
+  });
+
   const drawerRef = useRef<HTMLDivElement | null>(null);
+  const pointerStartedInsideRef = useRef(false);
+  const pointerMovedRef = useRef(false);
+  const activePointerIdRef = useRef<number | null>(null);
+  const startPosRef = useRef<{ x: number; y: number } | null>(null);
   const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -177,20 +191,49 @@ export function ScratchpadDrawer({ isOpen, onClose }: ScratchpadDrawerProps) {
   if (!isOpen) return null;
 
   return (
-    <>
-      {/* Backdrop */}
-      <div
-        onClick={onClose}
-        className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 transition-opacity duration-300"
-      />
-
-      {/* Drawer Panel */}
+    <div
+      onPointerDown={(e) => {
+        const target = e.target as Node;
+        pointerStartedInsideRef.current = drawerRef.current?.contains(target) ?? false;
+        pointerMovedRef.current = false;
+        activePointerIdRef.current = e.pointerId;
+        startPosRef.current = { x: e.clientX, y: e.clientY };
+      }}
+      onPointerMove={(e) => {
+        if (activePointerIdRef.current !== e.pointerId) return;
+        const start = startPosRef.current;
+        if (!start) return;
+        if (Math.hypot(e.clientX - start.x, e.clientY - start.y) > 6) pointerMovedRef.current = true;
+      }}
+      onPointerUp={(e) => {
+        if (activePointerIdRef.current !== e.pointerId) return;
+        if (pointerStartedInsideRef.current) {
+          pointerStartedInsideRef.current = false;
+          activePointerIdRef.current = null;
+          startPosRef.current = null;
+          return;
+        }
+        if (pointerMovedRef.current) {
+          pointerMovedRef.current = false;
+          activePointerIdRef.current = null;
+          startPosRef.current = null;
+          return;
+        }
+        activePointerIdRef.current = null;
+        startPosRef.current = null;
+        onClose();
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in cursor-pointer"
+    >
+      {/* Modal Container Panel */}
       <div
         ref={drawerRef}
-        className="fixed top-0 bottom-0 left-0 z-50 w-96 max-w-[90vw] bg-bg-surface border-r border-border-brand shadow-2xl flex flex-col transition-transform duration-300 ease-in-out"
+        onClick={(e) => e.stopPropagation()}
+        style={{ width: modalWidth }}
+        className="relative bg-bg-surface border border-border-brand rounded-2xl max-w-[95vw] shadow-2xl flex flex-col max-h-[85vh] h-[600px] overflow-hidden cursor-default"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border-brand bg-bg-app/40 select-none">
+        <div className="flex border-b border-border-brand/30 bg-bg-app/10 items-center justify-between relative px-4 py-3 select-none">
           <div className="flex items-center gap-2">
             <StickyNote className="h-5 w-5 text-accent-brand" />
             <h2 className="font-bold text-text-primary text-base">
@@ -202,7 +245,7 @@ export function ScratchpadDrawer({ isOpen, onClose }: ScratchpadDrawerProps) {
             {/* View Mode Toggle */}
             <button
               onClick={() => setIsRawMode(!isRawMode)}
-              className="p-1.5 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-surface transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-app/40 transition-colors cursor-pointer"
               title={isRawMode ? t("scratchpad.interactiveView", "Switch to Task View") : t("scratchpad.rawView", "Switch to Raw Markdown")}
             >
               {isRawMode ? <ListChecks className="h-4.5 w-4.5 text-accent-brand" /> : <Edit3 className="h-4.5 w-4.5" />}
@@ -211,7 +254,7 @@ export function ScratchpadDrawer({ isOpen, onClose }: ScratchpadDrawerProps) {
             {/* Close Button */}
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-surface transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-app/40 transition-colors cursor-pointer"
             >
               <X className="h-5 w-5" />
             </button>
@@ -219,7 +262,7 @@ export function ScratchpadDrawer({ isOpen, onClose }: ScratchpadDrawerProps) {
         </div>
 
         {/* Content Body */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-thin select-text min-h-0">
           {loading ? (
             <div className="text-center text-text-secondary py-8 text-sm">
               {t("common.loading", "Loading...")}
@@ -345,7 +388,17 @@ export function ScratchpadDrawer({ isOpen, onClose }: ScratchpadDrawerProps) {
             </button>
           </div>
         )}
+
+        {/* Right-edge resize handle */}
+        <div
+          onMouseDown={startResize}
+          onDoubleClick={resetModalWidth}
+          className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-accent-brand/5 z-30 group flex items-center justify-center select-none"
+          title={t("common.dragToResize")}
+        >
+          <div className="w-[2px] h-12 bg-border-brand/20 group-hover:bg-accent-brand/80 rounded transition-colors duration-150" />
+        </div>
       </div>
-    </>
+    </div>
   );
 }

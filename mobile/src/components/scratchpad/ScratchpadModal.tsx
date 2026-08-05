@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, StickyNote, Plus, Trash2, CheckSquare, Square, Edit3, ListChecks } from 'lucide-react';
 import { getScratchpadEntry, saveLocalEntry } from '../../services/db';
@@ -25,6 +25,21 @@ export const ScratchpadModal: React.FC<ScratchpadModalProps> = ({ isOpen, onClos
   const [newTaskText, setNewTaskText] = useState<string>('');
   const [isRawMode, setIsRawMode] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+
+  const openTimeRef = useRef<number>(performance.now());
+
+  useEffect(() => {
+    if (isOpen) {
+      openTimeRef.current = performance.now();
+    }
+  }, [isOpen]);
+
+  const handleBackdropClick = () => {
+    if (performance.now() - openTimeRef.current < 350) {
+      return;
+    }
+    handleManualClose();
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -131,8 +146,14 @@ export const ScratchpadModal: React.FC<ScratchpadModalProps> = ({ isOpen, onClos
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4 transition-opacity duration-300">
-      <div className="w-full max-w-lg bg-bg-surface rounded-t-3xl sm:rounded-3xl border border-border-brand shadow-2xl flex flex-col max-h-[85vh] h-[600px] overflow-hidden animate-slide-up">
+    <div
+      onClick={handleBackdropClick}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 cursor-pointer"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-md bg-bg-surface border border-border-brand rounded-2xl shadow-2xl flex flex-col max-h-[85vh] h-[600px] overflow-hidden cursor-default"
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border-brand bg-bg-app/40 select-none shrink-0">
           <div className="flex items-center gap-2.5">
