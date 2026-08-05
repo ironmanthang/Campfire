@@ -14,6 +14,7 @@ export interface OllamaTool {
 }
 
 export interface OllamaToolCall {
+  id?: string;
   function: {
     name: string;
     arguments: Record<string, any>;

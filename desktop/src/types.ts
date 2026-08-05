@@ -19,6 +19,11 @@ export interface AppConfig {
   custom_system_instruction: string;
   pwa_url: string;
 
+  llm_provider: 'ollama' | 'openai_compatible';
+  openai_base_url: string;
+  openai_api_key: string;
+  openai_model_name: string;
+
   // Donation heart settings
   show_donate_heart: boolean;
   heart_click_falls: boolean;

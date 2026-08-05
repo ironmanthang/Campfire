@@ -30,7 +30,13 @@ pub struct AppConfig {
     pub custom_system_instruction: String,
     pub pwa_url: String,
 
+    pub llm_provider: String,
+    pub openai_base_url: String,
+    pub openai_api_key: String,
+    pub openai_model_name: String,
+
     // Donation heart settings (kept here so they actually round-trip through
+
     // load_config / save_config — previously these lived only on the TS side
     // and were silently dropped on every reload because the Rust struct
     // didn't know about them.)
@@ -89,6 +95,10 @@ impl Default for AppConfig {
             system_instruction_mode: "default".to_string(),
             custom_system_instruction: String::new(),
             pwa_url: "https://app-campfire.pages.dev/".to_string(),
+            llm_provider: "ollama".to_string(),
+            openai_base_url: "http://127.0.0.1:8080/v1".to_string(),
+            openai_api_key: String::new(),
+            openai_model_name: "llama-server".to_string(),
             show_donate_heart: true,
             heart_click_falls: false,
             heart_fall_speed: 5,

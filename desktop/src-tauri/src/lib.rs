@@ -54,6 +54,9 @@ pub fn run() {
             commands::ollama::proxy_ollama_chat,
             commands::ollama::proxy_ollama_chat_stream,
             commands::ollama::proxy_ollama_pull_stream,
+            commands::openai::check_openai_status,
+            commands::openai::get_openai_models,
+            commands::openai::proxy_openai_chat_stream,
             debug::write_debug_payload // DEBUG
         ])
         .run(tauri::generate_context!())

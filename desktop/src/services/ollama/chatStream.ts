@@ -2,8 +2,10 @@ import { OLLAMA_BASE_URL, isTauri } from "../../lib/constants";
 import { invoke, Channel } from "@tauri-apps/api/core";
 import { saveDebugPayload } from "../debug";
 import { OllamaMessage, OllamaTool, OllamaToolCall } from "./types";
+import { streamOpenAIResponse } from "../openai";
+import { useAppStore } from "../../store/useAppStore";
 
-// Stream chat response from local Ollama service
+// Stream chat response from local Ollama service or OpenAI-compatible service
 export async function streamAIResponse(
   model: string,
   messages: OllamaMessage[],
@@ -13,6 +15,20 @@ export async function streamAIResponse(
   tools?: OllamaTool[],
   journalDir?: string
 ): Promise<OllamaToolCall[] | null> {
+  const { config } = useAppStore.getState();
+
+  if (config.llm_provider === "openai_compatible") {
+    const targetModel = config.openai_model_name || model;
+    return await streamOpenAIResponse(
+      targetModel,
+      messages,
+      onChunk,
+      config.openai_base_url || "http://127.0.0.1:8080/v1",
+      config.openai_api_key,
+      signal
+    );
+  }
+
   const chatBody = { model, messages, stream: true, options, tools };
 
   if (journalDir) {

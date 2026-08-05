@@ -6,6 +6,8 @@ import {
   getDownloadedModels, 
   getActiveModels 
 } from "../services/ollama";
+import { checkOpenAIStatus, getOpenAIModels } from "../services/openai";
+import { useAppStore } from "./useAppStore";
 import { isEmbeddingModel } from "../services/embeddings";
 
 interface OllamaState {
@@ -27,7 +29,7 @@ export const useOllamaStore = create<OllamaState>((set, get) => ({
   ollamaConnected: false,
   modelsList: [],
   activeModelsList: [],
-  activeModel: localStorage.getItem("active_model") || "gemma4:e2b-it-qat",
+  activeModel: localStorage.getItem("active_model") || "",
   checkingOllama: false,
   pinnedModels: (() => {
     try {
@@ -57,6 +59,42 @@ export const useOllamaStore = create<OllamaState>((set, get) => ({
   verifyOllamaConnection: async () => {
     set({ checkingOllama: true });
     try {
+      const { config } = useAppStore.getState();
+
+      if (config.llm_provider === "openai_compatible") {
+        const baseUrl = config.openai_base_url || "http://127.0.0.1:8080/v1";
+        const apiKey = config.openai_api_key;
+        const ok = await checkOpenAIStatus(baseUrl, apiKey);
+        set({ ollamaConnected: ok });
+
+        if (ok) {
+          const fetchedModelIds = await getOpenAIModels(baseUrl, apiKey).catch(() => []);
+          const configuredModelName = config.openai_model_name?.trim() || "gpt-4o-mini";
+          const modelNames = fetchedModelIds.length > 0 ? fetchedModelIds : [configuredModelName];
+
+          const openAiModels: OllamaModelInfo[] = modelNames.map((name) => ({
+            name,
+            size: 0,
+          }));
+
+          set({
+            modelsList: openAiModels,
+            activeModelsList: [],
+            chatModels: openAiModels,
+            embeddingModels: [],
+            activeModel: configuredModelName,
+          });
+        } else {
+          set({
+            modelsList: [],
+            activeModelsList: [],
+            chatModels: [],
+            embeddingModels: [],
+          });
+        }
+        return;
+      }
+
       const ok = await checkOllamaStatus();
       set({ ollamaConnected: ok });
       if (ok) {
@@ -73,7 +111,7 @@ export const useOllamaStore = create<OllamaState>((set, get) => ({
           embeddingModels: embed
         });
 
-        // Set default active model if currently selected is invalid/missing
+        // Set active model from actually downloaded chat models
         if (chat.length > 0) {
           const chatModelNames = chat.map((m) => m.name);
           const savedActiveModel = localStorage.getItem("active_model");
@@ -81,20 +119,30 @@ export const useOllamaStore = create<OllamaState>((set, get) => ({
 
           if (savedActiveModel && chatModelNames.includes(savedActiveModel)) {
             set({ activeModel: savedActiveModel });
-          } else if (chatModelNames.includes("gemma4:e2b-it-qat") && !chatModelNames.includes(currentActive)) {
-            set({ activeModel: "gemma4:e2b-it-qat" });
           } else if (!chatModelNames.includes(currentActive)) {
             set({ activeModel: chatModelNames[0] });
           }
         }
       } else {
-        set({ activeModelsList: [] });
+        set({
+          modelsList: [],
+          activeModelsList: [],
+          chatModels: [],
+          embeddingModels: [],
+        });
       }
     } catch (err) {
-      console.error("Failed to verify Ollama connection:", err);
-      set({ activeModelsList: [] });
+      console.error("Failed to verify LLM connection:", err);
+      set({
+        ollamaConnected: false,
+        modelsList: [],
+        activeModelsList: [],
+        chatModels: [],
+        embeddingModels: [],
+      });
     } finally {
       set({ checkingOllama: false });
     }
   }
 }));
+

@@ -9,4 +9,6 @@ pub mod web_search;
 pub mod oauth;
 pub mod backup;
 pub mod ollama;
+pub mod openai;
+
 
