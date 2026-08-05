@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Settings, RefreshCw, AlertTriangle, Cloud, CloudOff, Sun, Moon } from 'lucide-react';
+import { Settings, RefreshCw, AlertTriangle, Cloud, CloudOff, Sun, Moon, StickyNote } from 'lucide-react';
 import { type SyncProgress } from '../../services/sync';
 import { LogoModal } from '../modals';
 
 interface HeaderProps {
   onSettingsOpen: () => void;
+  onScratchpadOpen: () => void;
   onSync: () => void;
   onThemeToggle: () => void;
   theme: 'light' | 'dark';
@@ -17,6 +18,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   onSettingsOpen,
+  onScratchpadOpen,
   onSync,
   onThemeToggle,
   theme,
@@ -96,6 +98,16 @@ export const Header: React.FC<HeaderProps> = ({
             aria-label={theme === 'dark' ? t("common.themeLight", "Switch to Light Mode") : t("common.themeDark", "Switch to Dark Mode")}
           >
             {theme === 'dark' ? <Sun size={18} className="text-accent-brand" /> : <Moon size={18} className="text-accent-brand" />}
+          </button>
+
+          {/* Quick Scratchpad & To-Do */}
+          <button
+            onClick={onScratchpadOpen}
+            className="min-w-[44px] min-h-[44px] rounded-xl bg-bg-app border border-border-brand hover:border-accent-brand text-text-secondary hover:text-accent-brand transition-all active:scale-95 flex items-center justify-center cursor-pointer"
+            title={t("scratchpad.title", "Scratchpad & Notes")}
+            aria-label={t("scratchpad.title", "Scratchpad & Notes")}
+          >
+            <StickyNote size={18} />
           </button>
 
           {/* Settings Trigger */}

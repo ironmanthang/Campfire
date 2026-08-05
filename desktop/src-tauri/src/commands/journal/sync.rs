@@ -26,7 +26,7 @@ pub fn list_local_entries_for_sync(dir_path: String) -> Result<Vec<LocalEntrySyn
         let entry = entry.map_err(|e| e.to_string())?;
         let file_name = entry.file_name().into_string().map_err(|_| "Invalid filename")?;
 
-        if is_valid_date_file(&file_name) {
+        if is_valid_date_file(&file_name) || file_name == "scratchpad.md" {
             let date = file_name.replace(".md", "");
             let file_path = entry.path();
             let content = fs::read_to_string(&file_path).unwrap_or_default();

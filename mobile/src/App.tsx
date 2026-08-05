@@ -4,6 +4,7 @@ import { Header } from './components/layout';
 import { JournalList, JournalEditor } from './components/journal';
 import { SettingsModal } from './components/settings';
 import { SyncResultModal, SupportModal } from './components/modals';
+import { ScratchpadModal } from './components/scratchpad/ScratchpadModal';
 
 // Hooks
 import { useTheme } from './hooks/useTheme';
@@ -20,6 +21,7 @@ import { calculateStreak } from '@campfire/core';
 function App() {
   const { t, i18n } = useTranslation();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isScratchpadOpen, setIsScratchpadOpen] = useState(false);
   const [isDonateOpen, setIsDonateOpen] = useState(false);
   const [customLogo, setCustomLogo] = useState<string | null>(() => localStorage.getItem('past_you_custom_logo'));
 
@@ -143,6 +145,7 @@ function App() {
     <div className="flex flex-col h-full bg-bg-app transition-colors duration-200 relative">
       <Header 
         onSettingsOpen={() => setIsSettingsOpen(true)}
+        onScratchpadOpen={() => setIsScratchpadOpen(true)}
         onSync={handleSync}
         onThemeToggle={toggleTheme}
         theme={theme}
@@ -277,6 +280,11 @@ function App() {
       <SupportModal 
         isOpen={isDonateOpen}
         onClose={() => setIsDonateOpen(false)}
+      />
+
+      <ScratchpadModal
+        isOpen={isScratchpadOpen}
+        onClose={() => setIsScratchpadOpen(false)}
       />
 
       {toastMessage && (

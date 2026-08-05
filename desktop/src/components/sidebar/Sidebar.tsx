@@ -10,7 +10,8 @@ import {
   Moon,
   Info,
   Bug,
-  HelpCircle
+  HelpCircle,
+  StickyNote
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAppStore } from "../../store/useAppStore";
@@ -22,12 +23,14 @@ interface SidebarProps {
   onOpenAbout: () => void;
   onOpenFeedback: () => void;
   onOpenHelp: () => void;
+  onOpenScratchpad: () => void;
 }
 
 export function Sidebar({
   onOpenAbout,
   onOpenFeedback,
-  onOpenHelp
+  onOpenHelp,
+  onOpenScratchpad
 }: SidebarProps) {
   const { t } = useTranslation();
 
@@ -182,6 +185,16 @@ export function Sidebar({
                 title={t("sidebar.toggleThemeTooltip")}
               >
                 {config.theme === "dark" ? <Sun className="h-4.5 w-4.5" /> : <Moon className="h-4.5 w-4.5" />}
+              </button>
+
+              {/* Quick Scratchpad & To-Do */}
+              <button
+                onClick={onOpenScratchpad}
+                onMouseDown={(e) => e.preventDefault()}
+                className="p-2 rounded-lg text-text-secondary hover:text-accent-brand hover:bg-bg-surface transition-colors flex items-center justify-center cursor-pointer"
+                title={t("scratchpad.title", "Scratchpad & Notes")}
+              >
+                <StickyNote className="h-4.5 w-4.5" />
               </button>
 
               {/* Bug Report */}

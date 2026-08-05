@@ -9,6 +9,7 @@ import { HeartGateModal } from "./components/modals/general/HeartGateModal";
 import { DraggableHeart } from "./components/heart/DraggableHeart";
 import { FallingHearts } from "./components/heart/FallingHearts";
 import { HelpModal, FullscreenHoverExit } from "./components/common";
+import { ScratchpadDrawer } from "./components/scratchpad/ScratchpadDrawer";
 import { ToolExecutorTestPanel } from "./services/toolExecutorPanel";
 import { SyncResultModal } from "./components/modals/data_management/SyncResultModal";
 import { SettingsView } from "./views/SettingsView";
@@ -32,6 +33,7 @@ function App() {
   const [isSupportOpen, setIsSupportOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isScratchpadOpen, setIsScratchpadOpen] = useState(false);
   const [showDevPanel, setShowDevPanel] = useState(false);
 
   const [showDonateBanner, setShowDonateBanner] = useState(false);
@@ -272,6 +274,7 @@ function App() {
         onOpenAbout={() => setIsAboutOpen(true)}
         onOpenFeedback={() => setIsFeedbackOpen(true)}
         onOpenHelp={() => setIsHelpOpen(true)}
+        onOpenScratchpad={() => setIsScratchpadOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -378,6 +381,9 @@ function App() {
 
       {/* Global Help Modal */}
       <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
+
+      {/* Global Scratchpad Drawer */}
+      <ScratchpadDrawer isOpen={isScratchpadOpen} onClose={() => setIsScratchpadOpen(false)} />
 
       {/* Global Heart Gate Modal (shown when enabling click-to-fall for the first time) */}
       <HeartGateModal

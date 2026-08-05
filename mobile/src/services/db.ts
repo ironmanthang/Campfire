@@ -26,6 +26,11 @@ export async function getLocalEntry(date: string): Promise<LocalJournalEntry | u
   return await db.entries.get(date);
 }
 
+export async function getScratchpadEntry(): Promise<string> {
+  const entry = await db.entries.get('scratchpad');
+  return entry?.content || '';
+}
+
 export async function saveLocalEntry(date: string, content: string): Promise<void> {
   const existing = await db.entries.get(date);
   // If the content hasn't actually changed, don't mark as unsynced
@@ -57,7 +62,7 @@ export async function deleteLocalEntry(date: string): Promise<void> {
 
 export async function listLocalEntries(): Promise<LocalJournalEntry[]> {
   const all = await db.entries.orderBy('date').reverse().toArray();
-  return all.filter(e => e.content.trim() !== '');
+  return all.filter(e => e.content.trim() !== '' && e.date !== 'scratchpad');
 }
 
 export async function resolveLocalConflict(date: string, choice: 'local' | 'remote' | 'both'): Promise<string | null> {
