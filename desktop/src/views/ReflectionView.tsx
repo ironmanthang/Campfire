@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import ReactMarkdown from "react-markdown";
 import {
@@ -14,6 +14,7 @@ import { useResizer } from "../hooks/useResizer";
 import { useTranslation } from "react-i18next";
 import { SidebarToggleButton } from "../components/layout/SidebarToggleButton";
 import { usePersistedState } from "../hooks/usePersistedState";
+import { useEarliestEntryDate } from "../hooks/useEarliestEntryDate";
 import { DateRangePicker } from "../components/common/DateRangePicker";
 import { DragHandles } from "../components/common/DragHandles";
 import { useAppStore } from "../store/useAppStore";
@@ -21,7 +22,15 @@ import { useOllamaStore } from "../store/useOllamaStore";
 
 export function ReflectionView() {
   const { t } = useTranslation();
-  const [refStartDate, setRefStartDate] = usePersistedState("reflection_filter_start", "2010-01-01");
+  const earliestDate = useEarliestEntryDate();
+  const [refStartDate, setRefStartDate] = usePersistedState("reflection_filter_start", earliestDate);
+
+  useEffect(() => {
+    if (refStartDate === "2010-01-01") {
+      setRefStartDate(earliestDate);
+    }
+  }, [earliestDate, refStartDate, setRefStartDate]);
+
   const [refEndDate, setRefEndDate] = usePersistedState("reflection_filter_end", getLocalYYYYMMDD);
   const [reflectionReport, setReflectionReport] = usePersistedState("reflection_report_text", "");
   const [generatingReflection, setGeneratingReflection] = useState(false);
@@ -132,6 +141,7 @@ export function ReflectionView() {
             onStartChange={setRefStartDate}
             onEndChange={setRefEndDate}
             labelPrefix={t("reflectionView.analyzePeriod")}
+            earliestDate={earliestDate}
           />
 
           {/* Model Dropdown Selector */}

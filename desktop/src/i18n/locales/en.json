@@ -747,7 +747,10 @@
     "clickToOpen": "Click to Open",
     "clickToSelect": "Click to Select",
     "clickToOpenTooltip": "Clicking card will open the editor",
-    "clickToSelectTooltip": "Clicking card will select the entry"
+    "clickToSelectTooltip": "Clicking card will select the entry",
+    "sortOrder": "Sort Order",
+    "sortNewest": "Newest First",
+    "sortOldest": "Oldest First"
   },
   "editConfirmModal": {
     "title": "Edit Message",

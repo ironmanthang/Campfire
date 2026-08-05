@@ -8,10 +8,13 @@ import { useResizer } from "../../hooks/useResizer";
 import { useEntrySelection } from "../../hooks/useEntrySelection";
 import { DeleteConfirmModal } from "../../components/modals/data_management/DeleteConfirmModal";
 import { usePersistedState } from "../../hooks/usePersistedState";
+import { useEarliestEntryDate } from "../../hooks/useEarliestEntryDate";
 import { useAppStore } from "../../store/useAppStore";
 import { useSearchStore } from "../../store/useSearchStore";
 import { TimelineHeader } from "./TimelineHeader";
 import { TimelineEntryList } from "./TimelineEntryList";
+
+import { SortOrder } from "../../components/common";
 
 export function TimelineView() {
   const { t, i18n } = useTranslation();
@@ -34,9 +37,18 @@ export function TimelineView() {
 
   const { searchQuery, handleTagClick } = useSearchStore();
 
-  const [filterStartDate, setFilterStartDate] = usePersistedState("timeline_filter_start", "2010-01-01");
+  const earliestDate = useEarliestEntryDate();
+  const [filterStartDate, setFilterStartDate] = usePersistedState("timeline_filter_start", earliestDate);
+
+  useEffect(() => {
+    if (filterStartDate === "2010-01-01") {
+      setFilterStartDate(earliestDate);
+    }
+  }, [earliestDate, filterStartDate, setFilterStartDate]);
+
   const [filterEndDate, setFilterEndDate] = usePersistedState("timeline_filter_end", getLocalYYYYMMDD);
   const [activePresetLabel, setActivePresetLabel] = usePersistedState("timeline_active_preset", "All");
+  const [sortOrder, setSortOrder] = usePersistedState<SortOrder>("timeline_sort_order", "newest");
   const [clickMode, setClickMode] = usePersistedState<"open" | "select">("timeline_click_mode", "open");
 
   const [timelineWidth, startDrag] = useResizer({
@@ -100,12 +112,17 @@ export function TimelineView() {
   }, [config.journal_dir, journalRefreshKey]);
 
   const filteredEntries = useMemo(() => {
-    return timelineEntries.filter((entry) => {
+    const list = timelineEntries.filter((entry) => {
       if (filterStartDate && entry.date < filterStartDate) return false;
       if (filterEndDate && entry.date > filterEndDate) return false;
       return true;
     });
-  }, [timelineEntries, filterStartDate, filterEndDate]);
+    return list.sort((a, b) => {
+      return sortOrder === "newest"
+        ? b.date.localeCompare(a.date)
+        : a.date.localeCompare(b.date);
+    });
+  }, [timelineEntries, filterStartDate, filterEndDate, sortOrder]);
 
   // Derive grouped structure
   const groupedEntries = useMemo(() => {
@@ -203,6 +220,9 @@ export function TimelineView() {
         }}
         activePresetLabel={activePresetLabel}
         onPresetLabelChange={setActivePresetLabel}
+        earliestDate={earliestDate}
+        sortOrder={sortOrder}
+        onSortOrderChange={setSortOrder}
         clickMode={clickMode}
         onClickModeToggle={() => {
           setClickMode(clickMode === "open" ? "select" : "open");

@@ -7,6 +7,7 @@ interface DateRangePresetsProps {
   onSelect: (start: string, end: string) => void;
   activePresetLabel?: string;
   onPresetLabelChange?: (label: string) => void;
+  earliestDate?: string;
 }
 
 export function DateRangePresets({
@@ -15,9 +16,10 @@ export function DateRangePresets({
   onSelect,
   activePresetLabel,
   onPresetLabelChange,
+  earliestDate,
 }: DateRangePresetsProps) {
   const { t } = useTranslation();
-  const presets = getDatePresets();
+  const presets = getDatePresets(earliestDate);
 
   const handlePresetClick = (preset: DatePreset) => {
     onSelect(preset.start, preset.end);

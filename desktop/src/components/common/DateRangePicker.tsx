@@ -15,6 +15,7 @@ interface DateRangePickerProps {
   // Presets related props
   activePresetLabel?: string;
   onPresetLabelChange?: (label: string) => void;
+  earliestDate?: string;
 }
 
 export function DateRangePicker({
@@ -27,6 +28,7 @@ export function DateRangePicker({
   labelPrefix,
   activePresetLabel,
   onPresetLabelChange,
+  earliestDate,
 }: DateRangePickerProps) {
   const { t } = useTranslation();
 
@@ -103,6 +105,7 @@ export function DateRangePicker({
           }}
           activePresetLabel={activePresetLabel}
           onPresetLabelChange={onPresetLabelChange}
+          earliestDate={earliestDate}
         />
       </div>
     </div>

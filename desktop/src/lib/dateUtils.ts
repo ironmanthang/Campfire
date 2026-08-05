@@ -26,7 +26,7 @@ export const getLocalYYYYMMDD = (date: Date = new Date()): string => {
 
 export type DatePreset = { label: string; start: string; end: string };
 
-export const getDatePresets = (): DatePreset[] => {
+export const getDatePresets = (earliestDate?: string): DatePreset[] => {
   const today = getLocalYYYYMMDD();
   const d = (offset: number) => {
     const dt = new Date();
@@ -34,8 +34,9 @@ export const getDatePresets = (): DatePreset[] => {
     return getLocalYYYYMMDD(dt);
   };
   const thisYearStart = `${new Date().getFullYear()}-01-01`;
+  const allStart = earliestDate || today;
   return [
-    { label: "All",     start: "2010-01-01",   end: today },
+    { label: "All",     start: allStart,      end: today },
     { label: "7d",      start: d(7),          end: today },
     { label: "30d",     start: d(30),         end: today },
     { label: "3m",      start: d(90),         end: today },

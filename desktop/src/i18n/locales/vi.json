@@ -747,7 +747,10 @@
     "clickToOpen": "Bấm để mở đọc",
     "clickToSelect": "Bấm để chọn bài",
     "clickToOpenTooltip": "Bấm vào thẻ để mở trình chỉnh sửa nha",
-    "clickToSelectTooltip": "Bấm vào thẻ để chọn nhật ký này nha"
+    "clickToSelectTooltip": "Bấm vào thẻ để chọn nhật ký này nha",
+    "sortOrder": "Thứ tự sắp xếp",
+    "sortNewest": "Mới nhất",
+    "sortOldest": "Cũ nhất"
   },
   "editConfirmModal": {
     "title": "Chỉnh sửa tin nhắn",

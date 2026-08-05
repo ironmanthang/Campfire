@@ -42,6 +42,7 @@ export function ChatView({ visible }: { visible: boolean }) {
   // Hook 2: Chat Logic State & API Workflows
   const chatSession = useChatSession({ visible });
   const {
+    earliestDate,
     chatStartDate,
     setChatStartDate,
     chatEndDate,
@@ -146,6 +147,7 @@ export function ChatView({ visible }: { visible: boolean }) {
   ]);
 
   const chatContextValue = useMemo<ChatContextType>(() => ({
+    earliestDate,
     chatStartDate,
     setChatStartDate,
     chatEndDate,

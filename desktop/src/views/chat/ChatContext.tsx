@@ -3,6 +3,7 @@ import { OllamaMessage } from "../../services/ollama";
 import { DraftAttachment } from "../../types";
 
 export interface ChatContextType {
+  earliestDate: string;
   chatStartDate: string;
   setChatStartDate: (date: string) => void;
   chatEndDate: string;

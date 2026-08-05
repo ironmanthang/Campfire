@@ -14,6 +14,7 @@ import {
 import { getLocalYYYYMMDD } from "../../lib/dateUtils";
 import { useTranslation } from "react-i18next";
 import { usePersistedState } from "../../hooks/usePersistedState";
+import { useEarliestEntryDate } from "../../hooks/useEarliestEntryDate";
 import { useAutoFocus } from "../../hooks/useAutoFocus";
 import { SearchHeader, SearchHelpModal } from "../../components/search";
 import { useAppStore } from "../../store/useAppStore";
@@ -21,6 +22,7 @@ import { useOllamaStore } from "../../store/useOllamaStore";
 import { useSearchStore } from "../../store/useSearchStore";
 import { SearchContext, SearchContextType } from "./SearchContext";
 import { SearchResultList } from "./SearchResultList";
+import { SortOrder } from "../../components/common";
 
 export function SearchView() {
   const { t } = useTranslation();
@@ -106,9 +108,18 @@ export function SearchView() {
   const [isIndexing, setIsIndexing] = useState(false);
   const [indexProgress, setIndexProgress] = useState("");
 
-  const [searchStartDate, setSearchStartDate] = usePersistedState("search_filter_start", "2010-01-01");
+  const earliestDate = useEarliestEntryDate();
+  const [searchStartDate, setSearchStartDate] = usePersistedState("search_filter_start", earliestDate);
+
+  useEffect(() => {
+    if (searchStartDate === "2010-01-01") {
+      setSearchStartDate(earliestDate);
+    }
+  }, [earliestDate, searchStartDate, setSearchStartDate]);
+
   const [searchEndDate, setSearchEndDate] = usePersistedState("search_filter_end", getLocalYYYYMMDD);
   const [activePresetLabel, setActivePresetLabel] = usePersistedState("search_active_preset", "All");
+  const [sortOrder, setSortOrder] = usePersistedState<SortOrder>("search_sort_order", "newest");
   const [clickMode, setClickMode] = usePersistedState<"open" | "select">("search_click_mode", "open");
 
   useAutoFocus(searchInputRef, true, [searchStartDate, searchEndDate, searchMode, embeddingModel]);
@@ -118,12 +129,17 @@ export function SearchView() {
   }, [modelsList]);
 
   const filteredResults = useMemo(() => {
-    return searchResults.filter((result) => {
+    const list = searchResults.filter((result) => {
       if (searchStartDate && result.date < searchStartDate) return false;
       if (searchEndDate && result.date > searchEndDate) return false;
       return true;
     });
-  }, [searchResults, searchStartDate, searchEndDate]);
+    return list.sort((a, b) => {
+      return sortOrder === "newest"
+        ? b.date.localeCompare(a.date)
+        : a.date.localeCompare(b.date);
+    });
+  }, [searchResults, searchStartDate, searchEndDate, sortOrder]);
 
   // Unified flow to load and index the embedding cache, preventing race conditions
   useEffect(() => {
@@ -242,12 +258,15 @@ export function SearchView() {
     setEmbeddingModel,
     embeddingModels,
     searchInputRef,
+    earliestDate,
     searchStartDate,
     setSearchStartDate,
     searchEndDate,
     setSearchEndDate,
     activePresetLabel,
     setActivePresetLabel,
+    sortOrder,
+    setSortOrder,
     searchResultsLength: searchResults.length,
     allUniqueTags,
     tagsCollapsed,
@@ -274,6 +293,8 @@ export function SearchView() {
     setSearchEndDate,
     activePresetLabel,
     setActivePresetLabel,
+    sortOrder,
+    setSortOrder,
     searchResults.length,
     allUniqueTags,
     tagsCollapsed,

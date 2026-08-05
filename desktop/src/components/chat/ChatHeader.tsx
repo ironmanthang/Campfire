@@ -15,6 +15,7 @@ export function ChatHeader() {
   const { activeModel, handleModelChange, chatModels, pinnedModels, togglePinModel } = useOllamaStore();
   
   const {
+    earliestDate,
     chatStartDate,
     setChatStartDate,
     chatEndDate,
@@ -44,6 +45,7 @@ export function ChatHeader() {
           disabled={chatMessagesLength > 0}
           disabledTooltip={t("chatView.rangeTooltip")}
           labelPrefix={t("chatView.cloneRange")}
+          earliestDate={earliestDate}
         />
 
         {/* Model Dropdown Selector directly in Chat Header */}

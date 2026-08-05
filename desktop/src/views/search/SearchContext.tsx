@@ -1,8 +1,10 @@
 import { createContext, useContext } from "react";
 import { SearchResult } from "../../types";
 import { OllamaModelInfo } from "../../services/ollama";
+import { SortOrder } from "../../components/common";
 
 export interface SearchContextType {
+  earliestDate: string;
   isSelecting: boolean;
   setIsSelecting: (selecting: boolean) => void;
   selectedDates: Set<string>;
@@ -21,6 +23,8 @@ export interface SearchContextType {
   setSearchEndDate: (date: string) => void;
   activePresetLabel: string;
   setActivePresetLabel: (label: string) => void;
+  sortOrder: SortOrder;
+  setSortOrder: (val: SortOrder) => void;
   searchResultsLength: number;
   allUniqueTags: string[];
   tagsCollapsed: boolean;

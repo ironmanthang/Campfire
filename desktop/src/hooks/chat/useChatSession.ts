@@ -15,6 +15,7 @@ import { executeToolCall } from "../../services/tools";
 import { useAppStore } from "../../store/useAppStore";
 import { useOllamaStore } from "../../store/useOllamaStore";
 import { useTokenCapacity } from "./useTokenCapacity";
+import { useEarliestEntryDate } from "../useEarliestEntryDate";
 
 export function useChatSession({ visible }: { visible: boolean }) {
   const { t } = useTranslation();
@@ -22,7 +23,15 @@ export function useChatSession({ visible }: { visible: boolean }) {
   const { config, showNotification, setCurrentDate, navigateToView } = useAppStore();
   const { activeModel, handleModelChange, modelsList } = useOllamaStore();
 
-  const [chatStartDate, setChatStartDate] = usePersistedState("chat_filter_start", "2010-01-01");
+  const earliestDate = useEarliestEntryDate();
+  const [chatStartDate, setChatStartDate] = usePersistedState("chat_filter_start", earliestDate);
+
+  useEffect(() => {
+    if (chatStartDate === "2010-01-01") {
+      setChatStartDate(earliestDate);
+    }
+  }, [earliestDate, chatStartDate, setChatStartDate]);
+
   const [chatEndDate, setChatEndDate] = usePersistedState("chat_filter_end", getLocalYYYYMMDD);
   const [chatMessages, setChatMessages] = useState<OllamaMessage[]>([]);
   const [isStreamingChat, setIsStreamingChat] = useState(false);
@@ -416,6 +425,7 @@ export function useChatSession({ visible }: { visible: boolean }) {
   }, [isStreamingChat, messageQueue]);
 
   return {
+    earliestDate,
     chatStartDate,
     setChatStartDate,
     chatEndDate,

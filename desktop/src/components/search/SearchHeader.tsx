@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { SidebarToggleButton } from "../layout/SidebarToggleButton";
 import { ModelSelector } from "../ai/ModelSelector";
 import { DateRangePicker } from "../common/DateRangePicker";
+import { SortOrderToggle } from "../common/SortOrderToggle";
 import { SelectionToolbar } from "../common/SelectionToolbar";
 import { TagCloudPanel } from "./TagCloudPanel";
 import { useAppStore } from "../../store/useAppStore";
@@ -38,12 +39,15 @@ export function SearchHeader() {
     setEmbeddingModel,
     embeddingModels,
     searchInputRef,
+    earliestDate,
     searchStartDate,
     setSearchStartDate,
     searchEndDate,
     setSearchEndDate,
     activePresetLabel,
     setActivePresetLabel,
+    sortOrder,
+    setSortOrder,
     searchResultsLength,
     allUniqueTags,
     tagsCollapsed,
@@ -243,6 +247,12 @@ export function SearchHeader() {
                 }}
                 activePresetLabel={activePresetLabel}
                 onPresetLabelChange={setActivePresetLabel}
+                earliestDate={earliestDate}
+              />
+
+              <SortOrderToggle
+                sortOrder={sortOrder}
+                onSortOrderChange={setSortOrder}
               />
 
               {searchResultsLength > 0 && (

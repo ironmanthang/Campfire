@@ -1,6 +1,6 @@
 import { BookOpen } from "lucide-react";
 import { SidebarToggleButton } from "../../components/layout/SidebarToggleButton";
-import { DateRangePicker } from "../../components/common/DateRangePicker";
+import { DateRangePicker, SortOrderToggle, type SortOrder } from "../../components/common";
 import { SelectionToolbar } from "../../components/common/SelectionToolbar";
 
 export interface TimelineHeaderProps {
@@ -24,6 +24,9 @@ export interface TimelineHeaderProps {
   onFilterEndChange: (val: string) => void;
   activePresetLabel: string;
   onPresetLabelChange: (label: string) => void;
+  earliestDate?: string;
+  sortOrder: SortOrder;
+  onSortOrderChange: (val: SortOrder) => void;
   clickMode: "open" | "select";
   onClickModeToggle: () => void;
 
@@ -61,6 +64,9 @@ export const TimelineHeader: React.FC<TimelineHeaderProps> = ({
   onFilterEndChange,
   activePresetLabel,
   onPresetLabelChange,
+  earliestDate,
+  sortOrder,
+  onSortOrderChange,
   clickMode,
   onClickModeToggle,
   selectedCountLabel,
@@ -77,7 +83,6 @@ export const TimelineHeader: React.FC<TimelineHeaderProps> = ({
   clickToSelectTooltip,
   clickToSelectLabel,
 }) => {
-
   if (isSelecting) {
     return (
       <header className="relative z-20 p-6 border-b border-border-brand shrink-0 select-none min-h-[96px] bg-bg-surface/10 backdrop-blur-md flex items-center">
@@ -124,6 +129,12 @@ export const TimelineHeader: React.FC<TimelineHeaderProps> = ({
           onEndChange={onFilterEndChange}
           activePresetLabel={activePresetLabel}
           onPresetLabelChange={onPresetLabelChange}
+          earliestDate={earliestDate}
+        />
+
+        <SortOrderToggle
+          sortOrder={sortOrder}
+          onSortOrderChange={onSortOrderChange}
         />
 
         <button
