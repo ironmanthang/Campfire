@@ -208,6 +208,12 @@ function App() {
     // Apply initial zoom
     document.documentElement.style.fontSize = `${currentZoom}%`;
 
+    const applyZoom = (zoom: number) => {
+      document.documentElement.style.fontSize = `${zoom}%`;
+      localStorage.setItem("text-zoom-level", zoom.toString());
+      window.dispatchEvent(new Event("text-zoom-change"));
+    };
+
     const handleWheel = (e: WheelEvent) => {
       if (e.ctrlKey) {
         // Prevent default browser/webview zoom behavior
@@ -224,8 +230,7 @@ function App() {
         }
 
         // Apply and persist zoom level
-        document.documentElement.style.fontSize = `${currentZoom}%`;
-        localStorage.setItem("text-zoom-level", currentZoom.toString());
+        applyZoom(currentZoom);
       }
     };
 
@@ -234,18 +239,15 @@ function App() {
         if (e.key === "=" || e.key === "+") {
           e.preventDefault();
           currentZoom = Math.min(200, currentZoom + 5);
-          document.documentElement.style.fontSize = `${currentZoom}%`;
-          localStorage.setItem("text-zoom-level", currentZoom.toString());
+          applyZoom(currentZoom);
         } else if (e.key === "-") {
           e.preventDefault();
           currentZoom = Math.max(70, currentZoom - 5);
-          document.documentElement.style.fontSize = `${currentZoom}%`;
-          localStorage.setItem("text-zoom-level", currentZoom.toString());
+          applyZoom(currentZoom);
         } else if (e.key === "0") {
           e.preventDefault();
           currentZoom = 100;
-          document.documentElement.style.fontSize = `${currentZoom}%`;
-          localStorage.setItem("text-zoom-level", currentZoom.toString());
+          applyZoom(currentZoom);
         }
       }
     };

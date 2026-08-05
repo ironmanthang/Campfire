@@ -5,6 +5,19 @@
     <link rel="icon" type="image/png" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Campfire</title>
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem("text-zoom-level");
+          if (saved) {
+            var zoom = parseInt(saved, 10);
+            if (!isNaN(zoom) && zoom >= 70 && zoom <= 200) {
+              document.documentElement.style.fontSize = zoom + "%";
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
 
   <body>

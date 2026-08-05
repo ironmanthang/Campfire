@@ -29,9 +29,11 @@ function getDefaultPosition(size: number): { x: number; y: number } {
   if (anchorPos) return anchorPos;
 
   if (typeof window === "undefined") return { x: 0, y: 0 };
+  const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+  const zoomScale = rootFontSize / 16;
   return {
-    x: SIDEBAR_WIDTH_PX - SIDEBAR_FOOTER_BOTTOM_INSET_PX - size,
-    y: window.innerHeight - SIDEBAR_FOOTER_BOTTOM_INSET_PX - size,
+    x: SIDEBAR_WIDTH_PX * zoomScale - SIDEBAR_FOOTER_BOTTOM_INSET_PX * zoomScale - size,
+    y: window.innerHeight - SIDEBAR_FOOTER_BOTTOM_INSET_PX * zoomScale - size,
   };
 }
 
@@ -109,8 +111,12 @@ export function DraggableHeart({ onClick }: DraggableHeartProps) {
     };
 
     updatePos();
+    // Schedule a double update after initial layout & DOM render settles
+    const rafId = requestAnimationFrame(updatePos);
+    const timerId = setTimeout(updatePos, 100);
 
     window.addEventListener("resize", updatePos);
+    window.addEventListener("text-zoom-change", updatePos);
     if (window.visualViewport) {
       window.visualViewport.addEventListener("resize", updatePos);
     }
@@ -125,7 +131,10 @@ export function DraggableHeart({ onClick }: DraggableHeartProps) {
     }
 
     return () => {
+      cancelAnimationFrame(rafId);
+      clearTimeout(timerId);
       window.removeEventListener("resize", updatePos);
+      window.removeEventListener("text-zoom-change", updatePos);
       if (window.visualViewport) {
         window.visualViewport.removeEventListener("resize", updatePos);
       }
