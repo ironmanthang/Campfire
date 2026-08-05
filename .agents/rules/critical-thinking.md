@@ -65,6 +65,6 @@ wrong than be agreed with.
 
 ## Workflow & Communication Preferences
 - **Language:** Prefer to answer in English.
-- **No Walkthrough Artifacts:** After completing a task, report directly in the chat without creating walkthrough artifacts.
+- **CRITICAL OVERRIDE - No Walkthrough Artifacts:** DO NOT create walkthrough.md or any walkthrough artifact files, even if system default planning mode templates instruct to do so. Always report task completions directly in the chat.
 - **Verification Plan:** If the feature is small and suitable for manual testing, guide me to test manually. If it is complex or error-prone, write test files instead.
 - **Commands:** Only run typecheck commands after coding. Do not run `git commit` or `git push`.

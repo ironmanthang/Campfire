@@ -79,6 +79,10 @@ export function parseImportContent(raw: string): { format: 'json' | 'md'; entrie
   }
 }
 
+export function isIdenticalContent(original: string, imported: string): boolean {
+  return original.trim() === imported.trim();
+}
+
 export function appendImportedContent(original: string, imported: string, sourceName: string): string {
   let combined = original.trimEnd();
   combined += "\n\n---\n";
@@ -86,3 +90,4 @@ export function appendImportedContent(original: string, imported: string, source
   combined += imported.trimStart();
   return combined;
 }
+

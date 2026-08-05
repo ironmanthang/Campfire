@@ -16,6 +16,7 @@ export {
   parseMdImport,
   parseImportContent,
   appendImportedContent,
+  isIdenticalContent,
   type ImportReport,
   type ImportSkippedEntry,
   type ImportError,

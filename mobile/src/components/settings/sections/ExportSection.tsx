@@ -9,6 +9,7 @@ import {
   defaultExportFilename,
   parseImportContent,
   appendImportedContent,
+  isIdenticalContent,
   type ImportReport,
 } from '../../../lib/exportJournal';
 import { ImportReportModal } from '../../modals/data_management/ImportReportModal';
@@ -20,8 +21,8 @@ interface ExportSectionProps {
 export const ExportSection: React.FC<ExportSectionProps> = ({ onImportComplete }) => {
   const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [importReport, setImportReport] = useState<ImportReport | null>(null);
   const [isImporting, setIsImporting] = useState(false);
+  const [importReport, setImportReport] = useState<ImportReport | null>(null);
 
   const handleExportJson = async () => {
     try {
@@ -80,6 +81,13 @@ export const ExportSection: React.FC<ExportSectionProps> = ({ onImportComplete }
 
         const existing = await getLocalEntry(entry.date);
         if (existing && existing.content && existing.content.trim() !== '') {
+          if (isIdenticalContent(existing.content, entry.content)) {
+            report.skipped.push({
+              date: entry.date,
+              reason: 'Identical content',
+            });
+            continue;
+          }
           const merged = appendImportedContent(existing.content, entry.content, fileName);
           await saveLocalEntry(entry.date, merged);
           report.appended_entries.push(entry.date);

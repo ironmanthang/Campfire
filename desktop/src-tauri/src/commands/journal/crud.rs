@@ -49,6 +49,13 @@ fn import_exported_entries(
         let file_path = dir_path.join(&file_name);
         if file_path.exists() {
             let original = fs::read_to_string(&file_path).map_err(|e| e.to_string())?;
+            if original.trim() == content.trim() {
+                report.skipped.push(ImportSkippedEntry {
+                    date,
+                    reason: "identical content".to_string(),
+                });
+                continue;
+            }
             let merged = append_imported_content(&original, &content, source_name);
             fs::write(&file_path, merged).map_err(|e| e.to_string())?;
             report.appended_entries.push(date);
