@@ -284,7 +284,13 @@ function App() {
 
       <ScratchpadModal
         isOpen={isScratchpadOpen}
-        onClose={() => setIsScratchpadOpen(false)}
+        onClose={() => {
+          setIsScratchpadOpen(false);
+          const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';
+          if (autoSync && isLoggedIn) {
+            handleSync();
+          }
+        }}
       />
 
       {toastMessage && (

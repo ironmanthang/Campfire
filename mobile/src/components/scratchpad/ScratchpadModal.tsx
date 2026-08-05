@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, StickyNote, Plus, Trash2, CheckSquare, Square, Edit3, ListChecks } from 'lucide-react';
 import { getScratchpadEntry, saveLocalEntry } from '../../services/db';
+import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 
 interface ScratchpadModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ interface TaskItem {
 
 export const ScratchpadModal: React.FC<ScratchpadModalProps> = ({ isOpen, onClose }) => {
   const { t } = useTranslation();
+  const { handleManualClose } = useModalBackHandler(isOpen, onClose);
   const [content, setContent] = useState<string>('');
   const [newTaskText, setNewTaskText] = useState<string>('');
   const [isRawMode, setIsRawMode] = useState<boolean>(false);
@@ -156,7 +158,7 @@ export const ScratchpadModal: React.FC<ScratchpadModalProps> = ({ isOpen, onClos
               {isRawMode ? <ListChecks size={20} className="text-accent-brand" /> : <Edit3 size={20} />}
             </button>
             <button
-              onClick={onClose}
+              onClick={handleManualClose}
               className="p-2 rounded-xl text-text-secondary hover:text-text-primary hover:bg-bg-app transition-colors cursor-pointer"
             >
               <X size={20} />

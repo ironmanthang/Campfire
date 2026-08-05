@@ -5,6 +5,11 @@ interface Position {
   y: number;
 }
 
+interface SavedPosition {
+  x: number;
+  offsetFromBottom: number;
+}
+
 interface UseDraggableButtonOptions {
   storageKey: string;
   defaultCorner: 'bottom-left' | 'bottom-right';
@@ -23,6 +28,8 @@ export function useDraggableButton({
   const [position, setPosition] = useState<Position | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isInertia, setIsInertia] = useState(false);
+
+  const isDraggingRef = useRef(false);
   
   // Track pointer start, drag distance, velocity & animation state
   const dragInfo = useRef({
@@ -74,6 +81,42 @@ export function useDraggableButton({
     }
   }, [defaultCorner, buttonWidth, buttonHeight, buffer]);
 
+  // Helper to persist position to localStorage using bottom offset
+  const savePosition = useCallback((pos: Position, containerHeight: number) => {
+    const offsetFromBottom = Math.max(buffer, containerHeight - pos.y - buttonHeight);
+    const dataToSave: SavedPosition = {
+      x: pos.x,
+      offsetFromBottom,
+    };
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(dataToSave));
+    } catch {
+      // Ignore storage errors
+    }
+  }, [buffer, buttonHeight, storageKey]);
+
+  // Helper to calculate target position from localStorage or default
+  const getPositionFromSavedOrDefault = useCallback((width: number, height: number): Position => {
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (typeof parsed.offsetFromBottom === 'number' && typeof parsed.x === 'number') {
+          const calculatedY = height - buttonHeight - parsed.offsetFromBottom;
+          return clampPosition({ x: parsed.x, y: calculatedY }, width, height);
+        }
+        if (typeof parsed.x === 'number' && typeof parsed.y === 'number') {
+          const legacyOffset = Math.max(buffer, height - parsed.y - buttonHeight);
+          const calculatedY = height - buttonHeight - legacyOffset;
+          return clampPosition({ x: parsed.x, y: calculatedY }, width, height);
+        }
+      } catch {
+        // Fall through to default
+      }
+    }
+    return getDefaultPosition(width, height);
+  }, [storageKey, buttonHeight, buffer, clampPosition, getDefaultPosition]);
+
   // Cleanup inertia animation on unmount
   useEffect(() => {
     return () => {
@@ -81,47 +124,37 @@ export function useDraggableButton({
     };
   }, [stopInertia]);
 
-  // Initialize position from localStorage or default position on mount
+  // Dynamically update & clamp position when container resizes or mounts
   useEffect(() => {
-    const updateInitialPosition = () => {
-      const width = containerRef.current?.clientWidth || window.innerWidth;
-      const height = containerRef.current?.clientHeight || window.innerHeight;
-
-      const saved = localStorage.getItem(storageKey);
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          if (typeof parsed.x === 'number' && typeof parsed.y === 'number') {
-            setPosition(clampPosition(parsed, width, height));
-            return;
-          }
-        } catch {
-          // Fall through to default if parse fails
-        }
+    const updatePosition = () => {
+      if (isDraggingRef.current) return;
+      const el = containerRef.current;
+      const width = el?.clientWidth || window.innerWidth;
+      const height = el?.clientHeight || window.innerHeight;
+      if (width > 0 && height > 0) {
+        setPosition(getPositionFromSavedOrDefault(width, height));
       }
-
-      setPosition(getDefaultPosition(width, height));
     };
 
-    updateInitialPosition();
-  }, [storageKey, clampPosition, getDefaultPosition]);
+    updatePosition();
 
-  // Adjust position when container / window resizes
-  useEffect(() => {
-    const handleResize = () => {
-      if (!position) return;
-      const width = containerRef.current?.clientWidth || window.innerWidth;
-      const height = containerRef.current?.clientHeight || window.innerHeight;
-      setPosition((prev) => (prev ? clampPosition(prev, width, height) : null));
+    const el = containerRef.current;
+    let observer: ResizeObserver | null = null;
+    if (el && typeof ResizeObserver !== 'undefined') {
+      observer = new ResizeObserver(() => {
+        updatePosition();
+      });
+      observer.observe(el);
+    }
+
+    window.addEventListener('resize', updatePosition);
+    return () => {
+      if (observer && el) {
+        observer.unobserve(el);
+      }
+      window.removeEventListener('resize', updatePosition);
     };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [position, clampPosition]);
-
-
-
-
+  }, [getPositionFromSavedOrDefault]);
 
   const onPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
     if (!position) return;
@@ -151,6 +184,7 @@ export function useDraggableButton({
       vy: 0,
     };
 
+    isDraggingRef.current = true;
     setIsDragging(true);
   };
 
@@ -199,12 +233,21 @@ export function useDraggableButton({
     }
 
     dragInfo.current.activePointerId = null;
+    isDraggingRef.current = false;
     setIsDragging(false);
 
-    // Detect tap (not drag) — fire here instead of onClick because
-    // mobile browsers suppress click after setPointerCapture + touch-action:none
-    if (dragInfo.current.totalDistance <= 6) {
+    // Detect tap (not drag) — fire tap callback without saving position to localStorage
+    const isTap = dragInfo.current.totalDistance <= 6;
+    if (isTap) {
       tapCallbackRef.current?.();
+      // Reset micro drag delta back to initial position before pointer down
+      if (position) {
+        setPosition({
+          x: dragInfo.current.initialX,
+          y: dragInfo.current.initialY,
+        });
+      }
+      return;
     }
 
     const width = containerRef.current?.clientWidth || window.innerWidth;
@@ -274,25 +317,17 @@ export function useDraggableButton({
           animFrameRef.current = null;
           const finalClamped = clampPosition(clamped, width, height);
           setPosition(finalClamped);
-          try {
-            localStorage.setItem(storageKey, JSON.stringify(finalClamped));
-          } catch {
-            // Ignore storage errors
-          }
+          savePosition(finalClamped, height);
         }
       };
 
       animFrameRef.current = requestAnimationFrame(runInertia);
     } else {
-      // Immediate release without flick momentum
+      // Immediate release without flick momentum — save dragged position
       setPosition((currentPos) => {
         if (!currentPos) return null;
         const clamped = clampPosition(currentPos, width, height);
-        try {
-          localStorage.setItem(storageKey, JSON.stringify(clamped));
-        } catch {
-          // Ignore localStorage write errors
-        }
+        savePosition(clamped, height);
         return clamped;
       });
     }
@@ -333,3 +368,4 @@ export function useDraggableButton({
     handleTap,
   };
 }
+

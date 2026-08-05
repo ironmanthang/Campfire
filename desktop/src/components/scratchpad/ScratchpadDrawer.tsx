@@ -20,7 +20,7 @@ interface TaskItem {
 
 export function ScratchpadDrawer({ isOpen, onClose }: ScratchpadDrawerProps) {
   const { t } = useTranslation();
-  const { config } = useAppStore();
+  const { config, handleSync, isDriveConnected } = useAppStore();
   
   const [content, setContent] = useState<string>("");
   const [newTaskText, setNewTaskText] = useState<string>("");
@@ -28,6 +28,22 @@ export function ScratchpadDrawer({ isOpen, onClose }: ScratchpadDrawerProps) {
   const [loading, setLoading] = useState<boolean>(false);
 
   const drawerRef = useRef<HTMLDivElement | null>(null);
+  const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (syncTimerRef.current) clearTimeout(syncTimerRef.current);
+    };
+  }, []);
+
+  const triggerDebouncedSync = () => {
+    if (syncTimerRef.current) clearTimeout(syncTimerRef.current);
+    syncTimerRef.current = setTimeout(() => {
+      if (config.google_drive_auto_sync && config.google_drive_client_id && isDriveConnected) {
+        handleSync().catch(console.error);
+      }
+    }, 1000);
+  };
 
   // Read scratchpad content on open
   useEffect(() => {
@@ -75,6 +91,7 @@ export function ScratchpadDrawer({ isOpen, onClose }: ScratchpadDrawerProps) {
         date: "scratchpad",
         content: newContent,
       });
+      triggerDebouncedSync();
     } catch (err) {
       console.error("Failed to save scratchpad:", err);
     }

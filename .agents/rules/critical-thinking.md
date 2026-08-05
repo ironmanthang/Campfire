@@ -29,6 +29,7 @@ Before touching any code, think through (and share) these checks:
 - **Alternatives:** Is there a simpler or more maintainable way to get the same result?
 - **Tech debt cost:** What does this change make harder to do later? Would a quick
   version now create cleanup work in a month?
+- **Holistic Feature & Parity Audit:** Never perform isolated edits in a vacuum. Whenever modifying, fixing, or enhancing a behavior, feature, or component, proactively scan all related contexts across the codebase—including other platforms, views, input methods, state handlers, and parallel implementations. Proactively identify and flag any behavior mismatches, missing handlers, or parity gaps to the user instead of silently editing only one isolated area.
 - **No Hypothetical Phrasing in Plans:** During the planning and investigation phase, read and deep-scan the codebase first before writing a plan. Never use hand-wavy or tentative phrasing like "if X exists..." or "if our codebase supports...". Verify the actual implementation in the files, state exact concrete facts, and deliver deterministic recommendations.
 
 ## Flagging Issues

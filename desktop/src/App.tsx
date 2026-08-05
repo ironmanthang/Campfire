@@ -72,6 +72,8 @@ function App() {
     setHeartGateOpen,
     updateConfigField,
     startHeartRain,
+    handleSync,
+    isDriveConnected,
   } = useAppStore();
 
   const {
@@ -383,7 +385,15 @@ function App() {
       <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
 
       {/* Global Scratchpad Drawer */}
-      <ScratchpadDrawer isOpen={isScratchpadOpen} onClose={() => setIsScratchpadOpen(false)} />
+      <ScratchpadDrawer
+        isOpen={isScratchpadOpen}
+        onClose={() => {
+          setIsScratchpadOpen(false);
+          if (config.google_drive_auto_sync && config.google_drive_client_id && isDriveConnected) {
+            handleSync().catch(console.error);
+          }
+        }}
+      />
 
       {/* Global Heart Gate Modal (shown when enabling click-to-fall for the first time) */}
       <HeartGateModal
