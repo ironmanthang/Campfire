@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, StickyNote, Plus, Trash2, CheckSquare, Square, Edit3, ListChecks } from 'lucide-react';
+import { X, Plus, Trash2, CheckSquare, Square, Edit3, ListChecks } from 'lucide-react';
 import { getScratchpadEntry, saveLocalEntry } from '../../services/db';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 
@@ -158,7 +158,12 @@ export const ScratchpadModal: React.FC<ScratchpadModalProps> = ({ isOpen, onClos
         <div className="flex items-center justify-between px-5 py-4 border-b border-border-brand bg-bg-app/40 select-none shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-accent-brand/10 text-accent-brand">
-              <StickyNote size={20} />
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10l-6 6z" />
+                <path d="M15 15v6l6-6h-6z" />
+                <line x1="7" y1="8" x2="17" y2="8" />
+                <line x1="7" y1="12" x2="13" y2="12" />
+              </svg>
             </div>
             <div>
               <h2 className="font-bold text-text-primary text-base leading-tight">

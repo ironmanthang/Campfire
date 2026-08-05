@@ -36,6 +36,8 @@ async function applyTheme(theme: "dark" | "light") {
   }
 }
 
+let hasInitiatedConfigLoad = false;
+
 export const createConfigSlice: StateCreator<
   AppState,
   [],
@@ -75,6 +77,8 @@ export const createConfigSlice: StateCreator<
   loadingConfig: true,
 
   loadConfig: async () => {
+    if (hasInitiatedConfigLoad) return;
+    hasInitiatedConfigLoad = true;
     try {
       const loaded: AppConfig = await invoke("load_config");
       set({ config: loaded });

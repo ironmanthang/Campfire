@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { X, StickyNote, Plus, Trash2, CheckSquare, Square, Edit3, ListChecks } from "lucide-react";
+import { X, Plus, Trash2, CheckSquare, Square, Edit3, ListChecks } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { useAppStore } from "../../store/useAppStore";
@@ -235,7 +235,12 @@ export function ScratchpadDrawer({ isOpen, onClose }: ScratchpadDrawerProps) {
         {/* Header */}
         <div className="flex border-b border-border-brand/30 bg-bg-app/10 items-center justify-between relative px-4 py-3 select-none">
           <div className="flex items-center gap-2">
-            <StickyNote className="h-5 w-5 text-accent-brand" />
+            <svg className="h-5 w-5 text-accent-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10l-6 6z" />
+              <path d="M15 15v6l6-6h-6z" />
+              <line x1="7" y1="8" x2="17" y2="8" />
+              <line x1="7" y1="12" x2="13" y2="12" />
+            </svg>
             <h2 className="font-bold text-text-primary text-base">
               {t("scratchpad.title", "Scratchpad & Notes")}
             </h2>

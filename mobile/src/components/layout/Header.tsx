@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Settings, RefreshCw, AlertTriangle, Cloud, CloudOff, Sun, Moon, StickyNote } from 'lucide-react';
+import { Settings, RefreshCw, AlertTriangle, Cloud, CloudOff, Sun, Moon } from 'lucide-react';
 import { type SyncProgress } from '../../services/sync';
 import { LogoModal } from '../modals';
 
@@ -107,7 +107,12 @@ export const Header: React.FC<HeaderProps> = ({
             title={t("scratchpad.title", "Scratchpad & Notes")}
             aria-label={t("scratchpad.title", "Scratchpad & Notes")}
           >
-            <StickyNote size={18} />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10l-6 6z" />
+              <path d="M15 15v6l6-6h-6z" />
+              <line x1="7" y1="8" x2="17" y2="8" />
+              <line x1="7" y1="12" x2="13" y2="12" />
+            </svg>
           </button>
 
           {/* Settings Trigger */}

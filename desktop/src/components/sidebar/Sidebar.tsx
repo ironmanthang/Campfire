@@ -11,7 +11,6 @@ import {
   Info,
   Bug,
   HelpCircle,
-  StickyNote
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAppStore } from "../../store/useAppStore";
@@ -194,7 +193,12 @@ export function Sidebar({
                 className="p-2 rounded-lg text-text-secondary hover:text-accent-brand hover:bg-bg-surface transition-colors flex items-center justify-center cursor-pointer"
                 title={t("scratchpad.title", "Scratchpad & Notes")}
               >
-                <StickyNote className="h-4.5 w-4.5" />
+                <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M15 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10l-6 6z" />
+                  <path d="M15 15v6l6-6h-6z" />
+                  <line x1="7" y1="8" x2="17" y2="8" />
+                  <line x1="7" y1="12" x2="13" y2="12" />
+                </svg>
               </button>
 
               {/* Bug Report */}
