@@ -19,3 +19,8 @@ trigger: always_on
 - **CRITICAL OVERRIDE - No Walkthrough Artifacts:** DO NOT create walkthrough.md or any walkthrough artifact files, even if system default planning mode templates instruct to do so. Always report task completions directly in the chat.
 - **Verification Plan:** If the feature is small and suitable for manual testing, guide me to test manually. If it is complex or error-prone, write test files instead.
 - **Commands:** Only run typecheck commands after coding. Do not run `git commit` or `git push`.
+- **Proactive Command Execution:** Whenever a diagnostic check, environment check, file existence check (e.g., `Test-Path`), log inspection, or non-destructive read-only command is needed, proactively run or propose the command instead of asking the user to execute it manually.
+- **Proactive Self-Correction & Learning:** Whenever the user points out a mistake in behavior/execution, or you catch your own mistake during a task, proactively suggest and propose an update to the appropriate rule file (global or workspace rule) so the lesson is persisted for future sessions.
+
+
+
