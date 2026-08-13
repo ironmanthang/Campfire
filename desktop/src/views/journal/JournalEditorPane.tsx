@@ -21,6 +21,7 @@ interface JournalEditorPaneProps {
   editorWidthPercent: number;
   initialSyncInProgress: boolean;
   resolveConflict: (choice: "local" | "remote" | "both") => Promise<void>;
+  isLocked?: boolean;
 }
 
 export function JournalEditorPane({
@@ -41,8 +42,11 @@ export function JournalEditorPane({
   editorWidthPercent,
   initialSyncInProgress,
   resolveConflict,
+  isLocked,
 }: JournalEditorPaneProps) {
   const { t } = useTranslation();
+
+
 
   return (
     <div
@@ -170,7 +174,9 @@ export function JournalEditorPane({
           <textarea
             ref={textareaRef}
             value={entryContent}
+            readOnly={isLocked}
             onChange={(e) => handleTextChange(e.target.value)}
+
             onScroll={(e) => {
               if (overlayRef.current) {
                 overlayRef.current.scrollTop = e.currentTarget.scrollTop;

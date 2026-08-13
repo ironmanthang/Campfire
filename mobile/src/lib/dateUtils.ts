@@ -4,3 +4,15 @@ export const getLocalYYYYMMDD = (date: Date = new Date()): string => {
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 };
+
+export const getYesterdayYYYYMMDD = (): string => {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return getLocalYYYYMMDD(d);
+};
+
+export const isOlderThanYesterday = (dateStr: string): boolean => {
+  if (!dateStr || dateStr === 'scratchpad') return false;
+  const yesterday = getYesterdayYYYYMMDD();
+  return dateStr < yesterday;
+};

@@ -2,6 +2,8 @@ import { useState, useEffect, useRef, useCallback, RefObject } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useTranslation } from "react-i18next";
 import { extractTags } from "../../lib/tagUtils";
+import { isOlderThanYesterday } from "../../lib/dateUtils";
+import { AppConfig } from "../../types";
 
 type SaveStatus = "idle" | "saving";
 
@@ -14,6 +16,7 @@ export function useJournalSave({
   handleSync,
   journalRefreshKey,
   textareaRef,
+  updateConfigField,
 }: {
   config: any;
   currentDate: string;
@@ -23,7 +26,9 @@ export function useJournalSave({
   handleSync: (force?: boolean) => Promise<void>;
   journalRefreshKey: number;
   textareaRef: RefObject<HTMLTextAreaElement | null>;
+  updateConfigField?: <K extends keyof AppConfig>(field: K, value: AppConfig[K]) => Promise<void>;
 }) {
+
   const { t } = useTranslation();
   const prevDateRef = useRef(currentDate);
 
@@ -32,6 +37,7 @@ export function useJournalSave({
   const [isDirty, setIsDirty] = useState(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [editorTags, setEditorTags] = useState<string[]>([]);
+  const [isLocked, setIsLocked] = useState(false);
 
   const isSavingRef = useRef(false);
   const isDirtyRef = useRef(isDirty);
@@ -42,6 +48,28 @@ export function useJournalSave({
   isDirtyRef.current = isDirty;
   currentDateRef.current = currentDate;
   entryContentRef.current = entryContent;
+
+  useEffect(() => {
+    const explicitLock = config.locked_entries?.[currentDate];
+    if (explicitLock !== undefined) {
+      setIsLocked(explicitLock);
+    } else {
+      setIsLocked(isOlderThanYesterday(currentDate));
+    }
+  }, [currentDate, config.locked_entries]);
+
+  const toggleLock = useCallback(async () => {
+    const nextLocked = !isLocked;
+    setIsLocked(nextLocked);
+    const updatedLockedMap = {
+      ...(config.locked_entries || {}),
+      [currentDate]: nextLocked,
+    };
+    if (updateConfigField) {
+      await updateConfigField("locked_entries", updatedLockedMap);
+    }
+
+  }, [isLocked, currentDate, config.locked_entries, updateConfigField]);
 
   const saveEntryImmediate = useCallback(
     async (dateToSave: string, contentToSave: string) => {
@@ -126,16 +154,16 @@ export function useJournalSave({
 
   // Focus textarea when done loading
   useEffect(() => {
-    if (!loadingEntry && view === "journal" && textareaRef.current) {
+    if (!loadingEntry && !isLocked && view === "journal" && textareaRef.current) {
       textareaRef.current.focus();
       const length = textareaRef.current.value.length;
       textareaRef.current.setSelectionRange(length, length);
     }
-  }, [loadingEntry, view, textareaRef]);
+  }, [loadingEntry, isLocked, view, textareaRef]);
 
   // Keep focus on "do-nothing" clicks if no text is selected
   useEffect(() => {
-    if (view !== "journal") return;
+    if (view !== "journal" || isLocked) return;
     const handleGlobalClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (target.closest("textarea, input, select, button, [role='button']")) return;
@@ -148,11 +176,11 @@ export function useJournalSave({
 
     document.addEventListener("click", handleGlobalClick);
     return () => document.removeEventListener("click", handleGlobalClick);
-  }, [view, textareaRef]);
+  }, [view, isLocked, textareaRef]);
 
   // Auto-save debouncer
   useEffect(() => {
-    if (!config.journal_dir || loadingEntry || !isDirty) return;
+    if (!config.journal_dir || loadingEntry || !isDirty || isLocked) return;
     if (config.autosave_interval === 0) return;
 
     const delay = config.autosave_interval * 1000;
@@ -161,9 +189,10 @@ export function useJournalSave({
     }, delay);
 
     return () => clearTimeout(timer);
-  }, [entryContent, config.autosave_interval, isDirty, loadingEntry, currentDate]);
+  }, [entryContent, config.autosave_interval, isDirty, loadingEntry, currentDate, isLocked]);
 
   const handleTextChange = (text: string) => {
+    if (isLocked) return;
     setEntryContent(text);
     setEditorTags(extractTags(text));
     setIsDirty(true);
@@ -235,8 +264,11 @@ export function useJournalSave({
     isDirty,
     saveStatus,
     editorTags,
+    isLocked,
+    toggleLock,
     saveEntryImmediate,
     handleTextChange,
     resolveConflict,
   };
 }
+

@@ -40,6 +40,8 @@ export function JournalEditorView() {
     highlightedText,
     initialSyncInProgress,
     resolveConflict,
+    isLocked,
+    toggleLock,
   } = useJournalEditor();
 
   return (
@@ -58,6 +60,8 @@ export function JournalEditorView() {
         handleSync={handleSync}
         saveEntryImmediate={saveEntryImmediate}
         entryContent={entryContent}
+        isLocked={isLocked}
+        toggleLock={toggleLock}
       />
 
       <div className="flex-1 flex overflow-hidden relative">
@@ -79,7 +83,9 @@ export function JournalEditorView() {
           handleTextChange={handleTextChange}
           editorWidthPercent={editorWidthPercent}
           resolveConflict={resolveConflict}
+          isLocked={isLocked}
         />
+
 
         {/* Drag Handle Divider */}
         <div

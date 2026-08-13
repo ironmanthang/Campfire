@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronLeft, ChevronRight, Eye, Edit2, AlertTriangle, Undo2, Redo2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Eye, Edit2, AlertTriangle, Undo2, Redo2, Lock, Unlock } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { DatePicker } from '../common/DatePicker';
 import { hasConflictMarkers } from '../../services/merge';
+import { isOlderThanYesterday } from '../../lib/dateUtils';
+import { getLocalEntry, saveLocalEntryLockStatus } from '../../services/db';
 
 interface JournalEditorProps {
   date: string;
@@ -28,7 +30,33 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
 }) => {
   const { t, i18n } = useTranslation();
   const [isPreview, setIsPreview] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    async function checkLockStatus() {
+      const entry = await getLocalEntry(date);
+      if (active) {
+        if (entry && entry.isLocked !== undefined) {
+          setIsLocked(entry.isLocked);
+        } else {
+          setIsLocked(isOlderThanYesterday(date));
+        }
+      }
+    }
+    checkLockStatus();
+    return () => {
+      active = false;
+    };
+  }, [date]);
+
+  const handleToggleLock = async () => {
+    const nextLocked = !isLocked;
+    setIsLocked(nextLocked);
+    await saveLocalEntryLockStatus(date, nextLocked);
+  };
+
 
   // Undo / Redo history state
   const [past, setPast] = useState<string[]>([]);
@@ -101,6 +129,7 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
 
   // Debounced snapshot recorder for typing pauses (700ms)
   const handleContentChange = (newVal: string) => {
+    if (isLocked) return;
     onChange(newVal);
 
     if (timerRef.current) {
@@ -126,7 +155,7 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
   const canRedo = future.length > 0;
 
   const handleUndo = () => {
-    if (!canUndo) return;
+    if (!canUndo || isLocked) return;
 
     if (timerRef.current) {
       clearTimeout(timerRef.current);
@@ -155,7 +184,7 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
   };
 
   const handleRedo = () => {
-    if (!canRedo) return;
+    if (!canRedo || isLocked) return;
 
     if (timerRef.current) {
       clearTimeout(timerRef.current);
@@ -183,7 +212,7 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
         {/* Undo button */}
         <button
           onClick={handleUndo}
-          disabled={isPreview || isLoading || !canUndo}
+          disabled={isPreview || isLoading || !canUndo || isLocked}
           className="min-w-[44px] min-h-[44px] rounded-xl border border-border-brand/40 hover:border-accent-brand/50 hover:bg-bg-app hover:text-text-primary transition-all active:scale-95 disabled:opacity-25 disabled:pointer-events-none flex items-center justify-center cursor-pointer"
           title={t("journalEditor.undoTooltip")}
           aria-label={t("journalEditor.undoTooltip")}
@@ -191,15 +220,40 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
           <Undo2 size={18} />
         </button>
 
-        {/* Word count */}
-        <span className="text-center font-medium">
-          {words === 1 ? t("journalEditor.wordCount", { count: words }) : t("journalEditor.wordCountPlural", { count: words })}
-        </span>
+        <div className="flex items-center gap-2">
+          {/* Word count */}
+          <span className="text-center font-medium">
+            {words === 1 ? t("journalEditor.wordCount", { count: words }) : t("journalEditor.wordCountPlural", { count: words })}
+          </span>
+
+          {/* Lock / Unlock toggle button */}
+          <button
+            onClick={handleToggleLock}
+            className={`px-2.5 py-1 rounded-xl border transition-all active:scale-95 flex items-center gap-1 cursor-pointer text-xs font-bold ${
+              isLocked
+                ? 'border-amber-500/40 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20'
+                : 'border-border-brand/40 hover:border-accent-brand/50 hover:bg-bg-app text-text-secondary'
+            }`}
+            title={isLocked ? "Entry is locked (Read-Only). Tap to unlock." : "Lock entry (Prevent accidental edits)."}
+          >
+            {isLocked ? (
+              <>
+                <Lock size={13} />
+                <span>Locked</span>
+              </>
+            ) : (
+              <>
+                <Unlock size={13} />
+                <span>Unlocked</span>
+              </>
+            )}
+          </button>
+        </div>
 
         {/* Redo button */}
         <button
           onClick={handleRedo}
-          disabled={isPreview || isLoading || !canRedo}
+          disabled={isPreview || isLoading || !canRedo || isLocked}
           className="min-w-[44px] min-h-[44px] rounded-xl border border-border-brand/40 hover:border-accent-brand/50 hover:bg-bg-app hover:text-text-primary transition-all active:scale-95 disabled:opacity-25 disabled:pointer-events-none flex items-center justify-center cursor-pointer"
           title={t("journalEditor.redoTooltip")}
           aria-label={t("journalEditor.redoTooltip")}
@@ -267,6 +321,7 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
             <textarea
               ref={textareaRef}
               value={content}
+              readOnly={isLocked}
               onChange={(e) => handleContentChange(e.target.value)}
               placeholder={isLoading ? "" : t("journalEditor.placeholder", { date: formatDate(date) })}
               disabled={isLoading}
@@ -276,6 +331,7 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
           </div>
         )}
       </div>
+
 
       {/* Bottom Sub-Header Banner */}
       <div className="px-4 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] bg-bg-surface border-t border-border-brand flex items-center justify-between shrink-0 select-none">

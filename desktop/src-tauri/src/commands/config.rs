@@ -44,6 +44,8 @@ pub struct AppConfig {
     /// Optional `data:` URL (e.g. `data:image/png;base64,...`) for a custom
     /// image used in place of the default red heart. Empty string = default.
     pub heart_custom_image: String,
+    #[serde(default)]
+    pub locked_entries: std::collections::HashMap<String, bool>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
@@ -97,6 +99,7 @@ impl Default for AppConfig {
             heart_gate_dismissed: false,
             heart_shortcut: String::new(),
             heart_custom_image: String::new(),
+            locked_entries: std::collections::HashMap::new(),
         }
     }
 }

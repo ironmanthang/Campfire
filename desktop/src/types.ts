@@ -41,6 +41,7 @@ export interface AppConfig {
    * to it.
    */
   heart_custom_image: string;
+  locked_entries?: Record<string, boolean>;
 }
 
 export interface JournalEntryMetadata {

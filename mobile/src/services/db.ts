@@ -6,6 +6,7 @@ export interface LocalJournalEntry {
   lastModified: number; // local edit timestamp
   synced: boolean;    // local modifications synced?
   baseContent?: string; // Content at last successful sync (common ancestor)
+  isLocked?: boolean; // Explicit lock state
 }
 
 export class JournalDatabase extends Dexie {
@@ -43,9 +44,29 @@ export async function saveLocalEntry(date: string, content: string): Promise<voi
     content,
     lastModified: Date.now(),
     synced: false,
-    baseContent: existing?.baseContent
+    baseContent: existing?.baseContent,
+    isLocked: existing?.isLocked,
   });
 }
+
+export async function saveLocalEntryLockStatus(date: string, isLocked: boolean): Promise<void> {
+  const existing = await db.entries.get(date);
+  if (existing) {
+    await db.entries.put({
+      ...existing,
+      isLocked,
+    });
+  } else {
+    await db.entries.put({
+      date,
+      content: '',
+      lastModified: Date.now(),
+      synced: false,
+      isLocked,
+    });
+  }
+}
+
 
 export async function deleteLocalEntry(date: string): Promise<void> {
   const existing = await db.entries.get(date);

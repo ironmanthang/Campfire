@@ -24,6 +24,7 @@ export function useJournalEditor() {
     syncProgress,
     journalRefreshKey,
     initialSyncInProgress,
+    updateConfigField,
   } = useAppStore();
 
   const { handleTagClick } = useSearchStore();
@@ -46,6 +47,8 @@ export function useJournalEditor() {
     isDirty,
     saveStatus,
     editorTags,
+    isLocked,
+    toggleLock,
     saveEntryImmediate,
     handleTextChange,
     resolveConflict,
@@ -58,6 +61,7 @@ export function useJournalEditor() {
     handleSync,
     journalRefreshKey,
     textareaRef,
+    updateConfigField,
   });
 
   const {
@@ -153,6 +157,8 @@ export function useJournalEditor() {
     highlightedText,
     initialSyncInProgress,
     resolveConflict,
+    isLocked,
+    toggleLock,
     t,
   };
 }

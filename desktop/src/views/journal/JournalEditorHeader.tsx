@@ -9,6 +9,8 @@ import {
   CloudOff,
   RefreshCw,
   AlertTriangle,
+  Lock,
+  Unlock,
 } from "lucide-react";
 import { DatePicker } from "../../components/common/DatePicker";
 import { SidebarToggleButton } from "../../components/layout/SidebarToggleButton";
@@ -33,6 +35,8 @@ interface JournalEditorHeaderProps {
   handleSync: (force?: boolean) => Promise<void>;
   saveEntryImmediate: (date: string, content: string) => Promise<void>;
   entryContent: string;
+  isLocked?: boolean;
+  toggleLock?: () => void;
 }
 
 export function JournalEditorHeader({
@@ -49,8 +53,11 @@ export function JournalEditorHeader({
   handleSync,
   saveEntryImmediate,
   entryContent,
+  isLocked,
+  toggleLock,
 }: JournalEditorHeaderProps) {
   const { t } = useTranslation();
+
 
   return (
     <header className="p-4 border-b border-border-brand flex items-center justify-between shrink-0 bg-bg-surface/50">
@@ -80,26 +87,6 @@ export function JournalEditorHeader({
       </div>
 
       <div className="flex items-center gap-4">
-        {/* Saving / Save Indicator */}
-        <div className="flex items-center gap-2 text-xs text-text-secondary">
-          {saveStatus === "saving" ? (
-            <>
-              <Loader2 className="h-3.5 w-3.5 animate-spin text-accent-brand" />
-              <span>{t("journalEditor.statusWriting")}</span>
-            </>
-          ) : isDirty ? (
-            <>
-              <Clock className="h-3.5 w-3.5 text-yellow-500" />
-              <span>{t("journalEditor.statusAutoSaving")}</span>
-            </>
-          ) : (
-            <>
-              <Check className="h-3.5 w-3.5 text-accent-brand" />
-              <span>{t("journalEditor.statusSaved")}</span>
-            </>
-          )}
-        </div>
-
         {/* Cloud Sync Status */}
         {config.google_drive_client_id && (
           <button
@@ -141,6 +128,26 @@ export function JournalEditorHeader({
           </button>
         )}
 
+        {/* Saving / Save Indicator */}
+        <div className="flex items-center gap-2 text-xs text-text-secondary">
+          {saveStatus === "saving" ? (
+            <>
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-accent-brand" />
+              <span>{t("journalEditor.statusWriting")}</span>
+            </>
+          ) : isDirty ? (
+            <>
+              <Clock className="h-3.5 w-3.5 text-yellow-500" />
+              <span>{t("journalEditor.statusAutoSaving")}</span>
+            </>
+          ) : (
+            <>
+              <Check className="h-3.5 w-3.5 text-accent-brand" />
+              <span>{t("journalEditor.statusSaved")}</span>
+            </>
+          )}
+        </div>
+
         {/* Manual Save Trigger */}
         {config.autosave_interval === 0 && isDirty && (
           <button
@@ -150,6 +157,31 @@ export function JournalEditorHeader({
           >
             <Save className="h-3.5 w-3.5" />
             {t("journalEditor.saveButton")}
+          </button>
+        )}
+
+        {/* Lock / Unlock Toggle Button */}
+        {toggleLock && (
+          <button
+            onClick={toggleLock}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-all text-xs font-semibold cursor-pointer active:scale-95 ${
+              isLocked
+                ? "border-amber-500/40 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20"
+                : "border-border-brand hover:border-accent-brand bg-bg-surface/30 text-text-secondary hover:text-text-primary"
+            }`}
+            title={isLocked ? "Entry is locked (Read-Only). Click to unlock editing." : "Lock entry (Prevent accidental edits)."}
+          >
+            {isLocked ? (
+              <>
+                <Lock className="h-3.5 w-3.5 text-amber-500" />
+                <span className="hidden sm:inline">Locked</span>
+              </>
+            ) : (
+              <>
+                <Unlock className="h-3.5 w-3.5 text-text-secondary" />
+                <span className="hidden sm:inline">Unlocked</span>
+              </>
+            )}
           </button>
         )}
       </div>
