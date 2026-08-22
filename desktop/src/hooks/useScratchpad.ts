@@ -7,8 +7,13 @@ import {
   addChildItem as coreAddChildItem,
   addGroup as coreAddGroup,
   renameGroup as coreRenameGroup,
+  updateItemText as coreUpdateItemText,
   removeItem as coreRemoveItem,
   clearCompleted as coreClearCompleted,
+  togglePinItem as coreTogglePinItem,
+  moveItem as coreMoveItem,
+  moveChildItem as coreMoveChildItem,
+  isRootDuplicate,
 } from "@campfire/core";
 import { readScratchpadDoc, writeScratchpadDoc } from "../services/scratchpad";
 import { useAppStore } from "../store/useAppStore";
@@ -21,6 +26,11 @@ export interface UseScratchpadReturn {
   addChildItem: (parentId: string, text: string) => void;
   addGroup: (name: string) => void;
   renameGroup: (id: string, name: string) => void;
+  updateItemText: (id: string, text: string) => void;
+  togglePinItem: (id: string) => void;
+  moveItem: (id: string, direction: 'up' | 'down') => void;
+  moveChildItem: (parentId: string, childId: string, direction: 'up' | 'down') => void;
+  isDuplicate: (text: string, excludeId?: string) => boolean;
   removeItem: (id: string) => void;
   clearCompleted: () => void;
 }
@@ -97,7 +107,9 @@ export function useScratchpad(isOpen: boolean = true): UseScratchpadReturn {
     (text: string) => {
       setItems((prev) => {
         const next = coreAddItem(prev, text);
-        saveAndSync(next);
+        if (next !== prev) {
+          saveAndSync(next);
+        }
         return next;
       });
     },
@@ -119,7 +131,9 @@ export function useScratchpad(isOpen: boolean = true): UseScratchpadReturn {
     (name: string) => {
       setItems((prev) => {
         const next = coreAddGroup(prev, name);
-        saveAndSync(next);
+        if (next !== prev) {
+          saveAndSync(next);
+        }
         return next;
       });
     },
@@ -130,11 +144,70 @@ export function useScratchpad(isOpen: boolean = true): UseScratchpadReturn {
     (id: string, name: string) => {
       setItems((prev) => {
         const next = coreRenameGroup(prev, id, name);
+        if (next !== prev) {
+          saveAndSync(next);
+        }
+        return next;
+      });
+    },
+    [saveAndSync]
+  );
+
+  const updateItemText = useCallback(
+    (id: string, text: string) => {
+      setItems((prev) => {
+        const next = coreUpdateItemText(prev, id, text);
+        if (next !== prev) {
+          saveAndSync(next);
+        }
+        return next;
+      });
+    },
+    [saveAndSync]
+  );
+
+  const togglePinItem = useCallback(
+    (id: string) => {
+      setItems((prev) => {
+        const next = coreTogglePinItem(prev, id);
         saveAndSync(next);
         return next;
       });
     },
     [saveAndSync]
+  );
+
+  const moveItem = useCallback(
+    (id: string, direction: 'up' | 'down') => {
+      setItems((prev) => {
+        const next = coreMoveItem(prev, id, direction);
+        if (next !== prev) {
+          saveAndSync(next);
+        }
+        return next;
+      });
+    },
+    [saveAndSync]
+  );
+
+  const moveChildItem = useCallback(
+    (parentId: string, childId: string, direction: 'up' | 'down') => {
+      setItems((prev) => {
+        const next = coreMoveChildItem(prev, parentId, childId, direction);
+        if (next !== prev) {
+          saveAndSync(next);
+        }
+        return next;
+      });
+    },
+    [saveAndSync]
+  );
+
+  const isDuplicate = useCallback(
+    (text: string, excludeId?: string) => {
+      return isRootDuplicate(items, text, excludeId);
+    },
+    [items]
   );
 
   const removeItem = useCallback(
@@ -164,6 +237,11 @@ export function useScratchpad(isOpen: boolean = true): UseScratchpadReturn {
     addChildItem,
     addGroup,
     renameGroup,
+    updateItemText,
+    togglePinItem,
+    moveItem,
+    moveChildItem,
+    isDuplicate,
     removeItem,
     clearCompleted,
   };

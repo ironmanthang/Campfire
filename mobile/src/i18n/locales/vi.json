@@ -167,7 +167,20 @@
     "timeoutError": "Yêu cầu mạng quá thời gian. Vui lòng kiểm tra kết nối của bạn."
   },
   "common": {
-    "campfire": "Campfire"
+    "campfire": "Campfire",
+    "delete": "Xóa",
+    "cancel": "Hủy",
+    "back": "Quay lại",
+    "loading": "Đang tải...",
+    "create": "Tạo",
+    "add": "Thêm",
+    "more": "Thêm tùy chọn",
+    "expand": "Mở rộng",
+    "collapse": "Thu gọn"
+  },
+  "deleteConfirmModal": {
+    "cancelButton": "Hủy",
+    "deleteButton": "Xóa vĩnh viễn"
   },
   "scratchpad": {
     "title": "Ghi chú & Việc cần làm",
@@ -183,6 +196,23 @@
     "addSubtask": "Thêm việc phụ",
     "empty": "Chưa có ghi chú hay việc cần làm nào.",
     "emptyHint": "Thêm một ý nghĩ nhanh ở trên trước khi bạn quên!",
-    "clearCompleted": "Xóa các việc đã hoàn thành"
+    "editTask": "Sửa nội dung",
+    "clearCompleted": "Xóa các việc đã hoàn thành",
+    "confirmClear": "Xóa các việc đã hoàn thành?",
+    "pinned": "Đã ghim",
+    "other": "Ghi chú khác",
+    "pin": "Ghim lên đầu",
+    "unpin": "Bỏ ghim",
+    "moveUp": "Di chuyển lên",
+    "moveDown": "Di chuyển xuống",
+    "rename": "Đổi tên",
+    "alreadyExists": "Đã có mục mang tên này rồi",
+    "clearCompletedConfirmTitle": "Xóa việc đã hoàn thành",
+    "clearCompletedConfirmMessage": "Bạn có chắc muốn xóa vĩnh viễn tất cả việc đã hoàn thành? Hành động này không thể hoàn tác.",
+    "clearConfirmButton": "Xóa việc hoàn thành",
+    "deleteGroupConfirmTitle": "Xóa nhóm",
+    "deleteGroupConfirmMessage": "Bạn có chắc muốn xóa vĩnh viễn nhóm \"{{name}}\" và toàn bộ việc trong đó? Hành động này không thể hoàn tác.",
+    "deleteTaskConfirmTitle": "Xóa ghi chú",
+    "deleteTaskConfirmMessage": "Bạn có chắc muốn xóa vĩnh viễn \"{{name}}\"? Hành động này không thể hoàn tác."
   }
 }

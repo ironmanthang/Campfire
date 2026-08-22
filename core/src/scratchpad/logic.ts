@@ -16,6 +16,7 @@ function sanitizeItems(rawItems: any[]): ScratchpadItem[] {
       text: typeof item.text === 'string' ? item.text : '',
       isChecked: Boolean(item.isChecked),
       isGroup: Boolean(item.isGroup),
+      isPinned: Boolean(item.isPinned),
       children: Array.isArray(item.children) ? sanitizeItems(item.children) : [],
       createdAt: typeof item.createdAt === 'number' ? item.createdAt : now,
       updatedAt: typeof item.updatedAt === 'number' ? item.updatedAt : now,
@@ -155,9 +156,16 @@ export function removeItem(items: ScratchpadItem[], id: string): ScratchpadItem[
     });
 }
 
+export function isRootDuplicate(items: ScratchpadItem[], text: string, excludeId?: string): boolean {
+  const candidate = text.trim().toLowerCase();
+  if (!candidate) return false;
+  return items.some((item) => item.id !== excludeId && item.text.trim().toLowerCase() === candidate);
+}
+
 export function addItem(items: ScratchpadItem[], text: string): ScratchpadItem[] {
   const trimmed = text.trim();
   if (!trimmed) return items;
+  if (isRootDuplicate(items, trimmed)) return items;
 
   const now = Date.now();
   const newItem: ScratchpadItem = {
@@ -169,7 +177,14 @@ export function addItem(items: ScratchpadItem[], text: string): ScratchpadItem[]
     updatedAt: now,
   };
 
-  return [...items, newItem];
+  const firstUnpinnedIndex = items.findIndex((item) => !item.isPinned);
+  if (firstUnpinnedIndex === -1) {
+    return [...items, newItem];
+  }
+
+  const next = [...items];
+  next.splice(firstUnpinnedIndex, 0, newItem);
+  return next;
 }
 
 export function addChildItem(items: ScratchpadItem[], parentId: string, text: string): ScratchpadItem[] {
@@ -207,6 +222,7 @@ export function addChildItem(items: ScratchpadItem[], parentId: string, text: st
 export function addGroup(items: ScratchpadItem[], name: string): ScratchpadItem[] {
   const trimmed = name.trim();
   if (!trimmed) return items;
+  if (isRootDuplicate(items, trimmed)) return items;
 
   const now = Date.now();
   const newGroup: ScratchpadItem = {
@@ -219,28 +235,141 @@ export function addGroup(items: ScratchpadItem[], name: string): ScratchpadItem[
     updatedAt: now,
   };
 
-  return [...items, newGroup];
+  const firstUnpinnedIndex = items.findIndex((item) => !item.isPinned);
+  if (firstUnpinnedIndex === -1) {
+    return [...items, newGroup];
+  }
+
+  const next = [...items];
+  next.splice(firstUnpinnedIndex, 0, newGroup);
+  return next;
 }
 
-export function renameGroup(items: ScratchpadItem[], id: string, name: string): ScratchpadItem[] {
-  const trimmed = name.trim();
-  if (!trimmed) return items;
-
-  const now = Date.now();
+function updateTextRecursively(items: ScratchpadItem[], id: string, text: string, now: number): ScratchpadItem[] {
   return items.map((item) => {
     if (item.id === id) {
       return {
         ...item,
-        text: trimmed,
+        text,
         updatedAt: now,
       };
     }
     if (item.children && item.children.length > 0) {
       return {
         ...item,
-        children: renameGroup(item.children, id, name),
+        children: updateTextRecursively(item.children, id, text, now),
       };
     }
+    return item;
+  });
+}
+
+export function updateItemText(items: ScratchpadItem[], id: string, text: string): ScratchpadItem[] {
+  const trimmed = text.trim();
+  if (!trimmed) return items;
+
+  const isRoot = items.some((item) => item.id === id);
+  if (isRoot && isRootDuplicate(items, trimmed, id)) {
+    return items;
+  }
+
+  const now = Date.now();
+  return updateTextRecursively(items, id, trimmed, now);
+}
+
+export function renameGroup(items: ScratchpadItem[], id: string, name: string): ScratchpadItem[] {
+  return updateItemText(items, id, name);
+}
+
+export function togglePinItem(items: ScratchpadItem[], id: string): ScratchpadItem[] {
+  const now = Date.now();
+  return items.map((item) => {
+    if (item.id === id) {
+      return {
+        ...item,
+        isPinned: !item.isPinned,
+        updatedAt: now,
+      };
+    }
+    return item;
+  });
+}
+
+export function moveItem(items: ScratchpadItem[], id: string, direction: 'up' | 'down'): ScratchpadItem[] {
+  const targetIndex = items.findIndex((item) => item.id === id);
+  if (targetIndex === -1) return items;
+
+  const isTargetPinned = Boolean(items[targetIndex].isPinned);
+
+  if (direction === 'up') {
+    let swapIndex = -1;
+    for (let i = targetIndex - 1; i >= 0; i--) {
+      if (Boolean(items[i].isPinned) === isTargetPinned) {
+        swapIndex = i;
+        break;
+      }
+    }
+    if (swapIndex === -1) return items;
+
+    const next = [...items];
+    const temp = next[targetIndex];
+    next[targetIndex] = next[swapIndex];
+    next[swapIndex] = temp;
+    return next;
+  } else {
+    let swapIndex = -1;
+    for (let i = targetIndex + 1; i < items.length; i++) {
+      if (Boolean(items[i].isPinned) === isTargetPinned) {
+        swapIndex = i;
+        break;
+      }
+    }
+    if (swapIndex === -1) return items;
+
+    const next = [...items];
+    const temp = next[targetIndex];
+    next[targetIndex] = next[swapIndex];
+    next[swapIndex] = temp;
+    return next;
+  }
+}
+
+export function moveChildItem(
+  items: ScratchpadItem[],
+  parentId: string,
+  childId: string,
+  direction: 'up' | 'down'
+): ScratchpadItem[] {
+  const now = Date.now();
+  return items.map((item) => {
+    if (item.id === parentId && item.children && item.children.length > 0) {
+      const childIndex = item.children.findIndex((c) => c.id === childId);
+      if (childIndex === -1) return item;
+
+      const targetSwapIndex = direction === 'up' ? childIndex - 1 : childIndex + 1;
+      if (targetSwapIndex < 0 || targetSwapIndex >= item.children.length) {
+        return item;
+      }
+
+      const newChildren = [...item.children];
+      const temp = newChildren[childIndex];
+      newChildren[childIndex] = newChildren[targetSwapIndex];
+      newChildren[targetSwapIndex] = temp;
+
+      return {
+        ...item,
+        children: newChildren,
+        updatedAt: now,
+      };
+    }
+
+    if (item.children && item.children.length > 0) {
+      return {
+        ...item,
+        children: moveChildItem(item.children, parentId, childId, direction),
+      };
+    }
+
     return item;
   });
 }

@@ -1,12 +1,10 @@
-import { AlertCircle } from "lucide-react";
-import { useRef } from "react";
-import { formatToDDMMYY } from "../../../lib/dateUtils";
-import { useTranslation } from "react-i18next";
+import { AlertCircle } from 'lucide-react';
+import { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export interface DeleteConfirmModalProps {
-  dates?: string[];
-  title?: string;
-  message?: React.ReactNode;
+  title: string;
+  message: string;
   confirmLabel?: string;
   cancelLabel?: string;
   onCancel: () => void;
@@ -14,7 +12,6 @@ export interface DeleteConfirmModalProps {
 }
 
 export function DeleteConfirmModal({
-  dates,
   title,
   message,
   confirmLabel,
@@ -29,17 +26,8 @@ export function DeleteConfirmModal({
   const activePointerIdRef = useRef<number | null>(null);
   const startPosRef = useRef<{ x: number; y: number } | null>(null);
 
-  const modalTitle = title || t("deleteConfirmModal.title");
-  const modalCancel = cancelLabel || t("deleteConfirmModal.cancelButton");
-  const modalConfirm = confirmLabel || t("deleteConfirmModal.deleteButton");
-
-  let modalMessage: React.ReactNode = message;
-  if (!modalMessage && dates) {
-    modalMessage = t("deleteConfirmModal.confirmMessage", {
-      count: dates.length,
-      dates: dates.map(formatToDDMMYY).join(", "),
-    });
-  }
+  const modalCancel = cancelLabel ?? t('deleteConfirmModal.cancelButton', 'Cancel');
+  const modalConfirm = confirmLabel ?? t('deleteConfirmModal.deleteButton', 'Delete Permanent');
 
   return (
     <div
@@ -78,24 +66,26 @@ export function DeleteConfirmModal({
     >
       <div ref={modalRef} className="bg-bg-surface border border-border-brand rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4">
         <div className="flex items-center gap-3 text-red-500">
-          <AlertCircle className="h-6 w-6 shrink-0 font-bold" />
-          <h3 className="text-lg font-bold text-text-primary">{modalTitle}</h3>
+          <AlertCircle className="h-6 w-6 shrink-0" />
+          <h3 className="text-lg font-bold text-text-primary">{title}</h3>
         </div>
 
         <p className="text-sm text-text-secondary leading-relaxed">
-          {modalMessage}
+          {message}
         </p>
 
         <div className="flex justify-end gap-3 pt-2">
           <button
+            type="button"
             onClick={onCancel}
-            className="px-4 py-2 rounded-lg border border-border-brand hover:border-accent-brand text-xs font-semibold text-text-primary hover:bg-bg-surface/50 transition-all cursor-pointer"
+            className="px-4 py-2 rounded-lg border border-border-brand hover:border-accent-brand text-xs font-semibold text-text-primary active:bg-bg-surface/50 transition-all cursor-pointer"
           >
             {modalCancel}
           </button>
           <button
+            type="button"
             onClick={onConfirm}
-            className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-xs font-semibold text-white shadow-sm transition-all cursor-pointer"
+            className="px-4 py-2 rounded-lg bg-red-600 active:bg-red-700 text-xs font-semibold text-white shadow-sm transition-all cursor-pointer"
           >
             {modalConfirm}
           </button>

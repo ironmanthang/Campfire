@@ -3,6 +3,7 @@ export interface ScratchpadItem {
   text: string;
   isChecked: boolean;
   isGroup?: boolean;
+  isPinned?: boolean;
   children: ScratchpadItem[];
   createdAt: number;
   updatedAt: number;

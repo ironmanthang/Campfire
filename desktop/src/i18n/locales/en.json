@@ -986,6 +986,22 @@
     "addSubtask": "Add subtask",
     "empty": "No scratch ideas or tasks yet.",
     "emptyHint": "Add a quick thought above before you forget!",
-    "clearCompleted": "Clear completed tasks"
+    "editTask": "Edit text",
+    "clearCompleted": "Clear completed tasks",
+    "confirmClear": "Clear completed tasks?",
+    "pinned": "Pinned",
+    "other": "Other Notes",
+    "pin": "Pin to top",
+    "unpin": "Unpin note",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "alreadyExists": "An item with this name already exists",
+    "deleteTaskConfirmTitle": "Delete Note",
+    "deleteTaskConfirmMessage": "Are you sure you want to permanently delete \"{{name}}\"? This action is permanent and cannot be undone.",
+    "deleteGroupConfirmTitle": "Delete Group",
+    "deleteGroupConfirmMessage": "Are you sure you want to permanently delete the group \"{{name}}\" and all of its subtasks? This action is permanent and cannot be undone.",
+    "clearCompletedConfirmTitle": "Clear Completed Tasks",
+    "clearCompletedConfirmMessage": "Are you sure you want to permanently clear all completed tasks? This action is permanent and cannot be undone.",
+    "clearConfirmButton": "Clear Completed"
   }
 }

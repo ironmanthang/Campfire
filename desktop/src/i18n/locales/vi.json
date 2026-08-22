@@ -986,6 +986,22 @@
     "addSubtask": "Thêm việc phụ",
     "empty": "Chưa có ghi chú hay việc cần làm nào.",
     "emptyHint": "Thêm một ý nghĩ nhanh ở trên trước khi bạn quên!",
-    "clearCompleted": "Xóa các việc đã hoàn thành"
+    "editTask": "Sửa nội dung",
+    "clearCompleted": "Xóa các việc đã hoàn thành",
+    "confirmClear": "Xóa các việc đã hoàn thành?",
+    "pinned": "Đã ghim",
+    "other": "Ghi chú khác",
+    "pin": "Ghim lên đầu",
+    "unpin": "Bỏ ghim",
+    "moveUp": "Di chuyển lên",
+    "moveDown": "Di chuyển xuống",
+    "alreadyExists": "Đã có mục mang tên này rồi",
+    "deleteTaskConfirmTitle": "Xóa ghi chú",
+    "deleteTaskConfirmMessage": "Bạn có chắc chắn muốn xóa vĩnh viễn \"{{name}}\"? Hành động này không thể hoàn tác.",
+    "deleteGroupConfirmTitle": "Xóa nhóm",
+    "deleteGroupConfirmMessage": "Bạn có chắc chắn muốn xóa vĩnh viễn nhóm \"{{name}}\" cùng toàn bộ nội dung bên trong? Hành động này không thể hoàn tác.",
+    "clearCompletedConfirmTitle": "Xóa những mục đã hoàn thành",
+    "clearCompletedConfirmMessage": "Bạn có chắc chắn muốn xóa vĩnh viễn toàn bộ các nội dung đã hoàn thành? Hành động này không thể hoàn tác.",
+    "clearConfirmButton": "Dọn dẹp"
   }
 }

@@ -7,8 +7,13 @@ import {
   addChildItem as coreAddChildItem,
   addGroup as coreAddGroup,
   renameGroup as coreRenameGroup,
+  updateItemText as coreUpdateItemText,
   removeItem as coreRemoveItem,
   clearCompleted as coreClearCompleted,
+  togglePinItem as coreTogglePinItem,
+  moveItem as coreMoveItem,
+  moveChildItem as coreMoveChildItem,
+  isRootDuplicate,
 } from '@campfire/core';
 import { getScratchpadDoc, saveScratchpadDoc } from '../services/db';
 
@@ -20,6 +25,11 @@ export interface UseScratchpadReturn {
   addChildItem: (parentId: string, text: string) => void;
   addGroup: (name: string) => void;
   renameGroup: (id: string, name: string) => void;
+  updateItemText: (id: string, text: string) => void;
+  togglePinItem: (id: string) => void;
+  moveItem: (id: string, direction: 'up' | 'down') => void;
+  moveChildItem: (parentId: string, childId: string, direction: 'up' | 'down') => void;
+  isDuplicate: (text: string, excludeId?: string) => boolean;
   removeItem: (id: string) => void;
   clearCompleted: () => void;
 }
@@ -67,9 +77,11 @@ export function useScratchpad(isOpen: boolean = true): UseScratchpadReturn {
   const addItem = useCallback((text: string) => {
     setItems((prev) => {
       const next = coreAddItem(prev, text);
-      saveScratchpadDoc(toDocument(next)).catch((err) =>
-        console.error('Failed to save mobile scratchpad:', err)
-      );
+      if (next !== prev) {
+        saveScratchpadDoc(toDocument(next)).catch((err) =>
+          console.error('Failed to save mobile scratchpad:', err)
+        );
+      }
       return next;
     });
   }, []);
@@ -87,9 +99,11 @@ export function useScratchpad(isOpen: boolean = true): UseScratchpadReturn {
   const addGroup = useCallback((name: string) => {
     setItems((prev) => {
       const next = coreAddGroup(prev, name);
-      saveScratchpadDoc(toDocument(next)).catch((err) =>
-        console.error('Failed to save mobile scratchpad:', err)
-      );
+      if (next !== prev) {
+        saveScratchpadDoc(toDocument(next)).catch((err) =>
+          console.error('Failed to save mobile scratchpad:', err)
+        );
+      }
       return next;
     });
   }, []);
@@ -97,12 +111,67 @@ export function useScratchpad(isOpen: boolean = true): UseScratchpadReturn {
   const renameGroup = useCallback((id: string, name: string) => {
     setItems((prev) => {
       const next = coreRenameGroup(prev, id, name);
+      if (next !== prev) {
+        saveScratchpadDoc(toDocument(next)).catch((err) =>
+          console.error('Failed to save mobile scratchpad:', err)
+        );
+      }
+      return next;
+    });
+  }, []);
+
+  const updateItemText = useCallback((id: string, text: string) => {
+    setItems((prev) => {
+      const next = coreUpdateItemText(prev, id, text);
+      if (next !== prev) {
+        saveScratchpadDoc(toDocument(next)).catch((err) =>
+          console.error('Failed to save mobile scratchpad:', err)
+        );
+      }
+      return next;
+    });
+  }, []);
+
+  const togglePinItem = useCallback((id: string) => {
+    setItems((prev) => {
+      const next = coreTogglePinItem(prev, id);
       saveScratchpadDoc(toDocument(next)).catch((err) =>
         console.error('Failed to save mobile scratchpad:', err)
       );
       return next;
     });
   }, []);
+
+  const moveItem = useCallback((id: string, direction: 'up' | 'down') => {
+    setItems((prev) => {
+      const next = coreMoveItem(prev, id, direction);
+      if (next !== prev) {
+        saveScratchpadDoc(toDocument(next)).catch((err) =>
+          console.error('Failed to save mobile scratchpad:', err)
+        );
+      }
+      return next;
+    });
+  }, []);
+
+  const moveChildItem = useCallback((parentId: string, childId: string, direction: 'up' | 'down') => {
+    setItems((prev) => {
+      const next = coreMoveChildItem(prev, parentId, childId, direction);
+      if (next !== prev) {
+        saveScratchpadDoc(toDocument(next)).catch((err) =>
+          console.error('Failed to save mobile scratchpad:', err)
+        );
+      }
+      return next;
+    });
+  }, []);
+
+  const isDuplicate = useCallback(
+    (text: string, excludeId?: string) => {
+      return isRootDuplicate(items, text, excludeId);
+    },
+    [items]
+  );
 
   const removeItem = useCallback((id: string) => {
     setItems((prev) => {
@@ -132,6 +201,11 @@ export function useScratchpad(isOpen: boolean = true): UseScratchpadReturn {
     addChildItem,
     addGroup,
     renameGroup,
+    updateItemText,
+    togglePinItem,
+    moveItem,
+    moveChildItem,
+    isDuplicate,
     removeItem,
     clearCompleted,
   };
