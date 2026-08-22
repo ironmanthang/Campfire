@@ -4,7 +4,7 @@ import { Header } from './components/layout';
 import { JournalList, JournalEditor } from './components/journal';
 import { SettingsModal } from './components/settings';
 import { SyncResultModal, SupportModal } from './components/modals';
-import { ScratchpadModal } from './components/scratchpad/ScratchpadModal';
+import { ScratchpadView } from './components/scratchpad/ScratchpadView';
 
 // Hooks
 import { useTheme } from './hooks/useTheme';
@@ -21,7 +21,7 @@ import { calculateStreak } from '@campfire/core';
 function App() {
   const { t, i18n } = useTranslation();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isScratchpadOpen, setIsScratchpadOpen] = useState(false);
+  const [activeMainView, setActiveMainView] = useState<'journal' | 'scratchpad'>('journal');
   const [isDonateOpen, setIsDonateOpen] = useState(false);
   const [customLogo, setCustomLogo] = useState<string | null>(() => localStorage.getItem('past_you_custom_logo'));
 
@@ -145,7 +145,19 @@ function App() {
     <div className="flex flex-col h-full bg-bg-app transition-colors duration-200 relative">
       <Header 
         onSettingsOpen={() => setIsSettingsOpen(true)}
-        onScratchpadOpen={() => setIsScratchpadOpen(true)}
+        onScratchpadToggle={() => {
+          setActiveMainView((prev) => {
+            const next = prev === 'scratchpad' ? 'journal' : 'scratchpad';
+            if (next === 'journal') {
+              const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';
+              if (autoSync && isLoggedIn) {
+                handleSync();
+              }
+            }
+            return next;
+          });
+        }}
+        isScratchpadActive={activeMainView === 'scratchpad'}
         onSync={handleSync}
         onThemeToggle={toggleTheme}
         theme={theme}
@@ -197,7 +209,17 @@ function App() {
         </div>
       )}
 
-      {activeDate && !editorLoading ? (
+      {activeMainView === 'scratchpad' ? (
+        <ScratchpadView
+          onBack={() => {
+            setActiveMainView('journal');
+            const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';
+            if (autoSync && isLoggedIn) {
+              handleSync();
+            }
+          }}
+        />
+      ) : activeDate && !editorLoading ? (
         <JournalEditor
           key={`${activeDate}_${editorReloadKey}`}
           date={activeDate}
@@ -280,17 +302,6 @@ function App() {
       <SupportModal 
         isOpen={isDonateOpen}
         onClose={() => setIsDonateOpen(false)}
-      />
-
-      <ScratchpadModal
-        isOpen={isScratchpadOpen}
-        onClose={() => {
-          setIsScratchpadOpen(false);
-          const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';
-          if (autoSync && isLoggedIn) {
-            handleSync();
-          }
-        }}
       />
 
       {toastMessage && (

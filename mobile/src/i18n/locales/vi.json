@@ -168,5 +168,21 @@
   },
   "common": {
     "campfire": "Campfire"
+  },
+  "scratchpad": {
+    "title": "Ghi chú & Việc cần làm",
+    "subtitle": "Danh sách việc cần làm nhanh",
+    "addPlaceholder": "Ghi chú nhanh hoặc việc cần làm...",
+    "groupPlaceholder": "Tên nhóm (ví dụ: Công việc, Mua sắm)...",
+    "newTaskPlaceholder": "Công việc trong nhóm này...",
+    "subtaskPlaceholder": "Việc phụ mới...",
+    "newGroup": "Tạo nhóm",
+    "renameGroup": "Đổi tên nhóm",
+    "clickToRename": "Nhấn để đổi tên nhóm",
+    "addTaskToGroup": "Thêm việc vào nhóm",
+    "addSubtask": "Thêm việc phụ",
+    "empty": "Chưa có ghi chú hay việc cần làm nào.",
+    "emptyHint": "Thêm một ý nghĩ nhanh ở trên trước khi bạn quên!",
+    "clearCompleted": "Xóa các việc đã hoàn thành"
   }
 }

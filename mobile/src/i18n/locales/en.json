@@ -168,5 +168,21 @@
   },
   "common": {
     "campfire": "Campfire"
+  },
+  "scratchpad": {
+    "title": "Scratchpad & Notes",
+    "subtitle": "Quick persistent task list",
+    "addPlaceholder": "Quick scratch idea or todo...",
+    "groupPlaceholder": "Group name (e.g. Work, Shopping)...",
+    "newTaskPlaceholder": "Task in this group...",
+    "subtaskPlaceholder": "New subtask...",
+    "newGroup": "Group",
+    "renameGroup": "Rename group",
+    "clickToRename": "Click to rename group",
+    "addTaskToGroup": "Add task to group",
+    "addSubtask": "Add subtask",
+    "empty": "No scratch ideas or tasks yet.",
+    "emptyHint": "Add a quick thought above before you forget!",
+    "clearCompleted": "Clear completed tasks"
   }
 }

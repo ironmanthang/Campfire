@@ -6,7 +6,8 @@ import { LogoModal } from '../modals';
 
 interface HeaderProps {
   onSettingsOpen: () => void;
-  onScratchpadOpen: () => void;
+  onScratchpadToggle: () => void;
+  isScratchpadActive?: boolean;
   onSync: () => void;
   onThemeToggle: () => void;
   theme: 'light' | 'dark';
@@ -18,7 +19,8 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   onSettingsOpen,
-  onScratchpadOpen,
+  onScratchpadToggle,
+  isScratchpadActive = false,
   onSync,
   onThemeToggle,
   theme,
@@ -100,10 +102,14 @@ export const Header: React.FC<HeaderProps> = ({
             {theme === 'dark' ? <Sun size={18} className="text-accent-brand" /> : <Moon size={18} className="text-accent-brand" />}
           </button>
 
-          {/* Quick Scratchpad & To-Do */}
+          {/* Quick Scratchpad & To-Do Toggle */}
           <button
-            onClick={onScratchpadOpen}
-            className="min-w-[44px] min-h-[44px] rounded-xl bg-bg-app border border-border-brand hover:border-accent-brand text-text-secondary hover:text-accent-brand transition-all active:scale-95 flex items-center justify-center cursor-pointer"
+            onClick={onScratchpadToggle}
+            className={`min-w-[44px] min-h-[44px] rounded-xl border transition-all active:scale-95 flex items-center justify-center cursor-pointer ${
+              isScratchpadActive
+                ? 'bg-accent-brand text-bg-surface border-accent-brand shadow-sm'
+                : 'bg-bg-app border-border-brand text-text-secondary hover:text-accent-brand hover:border-accent-brand'
+            }`}
             title={t("scratchpad.title", "Scratchpad & Notes")}
             aria-label={t("scratchpad.title", "Scratchpad & Notes")}
           >

@@ -7,6 +7,8 @@ import {
   toggleItemWithChildren,
   addItem,
   addChildItem,
+  addGroup,
+  renameGroup,
   removeItem,
   clearCompleted,
   type ScratchpadItem,
@@ -83,15 +85,25 @@ describe('Scratchpad Core Logic', () => {
       });
     });
 
-    it('deserializes valid JSON document', () => {
+    it('deserializes valid JSON document with isGroup property', () => {
       const doc = {
         version: 1,
         items: [
           {
-            id: 'item-1',
-            text: 'Test task',
-            isChecked: true,
-            children: [],
+            id: 'group-1',
+            text: 'Shopping',
+            isChecked: false,
+            isGroup: true,
+            children: [
+              {
+                id: 'item-1',
+                text: 'Milk',
+                isChecked: true,
+                children: [],
+                createdAt: 1000,
+                updatedAt: 2000,
+              },
+            ],
             createdAt: 1000,
             updatedAt: 2000,
           },
@@ -100,9 +112,12 @@ describe('Scratchpad Core Logic', () => {
 
       const result = fromDocument(JSON.stringify(doc));
       expect(result).toHaveLength(1);
-      expect(result[0].id).toBe('item-1');
-      expect(result[0].text).toBe('Test task');
-      expect(result[0].isChecked).toBe(true);
+      expect(result[0].id).toBe('group-1');
+      expect(result[0].text).toBe('Shopping');
+      expect(result[0].isGroup).toBe(true);
+      expect(result[0].children).toHaveLength(1);
+      expect(result[0].children[0].text).toBe('Milk');
+      expect(result[0].children[0].isChecked).toBe(true);
     });
 
     it('migrates legacy flat-markdown string if JSON parsing fails', () => {
@@ -240,6 +255,78 @@ describe('Scratchpad Core Logic', () => {
       expect(cleared[0].id).toBe('1');
       expect(cleared[0].children).toHaveLength(1);
       expect(cleared[0].children[0].id).toBe('1-2');
+    });
+
+    it('adds a named group node with isGroup: true and empty children', () => {
+      const withGroup = addGroup(initialItems, 'Work Tasks');
+      expect(withGroup).toHaveLength(3);
+      const groupNode = withGroup[2];
+      expect(groupNode.text).toBe('Work Tasks');
+      expect(groupNode.isGroup).toBe(true);
+      expect(groupNode.isChecked).toBe(false);
+      expect(groupNode.children).toEqual([]);
+
+      // Ignores empty name
+      expect(addGroup(initialItems, '   ')).toHaveLength(2);
+    });
+
+    it('renames an existing group or item', () => {
+      const withGroup = addGroup(initialItems, 'Old Name');
+      const groupId = withGroup[2].id;
+      const renamed = renameGroup(withGroup, groupId, 'New Name');
+      expect(renamed[2].text).toBe('New Name');
+
+      // Ignores empty rename
+      const ignored = renameGroup(withGroup, groupId, '   ');
+      expect(ignored[2].text).toBe('Old Name');
+    });
+
+    it('toggles all children in a group when toggleItemWithChildren is called on the group', () => {
+      const groupWithKids: ScratchpadItem[] = [
+        {
+          id: 'group-1',
+          text: 'Groceries',
+          isChecked: false,
+          isGroup: true,
+          children: [
+            { id: 'c-1', text: 'Apples', isChecked: false, children: [], createdAt: 1, updatedAt: 1 },
+            { id: 'c-2', text: 'Bread', isChecked: false, children: [], createdAt: 1, updatedAt: 1 },
+            { id: 'c-3', text: 'Milk', isChecked: false, children: [], createdAt: 1, updatedAt: 1 },
+          ],
+          createdAt: 1,
+          updatedAt: 1,
+        },
+      ];
+
+      const toggledAll = toggleItemWithChildren(groupWithKids, 'group-1', true);
+      expect(toggledAll[0].children[0].isChecked).toBe(true);
+      expect(toggledAll[0].children[1].isChecked).toBe(true);
+      expect(toggledAll[0].children[2].isChecked).toBe(true);
+    });
+
+    it('preserves group container during clearCompleted while removing completed children', () => {
+      const groupWithMixedKids: ScratchpadItem[] = [
+        {
+          id: 'group-1',
+          text: 'Project Tasks',
+          isChecked: false,
+          isGroup: true,
+          children: [
+            { id: 'c-1', text: 'Done Task 1', isChecked: true, children: [], createdAt: 1, updatedAt: 1 },
+            { id: 'c-2', text: 'Done Task 2', isChecked: true, children: [], createdAt: 1, updatedAt: 1 },
+            { id: 'c-3', text: 'Pending Task', isChecked: false, children: [], createdAt: 1, updatedAt: 1 },
+          ],
+          createdAt: 1,
+          updatedAt: 1,
+        },
+      ];
+
+      const cleared = clearCompleted(groupWithMixedKids);
+      expect(cleared).toHaveLength(1);
+      expect(cleared[0].id).toBe('group-1');
+      expect(cleared[0].isGroup).toBe(true);
+      expect(cleared[0].children).toHaveLength(1);
+      expect(cleared[0].children[0].id).toBe('c-3');
     });
   });
 });

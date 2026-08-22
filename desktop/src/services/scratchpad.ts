@@ -11,19 +11,18 @@ export async function readScratchpadDoc(journalDir: string): Promise<ScratchpadD
     return toDocument([]);
   }
 
+  const items = fromDocument(raw);
+  const doc = toDocument(items);
+
   let isLegacy = false;
   try {
     const parsed = JSON.parse(raw);
-    if (parsed && typeof parsed === "object" && Array.isArray(parsed.items)) {
-      return parsed as ScratchpadDocument;
+    if (!parsed || typeof parsed !== "object" || !Array.isArray(parsed.items)) {
+      isLegacy = true;
     }
-    isLegacy = true;
   } catch {
     isLegacy = true;
   }
-
-  const items = fromDocument(raw);
-  const doc = toDocument(items);
 
   if (isLegacy && items.length > 0) {
     writeScratchpadDoc(journalDir, doc).catch((err) => {

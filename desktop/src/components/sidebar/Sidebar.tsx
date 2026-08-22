@@ -22,14 +22,12 @@ interface SidebarProps {
   onOpenAbout: () => void;
   onOpenFeedback: () => void;
   onOpenHelp: () => void;
-  onOpenScratchpad: () => void;
 }
 
 export function Sidebar({
   onOpenAbout,
   onOpenFeedback,
   onOpenHelp,
-  onOpenScratchpad
 }: SidebarProps) {
   const { t } = useTranslation();
 
@@ -148,6 +146,20 @@ export function Sidebar({
               disabled={!config.journal_dir}
             />
             <SidebarNavItem
+              icon={
+                <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M15 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10l-6 6z" />
+                  <path d="M15 15v6l6-6h-6z" />
+                  <line x1="7" y1="8" x2="17" y2="8" />
+                  <line x1="7" y1="12" x2="13" y2="12" />
+                </svg>
+              }
+              label={t("sidebar.navScratchpad", "Scratchpad & Notes")}
+              onClick={() => { if (config.journal_dir) setView("scratchpad"); }}
+              active={view === "scratchpad"}
+              disabled={!config.journal_dir}
+            />
+            <SidebarNavItem
               icon={<MessageSquare className="h-4.5 w-4.5" />}
               label={t("sidebar.navChat")}
               onClick={() => { if (config.journal_dir) setView("chat"); }}
@@ -184,21 +196,6 @@ export function Sidebar({
                 title={t("sidebar.toggleThemeTooltip")}
               >
                 {config.theme === "dark" ? <Sun className="h-4.5 w-4.5" /> : <Moon className="h-4.5 w-4.5" />}
-              </button>
-
-              {/* Quick Scratchpad & To-Do */}
-              <button
-                onClick={onOpenScratchpad}
-                onMouseDown={(e) => e.preventDefault()}
-                className="p-2 rounded-lg text-text-secondary hover:text-accent-brand hover:bg-bg-surface transition-colors flex items-center justify-center cursor-pointer"
-                title={t("scratchpad.title", "Scratchpad & Notes")}
-              >
-                <svg className="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M15 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10l-6 6z" />
-                  <path d="M15 15v6l6-6h-6z" />
-                  <line x1="7" y1="8" x2="17" y2="8" />
-                  <line x1="7" y1="12" x2="13" y2="12" />
-                </svg>
               </button>
 
               {/* Bug Report */}

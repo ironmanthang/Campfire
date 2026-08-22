@@ -18,6 +18,7 @@
     "navJournalEditor": "Journal Editor",
     "navTimeline": "Timeline Browse",
     "navSearch": "Keyword Search",
+    "navScratchpad": "Scratchpad & Notes",
     "navChatTooltipDisconnected": "Ollama service disconnected",
     "navChatTooltipConnected": "Reflect by the fire with the Narrator",
     "navChat": "Campfire Chat",
@@ -970,5 +971,21 @@
       "mobileNoteTitle": "Mobile Safety Net",
       "mobileNoteDesc": "On mobile there's no equivalent snapshot system — your entries live in the browser's local database. If you keep both the desktop and mobile apps on auto-sync, your desktop backups act as the safety net for both."
     }
+  },
+  "scratchpad": {
+    "title": "Scratchpad & Notes",
+    "subtitle": "Quick persistent tasks, notes, and scratch ideas",
+    "addPlaceholder": "Quick scratch idea or todo...",
+    "groupPlaceholder": "Group name (e.g. Work, Shopping)...",
+    "newTaskPlaceholder": "Task in this group...",
+    "subtaskPlaceholder": "New subtask...",
+    "newGroup": "New Group",
+    "renameGroup": "Rename group",
+    "clickToRename": "Click to rename group",
+    "addTaskToGroup": "Add task to group",
+    "addSubtask": "Add subtask",
+    "empty": "No scratch ideas or tasks yet.",
+    "emptyHint": "Add a quick thought above before you forget!",
+    "clearCompleted": "Clear completed tasks"
   }
 }

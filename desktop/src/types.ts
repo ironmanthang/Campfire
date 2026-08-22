@@ -91,7 +91,7 @@ export interface SystemResources {
   ram_raw: string;
 }
 
-export type ViewType = "journal" | "timeline" | "search" | "chat" | "reflection" | "settings";
+export type ViewType = "journal" | "timeline" | "search" | "scratchpad" | "chat" | "reflection" | "settings";
 
 export interface DraftAttachment {
   id: string;

@@ -15,6 +15,7 @@ function sanitizeItems(rawItems: any[]): ScratchpadItem[] {
       id: typeof item.id === 'string' && item.id.trim() ? item.id : generateId(),
       text: typeof item.text === 'string' ? item.text : '',
       isChecked: Boolean(item.isChecked),
+      isGroup: Boolean(item.isGroup),
       children: Array.isArray(item.children) ? sanitizeItems(item.children) : [],
       createdAt: typeof item.createdAt === 'number' ? item.createdAt : now,
       updatedAt: typeof item.updatedAt === 'number' ? item.updatedAt : now,
@@ -203,9 +204,50 @@ export function addChildItem(items: ScratchpadItem[], parentId: string, text: st
   });
 }
 
+export function addGroup(items: ScratchpadItem[], name: string): ScratchpadItem[] {
+  const trimmed = name.trim();
+  if (!trimmed) return items;
+
+  const now = Date.now();
+  const newGroup: ScratchpadItem = {
+    id: generateId(),
+    text: trimmed,
+    isChecked: false,
+    isGroup: true,
+    children: [],
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  return [...items, newGroup];
+}
+
+export function renameGroup(items: ScratchpadItem[], id: string, name: string): ScratchpadItem[] {
+  const trimmed = name.trim();
+  if (!trimmed) return items;
+
+  const now = Date.now();
+  return items.map((item) => {
+    if (item.id === id) {
+      return {
+        ...item,
+        text: trimmed,
+        updatedAt: now,
+      };
+    }
+    if (item.children && item.children.length > 0) {
+      return {
+        ...item,
+        children: renameGroup(item.children, id, name),
+      };
+    }
+    return item;
+  });
+}
+
 export function clearCompleted(items: ScratchpadItem[]): ScratchpadItem[] {
   return items
-    .filter((item) => !item.isChecked)
+    .filter((item) => item.isGroup || !item.isChecked)
     .map((item) => {
       if (item.children && item.children.length > 0) {
         return {

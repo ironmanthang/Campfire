@@ -130,7 +130,7 @@ export async function deleteLocalEntry(date: string): Promise<void> {
 
 export async function listLocalEntries(): Promise<LocalJournalEntry[]> {
   const all = await db.entries.orderBy('date').reverse().toArray();
-  return all.filter(e => e.content.trim() !== '');
+  return all.filter(e => e.date !== 'scratchpad' && e.content.trim() !== '');
 }
 
 export async function resolveLocalConflict(date: string, choice: 'local' | 'remote' | 'both'): Promise<string | null> {

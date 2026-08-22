@@ -2,10 +2,11 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import {
   type ScratchpadItem,
   toDocument,
-  toggleItem as coreToggleItem,
   toggleItemWithChildren as coreToggleItemWithChildren,
   addItem as coreAddItem,
   addChildItem as coreAddChildItem,
+  addGroup as coreAddGroup,
+  renameGroup as coreRenameGroup,
   removeItem as coreRemoveItem,
   clearCompleted as coreClearCompleted,
 } from "@campfire/core";
@@ -15,10 +16,11 @@ import { useAppStore } from "../store/useAppStore";
 export interface UseScratchpadReturn {
   items: ScratchpadItem[];
   loading: boolean;
-  toggleItem: (id: string) => void;
   toggleItemWithChildren: (id: string, checked?: boolean) => void;
   addItem: (text: string) => void;
   addChildItem: (parentId: string, text: string) => void;
+  addGroup: (name: string) => void;
+  renameGroup: (id: string, name: string) => void;
   removeItem: (id: string) => void;
   clearCompleted: () => void;
 }
@@ -80,17 +82,6 @@ export function useScratchpad(isOpen: boolean = true): UseScratchpadReturn {
     [config.journal_dir, triggerDebouncedSync]
   );
 
-  const toggleItem = useCallback(
-    (id: string) => {
-      setItems((prev) => {
-        const next = coreToggleItem(prev, id);
-        saveAndSync(next);
-        return next;
-      });
-    },
-    [saveAndSync]
-  );
-
   const toggleItemWithChildren = useCallback(
     (id: string, checked?: boolean) => {
       setItems((prev) => {
@@ -124,6 +115,28 @@ export function useScratchpad(isOpen: boolean = true): UseScratchpadReturn {
     [saveAndSync]
   );
 
+  const addGroup = useCallback(
+    (name: string) => {
+      setItems((prev) => {
+        const next = coreAddGroup(prev, name);
+        saveAndSync(next);
+        return next;
+      });
+    },
+    [saveAndSync]
+  );
+
+  const renameGroup = useCallback(
+    (id: string, name: string) => {
+      setItems((prev) => {
+        const next = coreRenameGroup(prev, id, name);
+        saveAndSync(next);
+        return next;
+      });
+    },
+    [saveAndSync]
+  );
+
   const removeItem = useCallback(
     (id: string) => {
       setItems((prev) => {
@@ -146,10 +159,11 @@ export function useScratchpad(isOpen: boolean = true): UseScratchpadReturn {
   return {
     items,
     loading,
-    toggleItem,
     toggleItemWithChildren,
     addItem,
     addChildItem,
+    addGroup,
+    renameGroup,
     removeItem,
     clearCompleted,
   };
