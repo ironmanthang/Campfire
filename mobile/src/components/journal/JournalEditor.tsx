@@ -229,21 +229,17 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
           {/* Lock / Unlock toggle button */}
           <button
             onClick={handleToggleLock}
-            className={`px-2.5 py-1 rounded-xl border transition-all active:scale-95 flex items-center gap-1 cursor-pointer text-xs font-bold ${
-              isLocked
-                ? 'border-amber-500/40 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20'
-                : 'border-border-brand/40 hover:border-accent-brand/50 hover:bg-bg-app text-text-secondary'
-            }`}
+            className="px-2.5 py-1 rounded-xl border border-border-brand/40 hover:border-accent-brand/50 hover:bg-bg-app text-text-secondary transition-all active:scale-95 flex items-center gap-1 cursor-pointer text-xs font-bold"
             title={isLocked ? "Entry is locked (Read-Only). Tap to unlock." : "Lock entry (Prevent accidental edits)."}
           >
             {isLocked ? (
               <>
-                <Lock size={13} />
+                <Lock size={13} className="text-text-secondary" />
                 <span>Locked</span>
               </>
             ) : (
               <>
-                <Unlock size={13} />
+                <Unlock size={13} className="text-amber-500" />
                 <span>Unlocked</span>
               </>
             )}

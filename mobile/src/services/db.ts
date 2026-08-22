@@ -1,4 +1,5 @@
 import Dexie, { type Table } from 'dexie';
+import { type ScratchpadDocument, parseLegacyMarkdown } from '@campfire/core';
 
 export interface LocalJournalEntry {
   date: string;       // YYYY-MM-DD
@@ -9,13 +10,25 @@ export interface LocalJournalEntry {
   isLocked?: boolean; // Explicit lock state
 }
 
+export interface LocalScratchpadDoc {
+  id: string; // 'scratchpad'
+  document: ScratchpadDocument;
+  lastModified: number;
+  synced: boolean;
+}
+
 export class JournalDatabase extends Dexie {
   entries!: Table<LocalJournalEntry>;
+  scratchpad!: Table<LocalScratchpadDoc>;
 
   constructor() {
     super('CampfireDatabase');
     this.version(1).stores({
       entries: 'date, lastModified, synced'
+    });
+    this.version(2).stores({
+      entries: 'date, lastModified, synced',
+      scratchpad: 'id, lastModified'
     });
   }
 }
@@ -27,9 +40,43 @@ export async function getLocalEntry(date: string): Promise<LocalJournalEntry | u
   return await db.entries.get(date);
 }
 
-export async function getScratchpadEntry(): Promise<string> {
-  const entry = await db.entries.get('scratchpad');
-  return entry?.content || '';
+export async function getScratchpadDoc(): Promise<ScratchpadDocument> {
+  const row = await db.scratchpad.get('scratchpad');
+  if (row) {
+    return row.document;
+  }
+
+  // One-time migration: check if legacy entry exists in entries table
+  const legacyEntry = await db.entries.get('scratchpad');
+  if (legacyEntry && legacyEntry.content) {
+    const items = parseLegacyMarkdown(legacyEntry.content);
+    const doc: ScratchpadDocument = {
+      version: 1,
+      items,
+    };
+    await db.scratchpad.put({
+      id: 'scratchpad',
+      document: doc,
+      lastModified: legacyEntry.lastModified || Date.now(),
+      synced: legacyEntry.synced ?? false,
+    });
+    await db.entries.delete('scratchpad');
+    return doc;
+  }
+
+  return {
+    version: 1,
+    items: [],
+  };
+}
+
+export async function saveScratchpadDoc(doc: ScratchpadDocument): Promise<void> {
+  await db.scratchpad.put({
+    id: 'scratchpad',
+    document: doc,
+    lastModified: Date.now(),
+    synced: false,
+  });
 }
 
 export async function saveLocalEntry(date: string, content: string): Promise<void> {
@@ -83,7 +130,7 @@ export async function deleteLocalEntry(date: string): Promise<void> {
 
 export async function listLocalEntries(): Promise<LocalJournalEntry[]> {
   const all = await db.entries.orderBy('date').reverse().toArray();
-  return all.filter(e => e.content.trim() !== '' && e.date !== 'scratchpad');
+  return all.filter(e => e.content.trim() !== '');
 }
 
 export async function resolveLocalConflict(date: string, choice: 'local' | 'remote' | 'both'): Promise<string | null> {

@@ -164,21 +164,17 @@ export function JournalEditorHeader({
         {toggleLock && (
           <button
             onClick={toggleLock}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-all text-xs font-semibold cursor-pointer active:scale-95 ${
-              isLocked
-                ? "border-amber-500/40 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20"
-                : "border-border-brand hover:border-accent-brand bg-bg-surface/30 text-text-secondary hover:text-text-primary"
-            }`}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border-brand hover:border-accent-brand bg-bg-surface/30 text-text-secondary hover:text-text-primary transition-all text-xs font-semibold cursor-pointer active:scale-95"
             title={isLocked ? "Entry is locked (Read-Only). Click to unlock editing." : "Lock entry (Prevent accidental edits)."}
           >
             {isLocked ? (
               <>
-                <Lock className="h-3.5 w-3.5 text-amber-500" />
+                <Lock className="h-3.5 w-3.5 text-text-secondary" />
                 <span className="hidden sm:inline">Locked</span>
               </>
             ) : (
               <>
-                <Unlock className="h-3.5 w-3.5 text-text-secondary" />
+                <Unlock className="h-3.5 w-3.5 text-amber-500" />
                 <span className="hidden sm:inline">Unlocked</span>
               </>
             )}

@@ -8,6 +8,7 @@ trigger: always_on
 - Prefer fewest new abstractions needed, consistency with existing patterns/conventions already in this repo, no duplicated logic, clear naming, and minimal new dependencies.
 - If a shortcut would create tech debt, name the debt explicitly and let me choose — don't take the shortcut quietly because it's faster to type.
 - Be active and try to follow the convention of the current codebase instead of re-creating code or UI components that already exist.
+- **Refactor feature audit:** When redesigning or refactoring a component, audit every existing feature against the new data model. Do NOT carry features forward by default — each one must justify itself against the new model from scratch. If a feature no longer fits cleanly (e.g., creates a second live representation of the same data, requires a lossy round-trip, or adds a special-case path), flag it for removal proactively, without waiting for the user to notice.
 
 ## File & Structure Management
 - **File size & structure alerts:** After coding, if any source code logic file ends up above 400 lines (excluding special files such as i18n JSON locales, auto-generated/lock files, raw data/mock constants, build/config manifests, and central entry points), or a folder has more than 10 files, alert the user and suggest a way to split/refactor the structure. Name subfolders appropriately so AI agents understand file contents. Prefer to follow SOLID, DRY, and Modularity principles when writing and refactoring code.

@@ -7,3 +7,5 @@ export * from './exportJournal';
 export * from './sync';
 export * from './streak';
 export * from './importJournal';
+export * from './scratchpad/types';
+export * from './scratchpad/logic';
