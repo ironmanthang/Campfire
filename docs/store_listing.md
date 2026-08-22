@@ -1,6 +1,6 @@
-# Store listing copy for v0.1.8
+# Store listing copy for v0.1.9
 
-Use this file as the canonical copy to paste into Microsoft Partner Center for the v0.1.8 release.
+Use this file as the canonical copy to paste into Microsoft Partner Center for the v0.1.9 release.
 
 **Description**:
 
@@ -14,6 +14,7 @@ Campfire includes a built-in AI reflection assistant that runs privately on your
 KEY FEATURES:
 
 - Complete Personal Privacy: Your journal entries are stored directly on your device. No cloud accounts, no data tracking, and no external access.
+- Hierarchical Scratchpad & Tasks: Capture quick thoughts, organize multi-level subtasks, and structure notes into custom named groups in a dedicated distraction-free view.
 - Private AI Assistant: Chat directly with your past entries to summarize old memories, reflect on personal progress, and clean up your archives.
 - Smart Search by Meaning: Search your journal using natural language concepts instead of guessing exact keywords.
 - Distraction-Free Editor: Enjoy a peaceful dark-mode writing space with instant side-by-side previews, automatic local saving, and word counts.
@@ -24,20 +25,23 @@ KEY FEATURES:
 
 Take a break from noisy feeds and public social media. Step into your private sanctuary and write for yourself.
 
-**What's new in v0.1.8**:
+**What's new in v0.1.9**:
 
-- Persistent Entry Lock & Auto Read-Only: Past entries are automatically placed into a read-only state so that older journal content cannot be changed by accident. A header lock toggle allows you to re-open entries for editing when required.
-- Desktop: added persisted `locked_entries` config field so per-day locks are saved across installs and devices via optional backup.
+Major update:
+- First-Class Scratchpad View: Promoted the quick notes scratchpad into a dedicated, full-page view on desktop and mobile for capturing thoughts, daily tasks, and brainstorms.
+- Hierarchical Tasks & Subtasks: Support for nested task hierarchies with collapsible parent-child subtasks, progress counters, and visual indentation guides.
+- Custom Named Groups: Organize tasks and notes into custom named groups with full create, rename, reorder, and deletion controls.
 
 **Product features (Partner Center - add as bullets)**:
 
-- 100% Private Local Storage: Your journal entries remain safely on your personal computer with no accounts and no third-party tracking.
-- Private AI Assistant: Chat with your journal locally to reflect on past memories, ask questions, and receive personalized insights.
-- Smart Search by Meaning: Find entries by context and concepts rather than exact keywords.
-- Interactive Life Timeline: Browse your entry history chronologically and filter by date ranges.
-- Automatic Google Drive Sync: Optional background backup directly to your personal Google Drive account.
-- Entry Lock Protection: Past entries auto-lock and open read-only to prevent accidental edits; unlock any entry using the header toggle.
-- No Subscriptions: Enjoy complete access to all features with zero monthly fees or hidden costs.
+100% Private Local Storage: Your journal entries remain safely on your personal computer with no accounts and no third-party tracking.
+Hierarchical Scratchpad & Tasks: Dedicated task manager with multi-level nested subtasks and custom named groups.
+Private AI Assistant: Chat with your journal locally to reflect on past memories, ask questions, and receive personalized insights.
+Smart Search by Meaning: Find entries by context and concepts rather than exact keywords.
+Interactive Life Timeline: Browse your entry history chronologically and filter by date ranges.
+Automatic Google Drive Sync: Optional background backup directly to your personal Google Drive account.
+Entry Lock Protection: Past entries auto-lock and open read-only to prevent accidental edits; unlock any entry using the header toggle.
+No Subscriptions: Enjoy complete access to all features with zero monthly fees or hidden costs.
 
 **Short description (<=270 chars)**:
 
@@ -48,6 +52,9 @@ A cozy personal journal with a private AI companion that runs on your computer. 
 - journal
 - diary
 - notes
+- scratchpad
+- todo
+- task manager
 - google drive sync
 - local-first
 - privacy
@@ -61,6 +68,6 @@ Campfire Journal is a native Windows desktop application built with Tauri (Rust 
 
 Notes for release process:
 
-- Ensure `package.json`, `core/package.json`, `desktop/package.json`, `mobile/package.json`, and `desktop/src-tauri/Cargo.toml` are bumped to `0.1.8` (the repo's `scripts/bump-version.mjs` handles this).
+- Ensure `package.json`, `core/package.json`, `desktop/package.json`, `mobile/package.json`, and `desktop/src-tauri/Cargo.toml` are bumped to `0.1.9` (the repo's `scripts/bump-version.mjs` handles this via `pnpm version:bump 0.1.9`).
 - Build and validate the new Windows package before submission (`pnpm prepush` then `pnpm tauri:windows:build`).
-- Update Partner Center: paste Description, replace "What's new" with the v0.1.8 text above, add the Entry Lock Protection feature to Product features, and upload new package.
+- Update Partner Center: paste Description, replace "What's new" with the v0.1.9 text above, update Product features with the new Scratchpad feature, and upload the new package.
