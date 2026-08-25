@@ -63,27 +63,26 @@ export class DexieLocalStore implements LocalStore {
   async update(date: string, patch: Partial<LocalEntry>): Promise<void> {
     if (date === 'scratchpad') {
       const spRow = await db.scratchpad.get('scratchpad');
-      if (!spRow) {
-        if (patch.content !== undefined || patch.baseContent !== undefined) {
-          const items = patch.content !== undefined ? fromDocument(patch.content) : [];
-          await db.scratchpad.put({
-            id: 'scratchpad',
-            document: toDocument(items),
-            lastModified: patch.lastModified ?? Date.now(),
-            synced: patch.synced ?? false,
-            baseContent: patch.baseContent,
-          });
-        }
-        return;
-      }
-      const updates: Partial<LocalScratchpadDoc> = {};
-      if (patch.content !== undefined) {
-        updates.document = toDocument(fromDocument(patch.content));
-      }
-      if (patch.lastModified !== undefined) updates.lastModified = patch.lastModified;
-      if (patch.synced !== undefined) updates.synced = patch.synced;
-      if (patch.baseContent !== undefined) updates.baseContent = patch.baseContent;
-      await db.scratchpad.update('scratchpad', updates);
+      const nextDoc: LocalScratchpadDoc = {
+        id: 'scratchpad',
+        document:
+          patch.content !== undefined
+            ? toDocument(fromDocument(patch.content))
+            : spRow?.document ?? { version: 1, items: [] },
+        lastModified:
+          patch.lastModified !== undefined
+            ? patch.lastModified
+            : spRow?.lastModified ?? Date.now(),
+        synced:
+          patch.synced !== undefined
+            ? patch.synced
+            : spRow?.synced ?? false,
+        baseContent:
+          patch.baseContent !== undefined
+            ? patch.baseContent
+            : spRow?.baseContent,
+      };
+      await db.scratchpad.put(nextDoc);
       return;
     }
 

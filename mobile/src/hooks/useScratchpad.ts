@@ -41,26 +41,15 @@ export function useScratchpad(
 ): UseScratchpadReturn {
   const [items, setItems] = useState<ScratchpadItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (syncTimerRef.current) clearTimeout(syncTimerRef.current);
-    };
-  }, []);
-
-  const triggerDebouncedSync = useCallback(() => {
-    if (syncTimerRef.current) clearTimeout(syncTimerRef.current);
-    syncTimerRef.current = setTimeout(() => {
-      onSyncTrigger?.();
-    }, 1000);
-  }, [onSyncTrigger]);
+  const isInitialLoadRef = useRef<boolean>(true);
 
   useEffect(() => {
     if (!isOpen) return;
 
     let isMounted = true;
-    setLoading(true);
+    if (isInitialLoadRef.current) {
+      setLoading(true);
+    }
 
     getScratchpadDoc()
       .then((doc) => {
@@ -74,6 +63,7 @@ export function useScratchpad(
       .finally(() => {
         if (isMounted) {
           setLoading(false);
+          isInitialLoadRef.current = false;
         }
       });
 
@@ -85,10 +75,10 @@ export function useScratchpad(
   const saveAndSync = useCallback(
     (newItems: ScratchpadItem[]) => {
       saveScratchpadDoc(toDocument(newItems))
-        .then(() => triggerDebouncedSync())
+        .then(() => onSyncTrigger?.())
         .catch((err) => console.error('Failed to save mobile scratchpad:', err));
     },
-    [triggerDebouncedSync]
+    [onSyncTrigger]
   );
 
   const toggleItemWithChildren = useCallback((id: string, checked?: boolean) => {

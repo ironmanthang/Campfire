@@ -482,3 +482,44 @@ test('Scratchpad Conflict on Sync: surfaces ambiguous conflict without corruptin
   expect(localSaved).not.toContain('<<<<<<<');
   expect(() => JSON.parse(localSaved!)).not.toThrow();
 });
+
+test('Scratchpad resolved conflict sync: uploading local after user conflict resolution where base matches remote', async () => {
+  const localJson = JSON.stringify({
+    version: 1,
+    items: [
+      { id: '1', text: 'Local Task Kept', isChecked: false, children: [], createdAt: 1000, updatedAt: 2000 },
+    ],
+  }, null, 2);
+
+  const remoteJson = JSON.stringify({
+    version: 1,
+    items: [
+      { id: '1', text: 'Remote Task Discarded', isChecked: false, children: [], createdAt: 1000, updatedAt: 2000 },
+    ],
+  }, null, 2);
+
+  // When conflict was resolved as 'local' (or 'both'), the sync base was set to remoteJson
+  store.__setEntry({ date: 'scratchpad', content: localJson, lastModified: 2000, synced: false });
+  store.__setBase('scratchpad', remoteJson);
+
+  drive.__setFile('scratchpad.md', {
+    id: 'drive-scratchpad.md',
+    name: 'scratchpad.md',
+    content: remoteJson,
+    modifiedTime: new Date(2000).toISOString(),
+  });
+
+  const result = await runSync(store, drive, logger, { conflictLabel: 'Desktop' }, mockProgressCallback);
+
+  // Should successfully upload local without surfacing another conflict
+  expect(result.conflictedDates).toEqual([]);
+  expect(result.scratchpadConflict).toBeNull();
+
+  // Cloud should now have local content
+  const remoteSaved = drive.__getFileByName('scratchpad.md')?.content;
+  expect(remoteSaved).toBe(localJson);
+
+  // Sync base should be updated to local content
+  expect(await store.readSyncBase('scratchpad')).toBe(localJson);
+});
+

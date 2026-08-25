@@ -201,7 +201,7 @@ export async function resolveScratchpadConflict(
     document: localDoc,
     lastModified: Date.now(),
     synced: false,
-    baseContent: existing?.baseContent,
+    baseContent: remoteContent,
   });
   return localDoc;
 }

@@ -72,6 +72,8 @@ function App() {
     pendingScratchpadConflict,
     setPendingScratchpadConflict,
     syncRefreshKey,
+    triggerSyncRefresh,
+    triggerDebouncedSync,
     toastMessage,
     setToastMessage,
     checkAuthStatus,
@@ -215,18 +217,9 @@ function App() {
       {activeMainView === 'scratchpad' ? (
         <ScratchpadView
           refreshKey={syncRefreshKey}
-          onSyncTrigger={() => {
-            const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';
-            if (autoSync && isLoggedIn) {
-              handleSync();
-            }
-          }}
+          onSyncTrigger={triggerDebouncedSync}
           onBack={() => {
             setActiveMainView('journal');
-            const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';
-            if (autoSync && isLoggedIn) {
-              handleSync();
-            }
           }}
         />
       ) : activeDate && !editorLoading ? (
@@ -342,6 +335,7 @@ function App() {
             setPendingScratchpadConflict(null);
             const { resolveScratchpadConflict } = await import('./services/db');
             await resolveScratchpadConflict(choice, conflict.remote);
+            triggerSyncRefresh();
             const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';
             if (autoSync && isLoggedIn) {
               handleSync();

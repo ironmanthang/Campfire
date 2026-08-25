@@ -36,31 +36,18 @@ export interface UseScratchpadReturn {
 }
 
 export function useScratchpad(isOpen: boolean = true): UseScratchpadReturn {
-  const { config, handleSync, isDriveConnected, journalRefreshKey } = useAppStore();
+  const { config, journalRefreshKey, triggerDebouncedSync } = useAppStore();
   const [items, setItems] = useState<ScratchpadItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (syncTimerRef.current) clearTimeout(syncTimerRef.current);
-    };
-  }, []);
-
-  const triggerDebouncedSync = useCallback(() => {
-    if (syncTimerRef.current) clearTimeout(syncTimerRef.current);
-    syncTimerRef.current = setTimeout(() => {
-      if (config.google_drive_auto_sync && config.google_drive_client_id && isDriveConnected) {
-        handleSync().catch(console.error);
-      }
-    }, 1000);
-  }, [config.google_drive_auto_sync, config.google_drive_client_id, isDriveConnected, handleSync]);
+  const isInitialLoadRef = useRef<boolean>(true);
 
   useEffect(() => {
     if (!isOpen || !config.journal_dir) return;
 
     let isMounted = true;
-    setLoading(true);
+    if (isInitialLoadRef.current) {
+      setLoading(true);
+    }
 
     readScratchpadDoc(config.journal_dir)
       .then((doc) => {
@@ -74,6 +61,7 @@ export function useScratchpad(isOpen: boolean = true): UseScratchpadReturn {
       .finally(() => {
         if (isMounted) {
           setLoading(false);
+          isInitialLoadRef.current = false;
         }
       });
 

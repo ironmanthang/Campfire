@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   getStoredAuthState,
@@ -161,6 +161,19 @@ export function useGoogleSync({
     }
   };
 
+  const debouncedSyncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const triggerDebouncedSync = useCallback((delayMs: number = 1000) => {
+    if (debouncedSyncTimerRef.current) clearTimeout(debouncedSyncTimerRef.current);
+    debouncedSyncTimerRef.current = setTimeout(() => {
+      const auth = getStoredAuthState();
+      const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';
+      if (autoSync && (auth.accessToken || auth.sessionId)) {
+        handleSync();
+      }
+    }, delayMs);
+  }, []);
+
   return {
     isLoggedIn,
     setIsLoggedIn,
@@ -173,6 +186,8 @@ export function useGoogleSync({
     pendingScratchpadConflict,
     setPendingScratchpadConflict,
     syncRefreshKey,
+    triggerSyncRefresh: () => setSyncRefreshKey((prev) => prev + 1),
+    triggerDebouncedSync,
     checkAuthStatus,
     handleSync
   };

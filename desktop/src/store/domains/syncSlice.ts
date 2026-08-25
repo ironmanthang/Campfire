@@ -18,6 +18,7 @@ export interface SyncSlice {
 
   checkDriveStatus: () => Promise<void>;
   handleSync: (isManual?: boolean, isStartupSync?: boolean) => Promise<void>;
+  triggerDebouncedSync: (delayMs?: number) => void;
   resolveScratchpadConflict: (choice: "local" | "remote" | "both") => Promise<void>;
   startDriveAuth: (clientId: string) => Promise<void>;
   disconnectDrive: () => Promise<void>;
@@ -25,6 +26,8 @@ export interface SyncSlice {
   restoreJournalBackup: (dirPath: string, timestamp: number) => Promise<void>;
   setSyncResultDates: (dates: string[] | null) => void;
 }
+
+let debouncedSyncTimer: ReturnType<typeof setTimeout> | null = null;
 
 export const createSyncSlice: StateCreator<
   AppState,
@@ -41,6 +44,16 @@ export const createSyncSlice: StateCreator<
   initialSyncInProgress: false,
 
   setSyncResultDates: (dates) => set({ syncResultDates: dates }),
+
+  triggerDebouncedSync: (delayMs = 1000) => {
+    if (debouncedSyncTimer) clearTimeout(debouncedSyncTimer);
+    debouncedSyncTimer = setTimeout(() => {
+      const { config, isDriveConnected } = get();
+      if (config.google_drive_auto_sync && config.google_drive_client_id && isDriveConnected) {
+        get().handleSync().catch(console.error);
+      }
+    }, delayMs);
+  },
 
   checkDriveStatus: async () => {
     try {
@@ -70,8 +83,17 @@ export const createSyncSlice: StateCreator<
         await writeScratchpadDoc(config.journal_dir, doc);
       }
 
+      // Record the remote content as the common sync base so the sync engine
+      // knows remote was the resolution baseline. If choice was 'local' or 'both',
+      // the engine will see local != base and base == remote, uploading local to cloud cleanly.
+      await invoke("write_sync_base", {
+        dirPath: config.journal_dir,
+        date: "scratchpad",
+        content: remote,
+      });
+
       get().triggerJournalRefresh();
-      if (config.google_drive_auto_sync) {
+      if (config.google_drive_auto_sync && get().isDriveConnected) {
         get().handleSync().catch(console.error);
       }
     } catch (err) {
