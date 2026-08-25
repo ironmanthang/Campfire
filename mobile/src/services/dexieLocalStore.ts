@@ -2,21 +2,55 @@
 // store journal entries. The core sync engine sees only the LocalStore
 // interface, so it never imports dexie directly.
 
-import { db, type LocalJournalEntry } from './db';
-import type { LocalEntry, LocalStore } from '@campfire/core';
+import { db, type LocalJournalEntry, type LocalScratchpadDoc } from './db';
+import { type LocalEntry, type LocalStore, fromDocument, toDocument } from '@campfire/core';
 
 export class DexieLocalStore implements LocalStore {
   async list(): Promise<LocalEntry[]> {
     const rows = await db.entries.orderBy('date').reverse().toArray();
-    return rows.map(toCore);
+    const entries = rows.map(toCore);
+
+    const spRow = await db.scratchpad.get('scratchpad');
+    if (spRow) {
+      entries.push({
+        date: 'scratchpad',
+        content: JSON.stringify(spRow.document, null, 2),
+        lastModified: spRow.lastModified,
+        synced: spRow.synced,
+        baseContent: spRow.baseContent,
+      });
+    }
+    return entries;
   }
 
   async get(date: string): Promise<LocalEntry | undefined> {
+    if (date === 'scratchpad') {
+      const spRow = await db.scratchpad.get('scratchpad');
+      if (!spRow) return undefined;
+      return {
+        date: 'scratchpad',
+        content: JSON.stringify(spRow.document, null, 2),
+        lastModified: spRow.lastModified,
+        synced: spRow.synced,
+        baseContent: spRow.baseContent,
+      };
+    }
     const row = await db.entries.get(date);
     return row ? toCore(row) : undefined;
   }
 
   async put(entry: LocalEntry): Promise<void> {
+    if (entry.date === 'scratchpad') {
+      const items = fromDocument(entry.content);
+      await db.scratchpad.put({
+        id: 'scratchpad',
+        document: toDocument(items),
+        lastModified: entry.lastModified,
+        synced: entry.synced,
+        baseContent: entry.baseContent,
+      });
+      return;
+    }
     await db.entries.put({
       date: entry.date,
       content: entry.content,
@@ -27,6 +61,32 @@ export class DexieLocalStore implements LocalStore {
   }
 
   async update(date: string, patch: Partial<LocalEntry>): Promise<void> {
+    if (date === 'scratchpad') {
+      const spRow = await db.scratchpad.get('scratchpad');
+      if (!spRow) {
+        if (patch.content !== undefined || patch.baseContent !== undefined) {
+          const items = patch.content !== undefined ? fromDocument(patch.content) : [];
+          await db.scratchpad.put({
+            id: 'scratchpad',
+            document: toDocument(items),
+            lastModified: patch.lastModified ?? Date.now(),
+            synced: patch.synced ?? false,
+            baseContent: patch.baseContent,
+          });
+        }
+        return;
+      }
+      const updates: Partial<LocalScratchpadDoc> = {};
+      if (patch.content !== undefined) {
+        updates.document = toDocument(fromDocument(patch.content));
+      }
+      if (patch.lastModified !== undefined) updates.lastModified = patch.lastModified;
+      if (patch.synced !== undefined) updates.synced = patch.synced;
+      if (patch.baseContent !== undefined) updates.baseContent = patch.baseContent;
+      await db.scratchpad.update('scratchpad', updates);
+      return;
+    }
+
     const existing = await db.entries.get(date);
     if (!existing) return;
     const updates: Partial<LocalJournalEntry> = {};
@@ -38,6 +98,10 @@ export class DexieLocalStore implements LocalStore {
   }
 
   async delete(date: string): Promise<void> {
+    if (date === 'scratchpad') {
+      await db.scratchpad.delete('scratchpad');
+      return;
+    }
     await db.entries.delete(date);
   }
 
@@ -46,6 +110,10 @@ export class DexieLocalStore implements LocalStore {
   // readSyncBase / writeSyncBase / deleteSyncBase uniformly, so the
   // desktop-vs-mobile storage difference is hidden behind this interface.
   async readSyncBase(date: string): Promise<string> {
+    if (date === 'scratchpad') {
+      const spRow = await db.scratchpad.get('scratchpad');
+      return spRow?.baseContent ?? '';
+    }
     const row = await db.entries.get(date);
     return row?.baseContent ?? '';
   }

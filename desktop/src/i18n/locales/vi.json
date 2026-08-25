@@ -1003,5 +1003,15 @@
     "clearCompletedConfirmTitle": "Xóa những mục đã hoàn thành",
     "clearCompletedConfirmMessage": "Bạn có chắc chắn muốn xóa vĩnh viễn toàn bộ các nội dung đã hoàn thành? Hành động này không thể hoàn tác.",
     "clearConfirmButton": "Dọn dẹp"
+  },
+  "scratchpadConflict": {
+    "title": "Xung đột đồng bộ Scratchpad",
+    "description": "Scratchpad của bạn đã được chỉnh sửa trên cả thiết bị này và Google Drive cùng lúc. Hãy chọn phiên bản bạn muốn giữ:",
+    "keepLocal": "Giữ bản trên máy",
+    "keepLocalDesc": "Ghi đè bản đám mây bằng bản trên thiết bị này",
+    "keepRemote": "Giữ bản đám mây",
+    "keepRemoteDesc": "Ghi đè bản trên thiết bị này bằng bản đám mây",
+    "keepBoth": "Giữ cả hai (Khuyên dùng)",
+    "keepBothDesc": "Gộp tất cả ghi chú từ cả hai phiên bản"
   }
 }

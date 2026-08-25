@@ -384,3 +384,101 @@ test('Logger: messages are captured for inspection', async () => {
   expect(joined).toContain('Starting sync');
   expect(joined).toContain('Uploaded successfully');
 });
+
+test('Scratchpad 3-Way Auto-Merge on Sync: merges local and remote changes cleanly', async () => {
+  const baseJson = JSON.stringify({
+    version: 1,
+    items: [
+      { id: '1', text: 'Base Task', isChecked: false, children: [], createdAt: 1000, updatedAt: 1000 },
+    ],
+  }, null, 2);
+
+  const localJson = JSON.stringify({
+    version: 1,
+    items: [
+      { id: '1', text: 'Base Task', isChecked: false, children: [], createdAt: 1000, updatedAt: 1000 },
+      { id: 'loc', text: 'Local Task', isChecked: false, children: [], createdAt: 2000, updatedAt: 2000 },
+    ],
+  }, null, 2);
+
+  const remoteJson = JSON.stringify({
+    version: 1,
+    items: [
+      { id: '1', text: 'Base Task', isChecked: false, children: [], createdAt: 1000, updatedAt: 1000 },
+      { id: 'rem', text: 'Remote Task', isChecked: false, children: [], createdAt: 2000, updatedAt: 2000 },
+    ],
+  }, null, 2);
+
+  store.__setEntry({ date: 'scratchpad', content: localJson, lastModified: 2000, synced: false });
+  store.__setBase('scratchpad', baseJson);
+
+  drive.__setFile('scratchpad.md', {
+    id: 'drive-scratchpad.md',
+    name: 'scratchpad.md',
+    content: remoteJson,
+    modifiedTime: new Date(2000).toISOString(),
+  });
+
+  const result = await runSync(store, drive, logger, { conflictLabel: 'Desktop' }, mockProgressCallback);
+
+  expect(result.conflictedDates).toEqual([]);
+  expect(result.scratchpadConflict).toBeNull();
+  expect(result.scratchpadModified).toBe(true);
+  expect(result.modifiedDates).toContain('scratchpad');
+
+  const localSaved = (await store.get('scratchpad'))?.content;
+  expect(localSaved).toBeDefined();
+  const parsed = JSON.parse(localSaved!);
+  expect(parsed.items).toHaveLength(3);
+  expect(parsed.items.map((i: any) => i.id)).toEqual(['1', 'loc', 'rem']);
+
+  // Cloud should also be updated with merged content
+  const remoteSaved = drive.__getFileByName('scratchpad.md')?.content;
+  expect(remoteSaved).toBe(localSaved);
+});
+
+test('Scratchpad Conflict on Sync: surfaces ambiguous conflict without corrupting local JSON', async () => {
+  const baseJson = JSON.stringify({
+    version: 1,
+    items: [
+      { id: '1', text: 'Base Task', isChecked: false, children: [], createdAt: 1000, updatedAt: 1000 },
+    ],
+  }, null, 2);
+
+  const localJson = JSON.stringify({
+    version: 1,
+    items: [
+      { id: '1', text: 'Local Task Text', isChecked: false, children: [], createdAt: 1000, updatedAt: 2000 },
+    ],
+  }, null, 2);
+
+  const remoteJson = JSON.stringify({
+    version: 1,
+    items: [
+      { id: '1', text: 'Remote Task Text', isChecked: false, children: [], createdAt: 1000, updatedAt: 2000 },
+    ],
+  }, null, 2);
+
+  store.__setEntry({ date: 'scratchpad', content: localJson, lastModified: 2000, synced: false });
+  store.__setBase('scratchpad', baseJson);
+
+  drive.__setFile('scratchpad.md', {
+    id: 'drive-scratchpad.md',
+    name: 'scratchpad.md',
+    content: remoteJson,
+    modifiedTime: new Date(2000).toISOString(),
+  });
+
+  const result = await runSync(store, drive, logger, { conflictLabel: 'Desktop' }, mockProgressCallback);
+
+  expect(result.conflictedDates).toEqual(['scratchpad']);
+  expect(result.scratchpadConflict).toEqual({
+    local: localJson,
+    remote: remoteJson,
+  });
+
+  // Local content should NOT have raw markdown conflict markers injected
+  const localSaved = (await store.get('scratchpad'))?.content;
+  expect(localSaved).not.toContain('<<<<<<<');
+  expect(() => JSON.parse(localSaved!)).not.toThrow();
+});

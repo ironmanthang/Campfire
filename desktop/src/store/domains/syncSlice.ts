@@ -13,10 +13,12 @@ export interface SyncSlice {
   syncPending: "none" | "auto" | "manual";
   syncResultDates: string[] | null;
   lastConflictedDates: string[];
+  pendingScratchpadConflict: { local: string; remote: string } | null;
   initialSyncInProgress: boolean;
 
   checkDriveStatus: () => Promise<void>;
   handleSync: (isManual?: boolean, isStartupSync?: boolean) => Promise<void>;
+  resolveScratchpadConflict: (choice: "local" | "remote" | "both") => Promise<void>;
   startDriveAuth: (clientId: string) => Promise<void>;
   disconnectDrive: () => Promise<void>;
   listJournalBackups: (dirPath: string) => Promise<number[]>;
@@ -35,6 +37,7 @@ export const createSyncSlice: StateCreator<
   syncPending: "none",
   syncResultDates: null,
   lastConflictedDates: [],
+  pendingScratchpadConflict: null,
   initialSyncInProgress: false,
 
   setSyncResultDates: (dates) => set({ syncResultDates: dates }),
@@ -45,6 +48,34 @@ export const createSyncSlice: StateCreator<
       set({ isDriveConnected: connected });
     } catch (err) {
       console.error(err);
+    }
+  },
+
+  resolveScratchpadConflict: async (choice) => {
+    const { config, pendingScratchpadConflict } = get();
+    if (!config.journal_dir || !pendingScratchpadConflict) return;
+    const { local, remote } = pendingScratchpadConflict;
+    set({ pendingScratchpadConflict: null });
+
+    try {
+      const { fromDocument, toDocument, mergeScratchpadKeepBoth } = await import("@campfire/core");
+      const { writeScratchpadDoc } = await import("../../services/scratchpad");
+
+      if (choice === "remote") {
+        const doc = toDocument(fromDocument(remote));
+        await writeScratchpadDoc(config.journal_dir, doc);
+      } else if (choice === "both") {
+        const mergedJson = mergeScratchpadKeepBoth(local, remote);
+        const doc = toDocument(fromDocument(mergedJson));
+        await writeScratchpadDoc(config.journal_dir, doc);
+      }
+
+      get().triggerJournalRefresh();
+      if (config.google_drive_auto_sync) {
+        get().handleSync().catch(console.error);
+      }
+    } catch (err) {
+      console.error("Failed to resolve scratchpad conflict:", err);
     }
   },
 
@@ -80,12 +111,16 @@ export const createSyncSlice: StateCreator<
     try {
       await invoke("create_journal_backup", { dirPath: config.journal_dir });
       const { runSync } = await import("../../services/sync/sync");
-      const { modifiedDates, conflictedDates } = await runSync(config.journal_dir, (progress) => {
+      const { modifiedDates, conflictedDates, scratchpadConflict } = await runSync(config.journal_dir, (progress) => {
         set({ syncProgress: progress });
       });
 
       const hasDownloads = modifiedDates && modifiedDates.length > 0;
       const shouldShowModal = hasDownloads && (isStartupSync || isManual);
+
+      if (scratchpadConflict) {
+        set({ pendingScratchpadConflict: scratchpadConflict });
+      }
 
       if (conflictedDates && conflictedDates.length > 0) {
         const prev = get().lastConflictedDates;

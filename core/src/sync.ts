@@ -5,6 +5,7 @@
 // same engine runs on the Tauri desktop and the browser-based mobile PWA.
 
 import { buildConflictBlock, hasConflictMarkers } from './merge';
+import { mergeScratchpadDocs } from './scratchpad/logic';
 import type { LocalEntry, LocalStore } from './storage';
 import type { DriveAdapter, DriveFileInfo } from './drive';
 import type { SyncLogger } from './logger';
@@ -19,6 +20,8 @@ function parseDriveTime(timeStr: string): number {
 export interface RunSyncResult {
   modifiedDates: string[];
   conflictedDates: string[];
+  scratchpadModified?: boolean;
+  scratchpadConflict?: { local: string; remote: string } | null;
 }
 
 export async function runSync(
@@ -30,6 +33,8 @@ export async function runSync(
 ): Promise<RunSyncResult> {
   const downloadedDates: string[] = []; // cloud → local (user must be notified)
   const conflictedDates: string[] = [];
+  let scratchpadModified = false;
+  let scratchpadConflict: { local: string; remote: string } | null = null;
   logger.log(`[Sync] Starting sync (conflict label: ${config.conflictLabel})`);
 
   try {
@@ -140,7 +145,7 @@ export async function runSync(
       // either the local or the cloud while in this state would risk
       // destroying the user's data. We still re-add the date to
       // conflictedDates so the user is reminded to resolve it.
-      if (local && hasConflictMarkers(local.content)) {
+      if (date !== 'scratchpad' && local && hasConflictMarkers(local.content)) {
         logger.log(`[Sync] Entry ${date}: Local is in conflict. Skipping sync; user must resolve.`);
         conflictedDates.push(date);
         continue;
@@ -201,6 +206,9 @@ export async function runSync(
           baseContent: content,
         });
         downloadedDates.push(date);
+        if (date === 'scratchpad') {
+          scratchpadModified = true;
+        }
         logger.log(`[Sync] Entry ${date}: Local file written successfully.`);
       }
       else if (local && remote) {
@@ -270,6 +278,9 @@ export async function runSync(
               baseContent: remoteContent,
             });
             downloadedDates.push(date);
+            if (date === 'scratchpad') {
+              scratchpadModified = true;
+            }
           } else if (remoteContent === baseContent) {
             // Cloud matches the recorded base, but local differs.
             // Only the local was edited (the base reflects an older sync
@@ -283,28 +294,54 @@ export async function runSync(
             // local→cloud upload: do NOT push to downloadedDates (no modal needed)
           } else {
             // Both local and cloud differ from the base AND from each other.
-            // We cannot tell which side is "right", so we surface the
-            // conflict to the user instead of silently picking a side.
-            // Write a conflict block to the local file (so the user sees
-            // both versions in the editor) and leave the cloud untouched.
-            logger.log(`[Sync] Entry ${date}: CONFLICT - local and cloud disagree. Writing conflict block to local.`);
-            const localLabel = `${config.conflictLabel} - ${new Date(localTime).toLocaleString()}`;
-            const remoteLabel = `Cloud - ${new Date(remoteTime).toLocaleString()}`;
-            const conflictBlock = buildConflictBlock(local.content, remoteContent, localLabel, remoteLabel);
-            await store.put({
-              date,
-              content: conflictBlock,
-              lastModified: remoteTime,
-              synced: false,
-              baseContent: baseContent, // keep base intact
-            });
-            // Note: we do NOT call updateFileContent here. The cloud's
-            // existing content is left intact so the user can choose
-            // either side. We do NOT call write_sync_base either, so the
-            // base still reflects the last agreed state and a future sync
-            // can do a real 3-way merge after the user resolves.
-            conflictedDates.push(date);
-            logger.log(`[Sync] Entry ${date}: Conflict written. Cloud preserved.`);
+            if (date === 'scratchpad') {
+              logger.log(`[Sync] Scratchpad CONFLICT: attempting 3-way auto-merge...`);
+              const mergeResult = mergeScratchpadDocs(baseContent, local.content, remoteContent);
+              if (!mergeResult.hasConflict) {
+                logger.log(`[Sync] Scratchpad auto-merge SUCCEEDED. Writing merged content to local & cloud.`);
+                const updateResult = await drive.updateFileContent(remote.id, mergeResult.merged);
+                const newRemoteTime = parseDriveTime(updateResult.modifiedTime);
+                await store.put({
+                  date,
+                  content: mergeResult.merged,
+                  lastModified: newRemoteTime,
+                  synced: true,
+                  baseContent: mergeResult.merged,
+                });
+                downloadedDates.push(date);
+                scratchpadModified = true;
+              } else {
+                logger.log(`[Sync] Scratchpad auto-merge CONFLICT. Surfacing conflict to user.`);
+                scratchpadConflict = {
+                  local: local.content,
+                  remote: remoteContent,
+                };
+                conflictedDates.push(date);
+              }
+            } else {
+              // We cannot tell which side is "right", so we surface the
+              // conflict to the user instead of silently picking a side.
+              // Write a conflict block to the local file (so the user sees
+              // both versions in the editor) and leave the cloud untouched.
+              logger.log(`[Sync] Entry ${date}: CONFLICT - local and cloud disagree. Writing conflict block to local.`);
+              const localLabel = `${config.conflictLabel} - ${new Date(localTime).toLocaleString()}`;
+              const remoteLabel = `Cloud - ${new Date(remoteTime).toLocaleString()}`;
+              const conflictBlock = buildConflictBlock(local.content, remoteContent, localLabel, remoteLabel);
+              await store.put({
+                date,
+                content: conflictBlock,
+                lastModified: remoteTime,
+                synced: false,
+                baseContent: baseContent, // keep base intact
+              });
+              // Note: we do NOT call updateFileContent here. The cloud's
+              // existing content is left intact so the user can choose
+              // either side. We do NOT call write_sync_base either, so the
+              // base still reflects the last agreed state and a future sync
+              // can do a real 3-way merge after the user resolves.
+              conflictedDates.push(date);
+              logger.log(`[Sync] Entry ${date}: Conflict written. Cloud preserved.`);
+            }
           }
         }
       }
@@ -330,7 +367,12 @@ export async function runSync(
     });
 
     logger.log(`[Sync] Sync completed. Downloaded dates: [${downloadedDates.join(', ')}], Conflicted dates: [${conflictedDates.join(', ')}]`);
-    return { modifiedDates: downloadedDates, conflictedDates };
+    return {
+      modifiedDates: downloadedDates,
+      conflictedDates,
+      scratchpadModified,
+      scratchpadConflict,
+    };
   } catch (error: any) {
     const message = error?.message ?? 'An error occurred during synchronization.';
     logger.log(`[Sync] Sync failed: ${message}`);

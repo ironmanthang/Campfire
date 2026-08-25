@@ -15,6 +15,7 @@ export interface LocalScratchpadDoc {
   document: ScratchpadDocument;
   lastModified: number;
   synced: boolean;
+  baseContent?: string;
 }
 
 export class JournalDatabase extends Dexie {
@@ -71,11 +72,13 @@ export async function getScratchpadDoc(): Promise<ScratchpadDocument> {
 }
 
 export async function saveScratchpadDoc(doc: ScratchpadDocument): Promise<void> {
+  const existing = await db.scratchpad.get('scratchpad');
   await db.scratchpad.put({
     id: 'scratchpad',
     document: doc,
     lastModified: Date.now(),
     synced: false,
+    baseContent: existing?.baseContent,
   });
 }
 
@@ -156,4 +159,49 @@ export async function resolveLocalConflict(date: string, choice: 'local' | 'remo
     baseContent: parsed.remoteContent
   });
   return resolvedVal;
+}
+
+export async function resolveScratchpadConflict(
+  choice: 'local' | 'remote' | 'both',
+  remoteContent: string
+): Promise<ScratchpadDocument> {
+  const existing = await db.scratchpad.get('scratchpad');
+  const localDoc = existing?.document || { version: 1, items: [] };
+  const { fromDocument, toDocument, mergeScratchpadKeepBoth } = await import('@campfire/core');
+
+  if (choice === 'remote') {
+    const remoteDoc = toDocument(fromDocument(remoteContent));
+    await db.scratchpad.put({
+      id: 'scratchpad',
+      document: remoteDoc,
+      lastModified: Date.now(),
+      synced: true,
+      baseContent: remoteContent,
+    });
+    return remoteDoc;
+  }
+
+  if (choice === 'both') {
+    const localJson = JSON.stringify(localDoc, null, 2);
+    const mergedJson = mergeScratchpadKeepBoth(localJson, remoteContent);
+    const mergedDoc = toDocument(fromDocument(mergedJson));
+    await db.scratchpad.put({
+      id: 'scratchpad',
+      document: mergedDoc,
+      lastModified: Date.now(),
+      synced: false,
+      baseContent: remoteContent,
+    });
+    return mergedDoc;
+  }
+
+  // choice === 'local'
+  await db.scratchpad.put({
+    id: 'scratchpad',
+    document: localDoc,
+    lastModified: Date.now(),
+    synced: false,
+    baseContent: existing?.baseContent,
+  });
+  return localDoc;
 }

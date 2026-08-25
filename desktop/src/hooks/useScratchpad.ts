@@ -36,7 +36,7 @@ export interface UseScratchpadReturn {
 }
 
 export function useScratchpad(isOpen: boolean = true): UseScratchpadReturn {
-  const { config, handleSync, isDriveConnected } = useAppStore();
+  const { config, handleSync, isDriveConnected, journalRefreshKey } = useAppStore();
   const [items, setItems] = useState<ScratchpadItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -80,7 +80,7 @@ export function useScratchpad(isOpen: boolean = true): UseScratchpadReturn {
     return () => {
       isMounted = false;
     };
-  }, [isOpen, config.journal_dir]);
+  }, [isOpen, config.journal_dir, journalRefreshKey]);
 
   const saveAndSync = useCallback(
     (newItems: ScratchpadItem[]) => {

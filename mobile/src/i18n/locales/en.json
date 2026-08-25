@@ -214,5 +214,15 @@
     "deleteGroupConfirmMessage": "Are you sure you want to permanently delete the group \"{{name}}\" and all of its tasks? This action cannot be undone.",
     "deleteTaskConfirmTitle": "Delete Note",
     "deleteTaskConfirmMessage": "Are you sure you want to permanently delete \"{{name}}\"? This action cannot be undone."
+  },
+  "scratchpadConflict": {
+    "title": "Scratchpad Sync Conflict",
+    "description": "Your scratchpad was modified on both this device and Google Drive at the exact same time. Choose which version you want to keep:",
+    "keepLocal": "Keep Local Version",
+    "keepLocalDesc": "Overwrite cloud with this device",
+    "keepRemote": "Keep Cloud Version",
+    "keepRemoteDesc": "Overwrite this device with cloud",
+    "keepBoth": "Keep Both (Recommended)",
+    "keepBothDesc": "Combine notes from both versions"
   }
 }

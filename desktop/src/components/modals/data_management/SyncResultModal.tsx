@@ -72,25 +72,32 @@ export function SyncResultModal({ updatedDates, onClose }: SyncResultModalProps)
             {t("syncResultModal.subtitle")}
           </p>
           <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1">
-            {updatedDates.map((date) => (
-              <div 
-                key={date} 
-                className="flex items-center justify-between text-xs font-semibold pl-3 pr-2 py-1.5 bg-bg-app border border-border-brand/40 rounded-lg text-text-primary"
-              >
-                <span>{formatToDDMMYY(date)} ({date})</span>
-                <button
-                  onClick={() => {
-                    setCurrentDate(date);
-                    navigateToView("journal");
-                    onClose();
-                  }}
-                  className="p-1 rounded-md hover:bg-bg-surface border border-transparent hover:border-border-brand/40 text-text-secondary hover:text-accent-brand transition-all duration-150 cursor-pointer shrink-0"
-                  title={t("syncResultModal.openEntryTooltip")}
+            {updatedDates.map((date) => {
+              const isScratchpad = date === 'scratchpad';
+              return (
+                <div 
+                  key={date} 
+                  className="flex items-center justify-between text-xs font-semibold pl-3 pr-2 py-1.5 bg-bg-app border border-border-brand/40 rounded-lg text-text-primary"
                 >
-                  <BookOpen className="h-4 w-4" />
-                </button>
-              </div>
-            ))}
+                  <span>{isScratchpad ? t("scratchpad.title", "Scratchpad & Notes") : `${formatToDDMMYY(date)} (${date})`}</span>
+                  <button
+                    onClick={() => {
+                      if (isScratchpad) {
+                        navigateToView("scratchpad");
+                      } else {
+                        setCurrentDate(date);
+                        navigateToView("journal");
+                      }
+                      onClose();
+                    }}
+                    className="p-1 rounded-md hover:bg-bg-surface border border-transparent hover:border-border-brand/40 text-text-secondary hover:text-accent-brand transition-all duration-150 cursor-pointer shrink-0"
+                    title={isScratchpad ? t("scratchpad.title", "Scratchpad & Notes") : t("syncResultModal.openEntryTooltip")}
+                  >
+                    <BookOpen className="h-4 w-4" />
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
 

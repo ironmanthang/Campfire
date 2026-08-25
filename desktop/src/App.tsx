@@ -12,6 +12,7 @@ import { HelpModal, FullscreenHoverExit } from "./components/common";
 import { ScratchpadView } from "./views/ScratchpadView";
 import { ToolExecutorTestPanel } from "./services/toolExecutorPanel";
 import { SyncResultModal } from "./components/modals/data_management/SyncResultModal";
+import { ScratchpadConflictModal } from "./components/modals/data_management/ScratchpadConflictModal";
 import { SettingsView } from "./views/SettingsView";
 import { JournalEditorView } from "./views/journal/JournalEditorView";
 import { TimelineView } from "./views/timeline";
@@ -63,6 +64,8 @@ function App() {
     showNotification,
     syncResultDates,
     setSyncResultDates,
+    pendingScratchpadConflict,
+    resolveScratchpadConflict,
     importReport,
     setImportReport,
     triggerJournalRefresh,
@@ -417,6 +420,14 @@ function App() {
           report={importReport}
           onClose={() => {
             setImportReport(null);
+          }}
+        />
+      )}
+
+      {pendingScratchpadConflict !== null && (
+        <ScratchpadConflictModal
+          onResolve={(choice) => {
+            resolveScratchpadConflict(choice);
           }}
         />
       )}

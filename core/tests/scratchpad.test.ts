@@ -16,6 +16,8 @@ import {
   togglePinItem,
   moveItem,
   moveChildItem,
+  mergeScratchpadDocs,
+  mergeScratchpadKeepBoth,
   type ScratchpadItem,
 } from '../src';
 
@@ -569,6 +571,212 @@ describe('Scratchpad Core Logic', () => {
       // Boundary: last child cannot move down
       const c3Down = moveChildItem(mixedItems, 'u2', 'c3', 'down');
       expect(c3Down.find((i) => i.id === 'u2')!.children.map((c) => c.id)).toEqual(['c1', 'c2', 'c3']);
+    });
+  });
+
+  describe('3-Way Scratchpad Document Merge (mergeScratchpadDocs & mergeScratchpadKeepBoth)', () => {
+    it('merges when only local modified an item', () => {
+      const base = toDocument([
+        { id: '1', text: 'Base task', isChecked: false, children: [], createdAt: 1000, updatedAt: 1000 },
+      ]);
+      const local = toDocument([
+        { id: '1', text: 'Local updated task', isChecked: true, children: [], createdAt: 1000, updatedAt: 2000 },
+      ]);
+      const remote = toDocument([
+        { id: '1', text: 'Base task', isChecked: false, children: [], createdAt: 1000, updatedAt: 1000 },
+      ]);
+
+      const result = mergeScratchpadDocs(JSON.stringify(base), JSON.stringify(local), JSON.stringify(remote));
+      expect(result.hasConflict).toBe(false);
+
+      const items = fromDocument(result.merged);
+      expect(items).toHaveLength(1);
+      expect(items[0].text).toBe('Local updated task');
+      expect(items[0].isChecked).toBe(true);
+    });
+
+    it('merges when only remote modified an item', () => {
+      const base = toDocument([
+        { id: '1', text: 'Base task', isChecked: false, children: [], createdAt: 1000, updatedAt: 1000 },
+      ]);
+      const local = toDocument([
+        { id: '1', text: 'Base task', isChecked: false, children: [], createdAt: 1000, updatedAt: 1000 },
+      ]);
+      const remote = toDocument([
+        { id: '1', text: 'Remote updated task', isChecked: true, children: [], createdAt: 1000, updatedAt: 2000 },
+      ]);
+
+      const result = mergeScratchpadDocs(JSON.stringify(base), JSON.stringify(local), JSON.stringify(remote));
+      expect(result.hasConflict).toBe(false);
+
+      const items = fromDocument(result.merged);
+      expect(items).toHaveLength(1);
+      expect(items[0].text).toBe('Remote updated task');
+      expect(items[0].isChecked).toBe(true);
+    });
+
+    it('merges independent additions from both local and remote', () => {
+      const base = toDocument([]);
+      const local = toDocument([
+        { id: 'loc-1', text: 'Local new note', isChecked: false, children: [], createdAt: 1000, updatedAt: 1000 },
+      ]);
+      const remote = toDocument([
+        { id: 'rem-1', text: 'Remote new note', isChecked: false, children: [], createdAt: 1000, updatedAt: 1000 },
+      ]);
+
+      const result = mergeScratchpadDocs(JSON.stringify(base), JSON.stringify(local), JSON.stringify(remote));
+      expect(result.hasConflict).toBe(false);
+
+      const items = fromDocument(result.merged);
+      expect(items).toHaveLength(2);
+      expect(items.map((i) => i.id)).toEqual(['loc-1', 'rem-1']);
+    });
+
+    it('honors deletions when one side deleted and the other side did not edit', () => {
+      const base = toDocument([
+        { id: '1', text: 'Task 1', isChecked: false, children: [], createdAt: 1000, updatedAt: 1000 },
+        { id: '2', text: 'Task 2', isChecked: false, children: [], createdAt: 1000, updatedAt: 1000 },
+      ]);
+      // Local deleted '1'
+      const local = toDocument([
+        { id: '2', text: 'Task 2', isChecked: false, children: [], createdAt: 1000, updatedAt: 1000 },
+      ]);
+      // Remote kept both untouched
+      const remote = toDocument([
+        { id: '1', text: 'Task 1', isChecked: false, children: [], createdAt: 1000, updatedAt: 1000 },
+        { id: '2', text: 'Task 2', isChecked: false, children: [], createdAt: 1000, updatedAt: 1000 },
+      ]);
+
+      const result = mergeScratchpadDocs(JSON.stringify(base), JSON.stringify(local), JSON.stringify(remote));
+      expect(result.hasConflict).toBe(false);
+
+      const items = fromDocument(result.merged);
+      expect(items).toHaveLength(1);
+      expect(items[0].id).toBe('2');
+    });
+
+    it('preserves remote edit if local deleted the item concurrently', () => {
+      const base = toDocument([
+        { id: '1', text: 'Task 1', isChecked: false, children: [], createdAt: 1000, updatedAt: 1000 },
+      ]);
+      // Local deleted '1'
+      const local = toDocument([]);
+      // Remote edited '1'
+      const remote = toDocument([
+        { id: '1', text: 'Task 1 (critical edit)', isChecked: true, children: [], createdAt: 1000, updatedAt: 2000 },
+      ]);
+
+      const result = mergeScratchpadDocs(JSON.stringify(base), JSON.stringify(local), JSON.stringify(remote));
+      const items = fromDocument(result.merged);
+      expect(items).toHaveLength(1);
+      expect(items[0].text).toBe('Task 1 (critical edit)');
+    });
+
+    it('merges hierarchical children inside groups concurrently', () => {
+      const base = toDocument([
+        {
+          id: 'group-1',
+          text: 'Project Group',
+          isChecked: false,
+          isGroup: true,
+          children: [
+            { id: 'c-base', text: 'Initial subtask', isChecked: false, children: [], createdAt: 1000, updatedAt: 1000 },
+          ],
+          createdAt: 1000,
+          updatedAt: 1000,
+        },
+      ]);
+      // Local added subtask-local
+      const local = toDocument([
+        {
+          id: 'group-1',
+          text: 'Project Group',
+          isChecked: false,
+          isGroup: true,
+          children: [
+            { id: 'c-base', text: 'Initial subtask', isChecked: false, children: [], createdAt: 1000, updatedAt: 1000 },
+            { id: 'c-loc', text: 'Subtask from Desktop', isChecked: false, children: [], createdAt: 2000, updatedAt: 2000 },
+          ],
+          createdAt: 1000,
+          updatedAt: 2000,
+        },
+      ]);
+      // Remote added subtask-remote
+      const remote = toDocument([
+        {
+          id: 'group-1',
+          text: 'Project Group',
+          isChecked: false,
+          isGroup: true,
+          children: [
+            { id: 'c-base', text: 'Initial subtask', isChecked: false, children: [], createdAt: 1000, updatedAt: 1000 },
+            { id: 'c-rem', text: 'Subtask from Mobile', isChecked: false, children: [], createdAt: 2000, updatedAt: 2000 },
+          ],
+          createdAt: 1000,
+          updatedAt: 2000,
+        },
+      ]);
+
+      const result = mergeScratchpadDocs(JSON.stringify(base), JSON.stringify(local), JSON.stringify(remote));
+      expect(result.hasConflict).toBe(false);
+
+      const items = fromDocument(result.merged);
+      expect(items).toHaveLength(1);
+      expect(items[0].id).toBe('group-1');
+      expect(items[0].children).toHaveLength(3);
+      expect(items[0].children.map((c) => c.id)).toEqual(['c-base', 'c-loc', 'c-rem']);
+    });
+
+    it('resolves conflicting edits on the same item by choosing newer updatedAt', () => {
+      const base = toDocument([
+        { id: '1', text: 'Original text', isChecked: false, children: [], createdAt: 1000, updatedAt: 1000 },
+      ]);
+      const local = toDocument([
+        { id: '1', text: 'Older local edit', isChecked: false, children: [], createdAt: 1000, updatedAt: 2000 },
+      ]);
+      const remote = toDocument([
+        { id: '1', text: 'Newer remote edit', isChecked: true, children: [], createdAt: 1000, updatedAt: 3000 },
+      ]);
+
+      const result = mergeScratchpadDocs(JSON.stringify(base), JSON.stringify(local), JSON.stringify(remote));
+      expect(result.hasConflict).toBe(false);
+
+      const items = fromDocument(result.merged);
+      expect(items[0].text).toBe('Newer remote edit');
+      expect(items[0].isChecked).toBe(true);
+    });
+
+    it('detects ambiguous conflict if both sides edit same item with identical timestamp and different text', () => {
+      const base = toDocument([
+        { id: '1', text: 'Original text', isChecked: false, children: [], createdAt: 1000, updatedAt: 1000 },
+      ]);
+      const local = toDocument([
+        { id: '1', text: 'Local edit version', isChecked: false, children: [], createdAt: 1000, updatedAt: 2000 },
+      ]);
+      const remote = toDocument([
+        { id: '1', text: 'Remote edit version', isChecked: false, children: [], createdAt: 1000, updatedAt: 2000 },
+      ]);
+
+      const result = mergeScratchpadDocs(JSON.stringify(base), JSON.stringify(local), JSON.stringify(remote));
+      expect(result.hasConflict).toBe(true);
+    });
+
+    it('merges both sides cleanly using mergeScratchpadKeepBoth', () => {
+      const local = toDocument([
+        { id: '1', text: 'Local version', isChecked: false, children: [], createdAt: 1000, updatedAt: 2000 },
+      ]);
+      const remote = toDocument([
+        { id: '1', text: 'Remote version', isChecked: false, children: [], createdAt: 1000, updatedAt: 2000 },
+      ]);
+
+      const mergedJson = mergeScratchpadKeepBoth(JSON.stringify(local), JSON.stringify(remote));
+      const items = fromDocument(mergedJson);
+
+      expect(items).toHaveLength(2);
+      expect(items[0].id).toBe('1');
+      expect(items[0].text).toBe('Local version');
+      expect(items[1].id).not.toBe('1'); // New ID generated for remote copy
+      expect(items[1].text).toBe('Remote version');
     });
   });
 });

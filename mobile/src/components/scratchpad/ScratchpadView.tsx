@@ -24,9 +24,11 @@ type DeleteConfirmState =
 
 interface ScratchpadViewProps {
   onBack: () => void;
+  onSyncTrigger?: () => void;
+  refreshKey?: number;
 }
 
-export const ScratchpadView: React.FC<ScratchpadViewProps> = ({ onBack }) => {
+export const ScratchpadView: React.FC<ScratchpadViewProps> = ({ onBack, onSyncTrigger, refreshKey }) => {
   const { t } = useTranslation();
   const [newTaskText, setNewTaskText] = useState('');
   const [isCreatingGroup, setIsCreatingGroup] = useState(false);
@@ -57,7 +59,7 @@ export const ScratchpadView: React.FC<ScratchpadViewProps> = ({ onBack }) => {
     isDuplicate,
     removeItem,
     clearCompleted,
-  } = useScratchpad(true);
+  } = useScratchpad(true, onSyncTrigger, refreshKey);
 
   useEffect(() => {
     quickInputRef.current?.focus();

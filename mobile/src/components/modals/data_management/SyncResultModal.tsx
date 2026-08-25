@@ -52,25 +52,28 @@ export const SyncResultModal: React.FC<SyncResultModalProps> = ({ updatedDates, 
             {t("sync.resultBody")}
           </p>
           <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1">
-            {updatedDates.map((date) => (
-              <div
-                key={date}
-                className="flex items-center justify-between text-xs font-semibold pl-3 pr-2 py-1.5 bg-bg-app border border-border-brand/40 rounded-lg text-text-primary"
-              >
-                <span>{formatDate(date)} ({date})</span>
-                {onSelectEntry && (
-                  <button
-                    onClick={() => {
-                      onSelectEntry(date);
-                    }}
-                    className="p-1 rounded-md hover:bg-bg-surface border border-border-brand/40 text-text-secondary hover:text-accent-brand transition-all duration-150 cursor-pointer shrink-0"
-                    title={t("sync.resultOpenEntry")}
-                  >
-                    <BookOpen className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-            ))}
+            {updatedDates.map((date) => {
+              const isScratchpad = date === 'scratchpad';
+              return (
+                <div
+                  key={date}
+                  className="flex items-center justify-between text-xs font-semibold pl-3 pr-2 py-1.5 bg-bg-app border border-border-brand/40 rounded-lg text-text-primary"
+                >
+                  <span>{isScratchpad ? t("scratchpad.title", "Scratchpad & Notes") : `${formatDate(date)} (${date})`}</span>
+                  {onSelectEntry && (
+                    <button
+                      onClick={() => {
+                        onSelectEntry(date);
+                      }}
+                      className="p-1 rounded-md hover:bg-bg-surface border border-border-brand/40 text-text-secondary hover:text-accent-brand transition-all duration-150 cursor-pointer shrink-0"
+                      title={isScratchpad ? t("scratchpad.title", "Scratchpad & Notes") : t("sync.resultOpenEntry")}
+                    >
+                      <BookOpen className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 

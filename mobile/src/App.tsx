@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Header } from './components/layout';
 import { JournalList, JournalEditor } from './components/journal';
 import { SettingsModal } from './components/settings';
-import { SyncResultModal, SupportModal } from './components/modals';
+import { SyncResultModal, SupportModal, ScratchpadConflictModal } from './components/modals';
 import { ScratchpadView } from './components/scratchpad/ScratchpadView';
 
 // Hooks
@@ -69,6 +69,9 @@ function App() {
     syncProgress,
     syncResultDates,
     setSyncResultDates,
+    pendingScratchpadConflict,
+    setPendingScratchpadConflict,
+    syncRefreshKey,
     toastMessage,
     setToastMessage,
     checkAuthStatus,
@@ -211,6 +214,13 @@ function App() {
 
       {activeMainView === 'scratchpad' ? (
         <ScratchpadView
+          refreshKey={syncRefreshKey}
+          onSyncTrigger={() => {
+            const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';
+            if (autoSync && isLoggedIn) {
+              handleSync();
+            }
+          }}
           onBack={() => {
             setActiveMainView('journal');
             const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';
@@ -315,8 +325,27 @@ function App() {
           updatedDates={syncResultDates} 
           onClose={() => setSyncResultDates(null)} 
           onSelectEntry={(date) => {
-            handleSelectEntry(date);
+            if (date === 'scratchpad') {
+              setActiveMainView('scratchpad');
+            } else {
+              handleSelectEntry(date);
+            }
             setSyncResultDates(null);
+          }}
+        />
+      )}
+
+      {pendingScratchpadConflict !== null && (
+        <ScratchpadConflictModal
+          onResolve={async (choice) => {
+            const conflict = pendingScratchpadConflict;
+            setPendingScratchpadConflict(null);
+            const { resolveScratchpadConflict } = await import('./services/db');
+            await resolveScratchpadConflict(choice, conflict.remote);
+            const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';
+            if (autoSync && isLoggedIn) {
+              handleSync();
+            }
           }}
         />
       )}

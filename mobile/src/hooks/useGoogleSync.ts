@@ -33,6 +33,8 @@ export function useGoogleSync({
   });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [syncResultDates, setSyncResultDates] = useState<string[] | null>(null);
+  const [pendingScratchpadConflict, setPendingScratchpadConflict] = useState<{ local: string; remote: string } | null>(null);
+  const [syncRefreshKey, setSyncRefreshKey] = useState<number>(0);
 
   const checkAuthStatus = async () => {
     // Check if coming back from Google OAuth redirect (?code=...)
@@ -109,7 +111,7 @@ export function useGoogleSync({
 
 
     try {
-      const { modifiedDates, conflictedDates } = await runSync((progress) => {
+      const { modifiedDates, conflictedDates, scratchpadConflict } = await runSync((progress) => {
         setSyncProgress(progress);
       });
       await loadEntries();
@@ -117,12 +119,19 @@ export function useGoogleSync({
       // Clear cache on sync to prevent stale cached entries
       clearCache();
 
+      // Bump refresh key so scratchpad and views reload
+      setSyncRefreshKey((prev) => prev + 1);
+
       // Reload current active editor content if it was updated during sync
       if (activeDate) {
         const entry = await getLocalEntry(activeDate);
         if (entry) {
           forceReloadEditor(activeDate, entry.content);
         }
+      }
+
+      if (scratchpadConflict) {
+        setPendingScratchpadConflict(scratchpadConflict);
       }
 
       if (conflictedDates && conflictedDates.length > 0) {
@@ -161,6 +170,9 @@ export function useGoogleSync({
     setToastMessage,
     syncResultDates,
     setSyncResultDates,
+    pendingScratchpadConflict,
+    setPendingScratchpadConflict,
+    syncRefreshKey,
     checkAuthStatus,
     handleSync
   };
