@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useCallback } from "react";
 import { MessageSquare, Loader2, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { DragHandles } from "../../components/common";
@@ -10,11 +10,15 @@ interface ChatMessageListProps {
   visible: boolean;
 }
 
+const SCROLL_BOTTOM_THRESHOLD_PX = 40;
+
 export function ChatMessageList({ visible }: ChatMessageListProps) {
   const { t } = useTranslation();
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const shouldScrollToBottomRef = useRef(false);
-  const userHasScrolledUpRef = useRef(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const isAtBottomRef = useRef<boolean>(true);
+  const prevMessageCountRef = useRef<number>(0);
+  const prevQueueCountRef = useRef<number>(0);
 
   const {
     chatMessages,
@@ -26,43 +30,67 @@ export function ChatMessageList({ visible }: ChatMessageListProps) {
     startDrag,
   } = useChatContext();
 
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = "auto") => {
+    const container = chatContainerRef.current;
+    if (container) {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior,
+      });
+    }
+  }, []);
+
   const handleChatScroll = () => {
     const container = chatContainerRef.current;
     if (container) {
-      userHasScrolledUpRef.current = !(container.scrollHeight - container.scrollTop - container.clientHeight < 15);
+      const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+      isAtBottomRef.current = distanceFromBottom <= SCROLL_BOTTOM_THRESHOLD_PX;
     }
   };
 
+  // Reset to bottom when visibility changes (switching to chat tab)
   useEffect(() => {
-    shouldScrollToBottomRef.current = true;
-    if (visible && chatContainerRef.current) {
-      chatContainerRef.current.scrollTo({ top: chatContainerRef.current.scrollHeight, behavior: "auto" });
-      userHasScrolledUpRef.current = false;
+    if (visible) {
+      isAtBottomRef.current = true;
+      scrollToBottom("auto");
     }
-  }, [visible]);
+  }, [visible, scrollToBottom]);
 
+  // When a new message is sent or added to queue, lock and snap to bottom
+  useLayoutEffect(() => {
+    const messageAdded = chatMessages.length > prevMessageCountRef.current;
+    const queueAdded = messageQueue.length > prevQueueCountRef.current;
+
+    if (messageAdded || queueAdded) {
+      isAtBottomRef.current = true;
+      scrollToBottom("auto");
+    }
+
+    prevMessageCountRef.current = chatMessages.length;
+    prevQueueCountRef.current = messageQueue.length;
+  }, [chatMessages.length, messageQueue.length, scrollToBottom]);
+
+  // Keep pinned to bottom on any DOM resize (streaming tokens, markdown reflows, tool open/close)
   useEffect(() => {
-    const container = chatContainerRef.current;
-    if (!container) return;
+    const content = contentRef.current;
+    if (!content) return;
 
-    if (shouldScrollToBottomRef.current) {
-      const scroll = () => {
-        container.scrollTo({
-          top: container.scrollHeight,
-          behavior: "smooth",
-        });
-      };
-      scroll();
-      setTimeout(scroll, 50);
-      shouldScrollToBottomRef.current = false;
-      userHasScrolledUpRef.current = false;
-    } else if (!userHasScrolledUpRef.current && isStreamingChat) {
-      container.scrollTo({
-        top: container.scrollHeight,
-        behavior: "auto",
-      });
+    const resizeObserver = new ResizeObserver(() => {
+      if (isAtBottomRef.current) {
+        scrollToBottom("auto");
+      }
+    });
+
+    resizeObserver.observe(content);
+    return () => resizeObserver.disconnect();
+  }, [scrollToBottom]);
+
+  // Also catch direct message streaming / state transitions if DOM resize hasn't fired yet
+  useEffect(() => {
+    if (isAtBottomRef.current && isStreamingChat) {
+      scrollToBottom("auto");
     }
-  }, [chatMessages, isStreamingChat]);
+  }, [chatMessages, isStreamingChat, scrollToBottom]);
 
   return (
     <div
@@ -71,6 +99,7 @@ export function ChatMessageList({ visible }: ChatMessageListProps) {
       onScroll={handleChatScroll}
     >
       <div
+        ref={contentRef}
         className="relative mx-auto w-full px-6 py-6 min-h-full flex flex-col"
         style={{ maxWidth: `${chatWidth}px` }}
       >
