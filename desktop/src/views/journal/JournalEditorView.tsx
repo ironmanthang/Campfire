@@ -12,9 +12,6 @@ export function JournalEditorView() {
     sidebarCollapsed,
     toggleSidebar,
     navigateToView,
-    isDriveConnected,
-    handleSync,
-    syncProgress,
     handleTagClick,
     textareaRef,
     overlayRef,
@@ -55,9 +52,6 @@ export function JournalEditorView() {
         saveStatus={saveStatus}
         isDirty={isDirty}
         config={config}
-        isDriveConnected={isDriveConnected}
-        syncProgress={syncProgress}
-        handleSync={handleSync}
         saveEntryImmediate={saveEntryImmediate}
         entryContent={entryContent}
         isLocked={isLocked}

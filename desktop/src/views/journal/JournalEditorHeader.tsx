@@ -5,10 +5,6 @@ import {
   Clock,
   Check,
   Save,
-  Cloud,
-  CloudOff,
-  RefreshCw,
-  AlertTriangle,
   Lock,
   Unlock,
 } from "lucide-react";
@@ -25,14 +21,6 @@ interface JournalEditorHeaderProps {
   saveStatus: "idle" | "saving";
   isDirty: boolean;
   config: any;
-  isDriveConnected: boolean;
-  syncProgress: {
-    status: "idle" | "authenticating" | "connecting" | "syncing" | "completed" | "error";
-    message: string;
-    filesProcessed: number;
-    totalFiles: number;
-  };
-  handleSync: (force?: boolean) => Promise<void>;
   saveEntryImmediate: (date: string, content: string) => Promise<void>;
   entryContent: string;
   isLocked?: boolean;
@@ -48,16 +36,12 @@ export function JournalEditorHeader({
   saveStatus,
   isDirty,
   config,
-  isDriveConnected,
-  syncProgress,
-  handleSync,
   saveEntryImmediate,
   entryContent,
   isLocked,
   toggleLock,
 }: JournalEditorHeaderProps) {
   const { t } = useTranslation();
-
 
   return (
     <header className="p-4 border-b border-border-brand flex items-center justify-between shrink-0 bg-bg-surface/50">
@@ -70,7 +54,7 @@ export function JournalEditorHeader({
         <button
           onClick={(e) => stepDate(-1, e.shiftKey)}
           onMouseDown={(e) => e.preventDefault()}
-          className="p-1.5 border border-border-brand rounded-lg hover:bg-bg-surface transition-colors"
+          className="p-1.5 border border-border-brand rounded-lg hover:bg-bg-surface transition-colors cursor-pointer"
           title={t("journalEditor.prevDayTooltip")}
         >
           <ChevronLeft className="h-4 w-4" />
@@ -79,104 +63,61 @@ export function JournalEditorHeader({
         <button
           onClick={(e) => stepDate(1, e.shiftKey)}
           onMouseDown={(e) => e.preventDefault()}
-          className="p-1.5 border border-border-brand rounded-lg hover:bg-bg-surface transition-colors"
+          className="p-1.5 border border-border-brand rounded-lg hover:bg-bg-surface transition-colors cursor-pointer"
           title={t("journalEditor.nextDayTooltip")}
         >
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
 
-      <div className="flex items-center gap-4">
-        {/* Cloud Sync Status */}
-        {config.google_drive_client_id && (
-          <button
-            onClick={() => {
-              if (syncProgress.status !== "syncing" && syncProgress.status !== "connecting") {
-                handleSync(true).catch(console.error);
-              }
-            }}
-            disabled={syncProgress.status === "syncing" || syncProgress.status === "connecting"}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border-brand hover:border-accent-brand bg-bg-surface/30 text-text-secondary hover:text-text-primary transition-colors disabled:opacity-85 text-xs font-semibold cursor-pointer active:scale-95"
-            title={
-              !isDriveConnected
-                ? t("journalEditor.driveNotConnected")
-                : syncProgress.status === "idle"
-                ? t("journalEditor.driveClickToSync")
-                : syncProgress.message
-            }
-          >
-            {!isDriveConnected ? (
-              <CloudOff className="h-3.5 w-3.5 text-text-secondary" />
-            ) : syncProgress.status === "syncing" || syncProgress.status === "connecting" ? (
-              <RefreshCw className="h-3.5 w-3.5 text-accent-brand animate-spin" />
-            ) : syncProgress.status === "error" ? (
-              <AlertTriangle className="h-3.5 w-3.5 text-red-500 animate-pulse" />
-            ) : (
-              <Cloud className="h-3.5 w-3.5 text-emerald-500" />
-            )}
-            <span className="hidden sm:inline">
-              {!isDriveConnected
-                ? t("journalEditor.statusOffline")
-                : syncProgress.status === "syncing"
-                ? t("journalEditor.statusSyncing")
-                : syncProgress.status === "connecting"
-                ? t("journalEditor.statusConnecting")
-                : syncProgress.status === "error"
-                ? t("journalEditor.statusError")
-                : t("journalEditor.statusSynced")}
-            </span>
-          </button>
-        )}
-
-        {/* Saving / Save Indicator */}
-        <div className="flex items-center gap-2 text-xs text-text-secondary">
-          {saveStatus === "saving" ? (
-            <>
-              <Loader2 className="h-3.5 w-3.5 animate-spin text-accent-brand" />
-              <span>{t("journalEditor.statusWriting")}</span>
-            </>
-          ) : isDirty ? (
-            <>
-              <Clock className="h-3.5 w-3.5 text-yellow-500" />
-              <span>{t("journalEditor.statusAutoSaving")}</span>
-            </>
-          ) : (
-            <>
-              <Check className="h-3.5 w-3.5 text-accent-brand" />
-              <span>{t("journalEditor.statusSaved")}</span>
-            </>
-          )}
-        </div>
-
-        {/* Manual Save Trigger */}
-        {config.autosave_interval === 0 && isDirty && (
+      <div className="flex items-center gap-2">
+        {/* Manual Save Trigger (when autosave is disabled) */}
+        {config.autosave_interval === 0 && isDirty ? (
           <button
             onClick={() => saveEntryImmediate(currentDate, entryContent)}
             onMouseDown={(e) => e.preventDefault()}
-            className="px-3.5 py-1.5 bg-accent-brand text-bg-app rounded-lg text-xs font-semibold hover:bg-accent-brand-hover transition-colors flex items-center gap-1.5"
+            className="p-1.5 bg-accent-brand text-bg-app rounded-lg hover:bg-accent-brand-hover transition-colors flex items-center justify-center cursor-pointer active:scale-95 shrink-0"
+            title={t("journalEditor.saveButton")}
           >
-            <Save className="h-3.5 w-3.5" />
-            {t("journalEditor.saveButton")}
+            <Save className="h-4 w-4" />
           </button>
+        ) : (
+          /* Autosave / Disk Save Status Indicator (Fixed icon, no layout shift) */
+          <div
+            className="p-1.5 flex items-center justify-center text-text-secondary shrink-0"
+            title={
+              saveStatus === "saving"
+                ? t("journalEditor.statusWriting")
+                : isDirty
+                ? t("journalEditor.statusAutoSaving")
+                : t("journalEditor.statusSaved")
+            }
+          >
+            {saveStatus === "saving" ? (
+              <Loader2 className="h-4 w-4 animate-spin text-accent-brand" />
+            ) : isDirty ? (
+              <Clock className="h-4 w-4 text-yellow-500 animate-pulse" />
+            ) : (
+              <Check className="h-4 w-4 text-accent-brand" />
+            )}
+          </div>
         )}
 
-        {/* Lock / Unlock Toggle Button */}
+        {/* Lock / Unlock Toggle Button (Fixed icon) */}
         {toggleLock && (
           <button
             onClick={toggleLock}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border-brand hover:border-accent-brand bg-bg-surface/30 text-text-secondary hover:text-text-primary transition-all text-xs font-semibold cursor-pointer active:scale-95"
-            title={isLocked ? "Entry is locked (Read-Only). Click to unlock editing." : "Lock entry (Prevent accidental edits)."}
+            className="p-1.5 rounded-lg border border-border-brand hover:border-accent-brand bg-bg-surface/30 text-text-secondary hover:text-text-primary transition-all cursor-pointer active:scale-95 flex items-center justify-center shrink-0"
+            title={
+              isLocked
+                ? "Entry is locked (Read-Only). Click to unlock editing."
+                : "Lock entry (Prevent accidental edits)."
+            }
           >
             {isLocked ? (
-              <>
-                <Lock className="h-3.5 w-3.5 text-text-secondary" />
-                <span className="hidden sm:inline">Locked</span>
-              </>
+              <Lock className="h-4 w-4 text-text-secondary" />
             ) : (
-              <>
-                <Unlock className="h-3.5 w-3.5 text-amber-500" />
-                <span className="hidden sm:inline">Unlocked</span>
-              </>
+              <Unlock className="h-4 w-4 text-amber-500" />
             )}
           </button>
         )}

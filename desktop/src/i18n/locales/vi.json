@@ -293,7 +293,6 @@
     "keepBoth": "Giữ cả hai bản",
     "driveNotConnected": "Chưa kết nối Google Drive",
     "driveClickToSync": "Đã kết nối Drive (Bấm để đồng bộ lại)",
-    "statusOffline": "Ngoại tuyến",
     "statusSyncing": "Đang đồng bộ",
     "statusConnecting": "Đang kết nối",
     "statusError": "Lỗi",

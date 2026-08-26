@@ -293,7 +293,6 @@
     "keepBoth": "Keep Both",
     "driveNotConnected": "Drive not connected",
     "driveClickToSync": "Drive Connected (Click to sync now)",
-    "statusOffline": "Offline",
     "statusSyncing": "Syncing",
     "statusConnecting": "Connecting",
     "statusError": "Error",

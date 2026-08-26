@@ -11,6 +11,10 @@ import {
   Info,
   Bug,
   HelpCircle,
+  Cloud,
+  CloudOff,
+  RefreshCw,
+  AlertTriangle,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAppStore } from "../../store/useAppStore";
@@ -37,6 +41,9 @@ export function Sidebar({
     config,
     toggleTheme,
     sidebarCollapsed: isCollapsed,
+    isDriveConnected,
+    syncProgress,
+    handleSync,
   } = useAppStore();
 
   const { ollamaConnected } = useOllamaStore();
@@ -188,6 +195,43 @@ export function Sidebar({
         <div className="p-4 border-t border-border-brand bg-bg-app/20 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1">
+              {/* Cloud Sync Status & Manual Trigger */}
+              {config.google_drive_client_id && (
+                <button
+                  onClick={() => {
+                    if (syncProgress.status !== "syncing" && syncProgress.status !== "connecting") {
+                      handleSync(true).catch(console.error);
+                    }
+                  }}
+                  disabled={syncProgress.status === "syncing" || syncProgress.status === "connecting"}
+                  className="p-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-surface transition-colors flex items-center justify-center cursor-pointer disabled:opacity-85"
+                  title={
+                    !isDriveConnected
+                      ? t("journalEditor.driveNotConnected")
+                      : syncProgress.status === "idle"
+                      ? t("journalEditor.driveClickToSync")
+                      : syncProgress.message ||
+                        (syncProgress.status === "syncing"
+                          ? t("journalEditor.statusSyncing")
+                          : syncProgress.status === "connecting"
+                          ? t("journalEditor.statusConnecting")
+                          : syncProgress.status === "error"
+                          ? t("journalEditor.statusError")
+                          : t("journalEditor.statusSynced"))
+                  }
+                >
+                  {!isDriveConnected ? (
+                    <CloudOff className="h-4.5 w-4.5 text-text-secondary/70" />
+                  ) : syncProgress.status === "syncing" || syncProgress.status === "connecting" ? (
+                    <RefreshCw className="h-4.5 w-4.5 text-accent-brand animate-spin" />
+                  ) : syncProgress.status === "error" ? (
+                    <AlertTriangle className="h-4.5 w-4.5 text-red-500 animate-pulse" />
+                  ) : (
+                    <Cloud className="h-4.5 w-4.5 text-emerald-500" />
+                  )}
+                </button>
+              )}
+
               {/* Light/Dark Toggle */}
               <button
                 onClick={() => toggleTheme()}
