@@ -1,26 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type LocalJournalEntry } from '../../services/db';
-import { Plus, Search, FileText, SlidersHorizontal, X, Heart } from 'lucide-react';
+import { Search, FileText, SlidersHorizontal, X } from 'lucide-react';
 import { JournalListItem } from './JournalListItem';
 import { FilterModal, type DateRangeFilter, type SortOrderFilter } from './FilterModal';
-import { useDraggableButton } from '../../hooks/useDraggableButton';
-import { DEFAULT_HEART_SIZE } from '../../constants/heart';
 
 interface JournalListProps {
   entries: LocalJournalEntry[];
   onSelectEntry: (date: string) => void;
-  onCreateToday: () => void;
-  onDonateOpen: () => void;
-  onStartHeartRain?: (durationMs?: number) => void;
 }
 
 export const JournalList: React.FC<JournalListProps> = ({
   entries,
   onSelectEntry,
-  onCreateToday,
-  onDonateOpen,
-  onStartHeartRain,
 }) => {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState(() => {
@@ -41,67 +33,6 @@ export const JournalList: React.FC<JournalListProps> = ({
     }
     return 'newest';
   });
-
-  // Heart Customization State
-  const [showDonateHeart, setShowDonateHeart] = useState<boolean>(() => {
-    return localStorage.getItem('campfire_mobile_show_donate_heart') !== 'false';
-  });
-  const [heartClickFalls, setHeartClickFalls] = useState<boolean>(() => {
-    return localStorage.getItem('campfire_mobile_heart_click_falls') === 'true';
-  });
-  const [heartSize, setHeartSize] = useState<number>(() => {
-    return parseInt(localStorage.getItem('campfire_mobile_heart_size') || String(DEFAULT_HEART_SIZE), 10);
-  });
-  const [heartRainDuration, setHeartRainDuration] = useState<number>(() => {
-    return parseInt(localStorage.getItem('campfire_mobile_heart_rain_duration') || '5', 10);
-  });
-  const [customImage, setCustomImage] = useState<string | null>(() => {
-    return localStorage.getItem('campfire_mobile_heart_custom_image');
-  });
-
-  // Listen for config changes and resets
-  useEffect(() => {
-    const updateHeartConfig = () => {
-      setShowDonateHeart(localStorage.getItem('campfire_mobile_show_donate_heart') !== 'false');
-      setHeartClickFalls(localStorage.getItem('campfire_mobile_heart_click_falls') === 'true');
-      setHeartSize(parseInt(localStorage.getItem('campfire_mobile_heart_size') || String(DEFAULT_HEART_SIZE), 10));
-      setHeartRainDuration(parseInt(localStorage.getItem('campfire_mobile_heart_rain_duration') || '5', 10));
-      setCustomImage(localStorage.getItem('campfire_mobile_heart_custom_image'));
-    };
-
-    window.addEventListener('heart-config-changed', updateHeartConfig);
-    return () => window.removeEventListener('heart-config-changed', updateHeartConfig);
-  }, []);
-
-  const donateBtn = useDraggableButton({
-    storageKey: 'campfire_mobile_donate_pos',
-    defaultCorner: 'bottom-left',
-    buttonWidth: heartSize,
-    buttonHeight: heartSize,
-    buffer: 20,
-  });
-
-  const addBtn = useDraggableButton({
-    storageKey: 'campfire_mobile_add_pos',
-    defaultCorner: 'bottom-right',
-    buttonWidth: 56,
-    buttonHeight: 56,
-    buffer: 20,
-  });
-
-  // Listen for position reset event
-  useEffect(() => {
-    const handleReset = () => {
-      donateBtn.resetPosition();
-    };
-    window.addEventListener('heart-reset', handleReset);
-    return () => window.removeEventListener('heart-reset', handleReset);
-  }, [donateBtn]);
-
-  const setContainerRefs = (node: HTMLDivElement | null) => {
-    donateBtn.containerRef.current = node;
-    addBtn.containerRef.current = node;
-  };
 
   useEffect(() => {
     localStorage.setItem('campfire_mobile_search_query', searchQuery);
@@ -180,16 +111,8 @@ export const JournalList: React.FC<JournalListProps> = ({
     return sortOrder === 'newest' ? timeB - timeA : timeA - timeB;
   });
 
-  const handleHeartClick = () => {
-    if (heartClickFalls) {
-      onStartHeartRain?.(heartRainDuration * 1000);
-    } else {
-      onDonateOpen();
-    }
-  };
-
   return (
-    <div ref={setContainerRefs} className="flex-1 flex flex-col min-h-0 bg-bg-app relative overflow-hidden">
+    <div className="flex-1 flex flex-col min-h-0 bg-bg-app relative overflow-hidden">
       {/* Search Bar & Filter */}
       <div className="px-4 py-3 bg-bg-surface border-b border-border-brand shrink-0 flex items-center gap-2 select-none">
         <div className="relative flex-1 flex items-center">
@@ -243,61 +166,6 @@ export const JournalList: React.FC<JournalListProps> = ({
         )}
       </div>
 
-      {/* Floating Donate Heart Button */}
-      {showDonateHeart && (
-        <button 
-          {...donateBtn.bind}
-          onClick={donateBtn.handleTap(handleHeartClick)}
-          style={{
-            left: donateBtn.position ? `${donateBtn.position.x}px` : undefined,
-            top: donateBtn.position ? `${donateBtn.position.y}px` : undefined,
-            width: `${heartSize}px`,
-            height: `${heartSize}px`,
-            touchAction: 'none',
-            opacity: donateBtn.position ? 1 : 0,
-          }}
-          className={`absolute z-30 flex items-center justify-center cursor-grab active:cursor-grabbing select-none ${
-            customImage
-              ? ''
-              : 'text-red-500 drop-shadow-[0_0_12px_rgba(239,68,68,0.65)] hover:drop-shadow-[0_0_18px_rgba(239,68,68,0.85)]'
-          } ${
-            donateBtn.isDragging || donateBtn.isInertia ? 'transition-none scale-110' : 'transition-all duration-300 ease-out hover:scale-110 active:scale-95'
-          }`}
-          title={t("header.donateTooltip")}
-        >
-          {customImage ? (
-            <img
-              src={customImage}
-              alt=""
-              draggable={false}
-              className="w-full h-full object-contain pointer-events-none"
-            />
-          ) : (
-            <Heart style={{ width: heartSize, height: heartSize }} className="fill-red-500 text-red-500 pointer-events-none animate-heartbeat" />
-          )}
-        </button>
-      )}
-
-      {/* Floating Action Button (Current Date / Add) */}
-      <button 
-        {...addBtn.bind}
-        onClick={addBtn.handleTap(onCreateToday)}
-        style={{
-          left: addBtn.position ? `${addBtn.position.x}px` : undefined,
-          top: addBtn.position ? `${addBtn.position.y}px` : undefined,
-          width: '56px',
-          height: '56px',
-          touchAction: 'none',
-          opacity: addBtn.position ? 1 : 0,
-        }}
-        className={`absolute z-30 w-[56px] h-[56px] rounded-full bg-accent-brand text-bg-app shadow-[0_0_16px] shadow-accent-brand/45 hover:shadow-[0_0_22px] hover:shadow-accent-brand/65 hover:bg-accent-brand-hover flex items-center justify-center cursor-grab active:cursor-grabbing select-none ${
-          addBtn.isDragging || addBtn.isInertia ? 'transition-none scale-110' : 'transition-all duration-300 ease-out hover:scale-105 active:scale-95'
-        }`}
-      >
-
-        <Plus size={26} className="pointer-events-none" />
-      </button>
-
       {/* Filter Modal Sheet */}
       <FilterModal
         isOpen={isFilterOpen}
@@ -315,4 +183,5 @@ export const JournalList: React.FC<JournalListProps> = ({
     </div>
   );
 };
+
 

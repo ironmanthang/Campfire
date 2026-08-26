@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Header } from './components/layout';
+import { Header, FloatingActionButtons } from './components/layout';
 import { JournalList, JournalEditor } from './components/journal';
 import { SettingsModal } from './components/settings';
 import { SyncResultModal, SupportModal, ScratchpadConflictModal } from './components/modals';
-import { ScratchpadView } from './components/scratchpad/ScratchpadView';
+import { ScratchpadView, type ScratchpadViewHandle } from './components/scratchpad/ScratchpadView';
 
 // Hooks
 import { useTheme } from './hooks/useTheme';
@@ -21,7 +21,9 @@ import { calculateStreak } from '@campfire/core';
 function App() {
   const { t, i18n } = useTranslation();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [activeMainView, setActiveMainView] = useState<'journal' | 'scratchpad'>('journal');
+  const [activeMainView, setActiveMainView] = useState<'journal' | 'scratchpad'>(() => {
+    return localStorage.getItem('campfire_mobile_active_view') === 'scratchpad' ? 'scratchpad' : 'journal';
+  });
   const [isDonateOpen, setIsDonateOpen] = useState(false);
   const [customLogo, setCustomLogo] = useState<string | null>(() => localStorage.getItem('past_you_custom_logo'));
 
@@ -32,6 +34,8 @@ function App() {
   const [customImage, setCustomImage] = useState<string | null>(() => {
     return localStorage.getItem('campfire_mobile_heart_custom_image');
   });
+
+  const scratchpadRef = useRef<ScratchpadViewHandle>(null);
 
   useEffect(() => {
     const updateHeartConfig = () => {
@@ -123,6 +127,25 @@ function App() {
   clearCacheRef.current = clearCache;
   forceReloadEditorRef.current = forceReloadEditor;
 
+  const switchMainView = (view: 'journal' | 'scratchpad') => {
+    localStorage.setItem('campfire_mobile_active_view', view);
+    setActiveMainView(view);
+    if (view === 'journal') {
+      const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';
+      if (autoSync && isLoggedIn) {
+        handleSync();
+      }
+    }
+  };
+
+  const handleFloatingAdd = () => {
+    if (activeMainView === 'scratchpad') {
+      scratchpadRef.current?.triggerFloatingAdd();
+    } else {
+      handleCreateToday();
+    }
+  };
+
   // Donation banner controller
   useEffect(() => {
     const neverAsk = localStorage.getItem("donate-reminder-never-ask") === "true";
@@ -146,21 +169,14 @@ function App() {
     }
   }, [entries]);
 
+  const showFloatingButtons = activeMainView === 'scratchpad' || (activeMainView === 'journal' && (!activeDate || editorLoading));
+
   return (
-    <div className="flex flex-col h-full bg-bg-app transition-colors duration-200 relative">
+    <div className="flex flex-col h-full bg-bg-app transition-colors duration-200 relative overflow-hidden">
       <Header 
         onSettingsOpen={() => setIsSettingsOpen(true)}
         onScratchpadToggle={() => {
-          setActiveMainView((prev) => {
-            const next = prev === 'scratchpad' ? 'journal' : 'scratchpad';
-            if (next === 'journal') {
-              const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';
-              if (autoSync && isLoggedIn) {
-                handleSync();
-              }
-            }
-            return next;
-          });
+          switchMainView(activeMainView === 'scratchpad' ? 'journal' : 'scratchpad');
         }}
         isScratchpadActive={activeMainView === 'scratchpad'}
         onSync={handleSync}
@@ -216,11 +232,9 @@ function App() {
 
       {activeMainView === 'scratchpad' ? (
         <ScratchpadView
+          ref={scratchpadRef}
           refreshKey={syncRefreshKey}
           onSyncTrigger={triggerDebouncedSync}
-          onBack={() => {
-            setActiveMainView('journal');
-          }}
         />
       ) : activeDate && !editorLoading ? (
         <JournalEditor
@@ -277,7 +291,13 @@ function App() {
         <JournalList 
           entries={entries}
           onSelectEntry={handleSelectEntry}
-          onCreateToday={handleCreateToday}
+        />
+      )}
+
+      {/* Shared Draggable Floating Action Buttons (Heart & Add) */}
+      {showFloatingButtons && (
+        <FloatingActionButtons
+          onAddClick={handleFloatingAdd}
           onDonateOpen={() => setIsDonateOpen(true)}
           onStartHeartRain={startHeartRain}
         />
@@ -319,7 +339,7 @@ function App() {
           onClose={() => setSyncResultDates(null)} 
           onSelectEntry={(date) => {
             if (date === 'scratchpad') {
-              setActiveMainView('scratchpad');
+              switchMainView('scratchpad');
             } else {
               handleSelectEntry(date);
             }

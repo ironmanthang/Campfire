@@ -7,7 +7,9 @@
     "syncSetupGoogle": "Thiết lập Google Drive để đồng bộ",
     "syncWithGoogle": "Đồng bộ với Google Drive",
     "lastSynced": "Đồng bộ lần cuối: {{time}}",
-    "donateTooltip": "Ủng hộ mình nhé :D"
+    "donateTooltip": "Ủng hộ mình nhé :D",
+    "viewJournal": "Nhật ký",
+    "viewScratchpad": "Ghi chú & Việc cần làm"
   },
   "journalList": {
     "searchPlaceholder": "Tìm nhật ký hoặc thẻ (#congviec)...",

@@ -1,8 +1,6 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useImperativeHandle, forwardRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  ArrowLeft,
-  Plus,
   Trash2,
   FolderPlus,
   Folder,
@@ -22,157 +20,160 @@ type DeleteConfirmState =
   | { type: 'clearCompleted'; id: string; name: string }
   | null;
 
+export interface ScratchpadViewHandle {
+  triggerFloatingAdd: () => void;
+}
+
 interface ScratchpadViewProps {
-  onBack: () => void;
   onSyncTrigger?: () => void;
   refreshKey?: number;
 }
 
-export const ScratchpadView: React.FC<ScratchpadViewProps> = ({ onBack, onSyncTrigger, refreshKey }) => {
-  const { t } = useTranslation();
-  const [newTaskText, setNewTaskText] = useState('');
-  const [isCreatingGroup, setIsCreatingGroup] = useState(false);
-  const [newGroupName, setNewGroupName] = useState('');
-  const [collapsedMap, setCollapsedMap] = usePersistedState<Record<string, boolean>>(
-    'scratchpad_collapsed_map',
-    {}
-  );
-
-  const quickInputRef = useRef<HTMLInputElement>(null);
-  const groupInputRef = useRef<HTMLInputElement>(null);
-  const groupFormContainerRef = useRef<HTMLDivElement>(null);
-  const newGroupBtnRef = useRef<HTMLButtonElement>(null);
-
-  const [deleteConfirmTarget, setDeleteConfirmTarget] = useState<DeleteConfirmState>(null);
-
-  const {
-    items,
-    loading,
-    toggleItemWithChildren,
-    addItem,
-    addChildItem,
-    addGroup,
-    updateItemText,
-    togglePinItem,
-    moveItem,
-    moveChildItem,
-    isDuplicate,
-    removeItem,
-    clearCompleted,
-  } = useScratchpad(true, onSyncTrigger, refreshKey);
-
-  useEffect(() => {
-    quickInputRef.current?.focus();
-  }, []);
-
-  useEffect(() => {
-    if (!isCreatingGroup) return;
-    groupInputRef.current?.focus();
-
-    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
-      const target = e.target as Node;
-      if (
-        groupFormContainerRef.current &&
-        !groupFormContainerRef.current.contains(target) &&
-        !newGroupBtnRef.current?.contains(target)
-      ) {
-        setNewGroupName('');
-        setIsCreatingGroup(false);
-      }
-    };
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setNewGroupName('');
-        setIsCreatingGroup(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('touchstart', handleClickOutside);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isCreatingGroup]);
-
-  const isTaskDuplicate = Boolean(newTaskText.trim()) && isDuplicate(newTaskText);
-  const isGroupDuplicate = Boolean(newGroupName.trim()) && isDuplicate(newGroupName);
-
-  const handleAddTask = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    const trimmed = newTaskText.trim();
-    if (!trimmed || isTaskDuplicate) return;
-    addItem(trimmed);
-    setNewTaskText('');
-  };
-
-  const handleCreateGroup = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    const trimmed = newGroupName.trim();
-    if (trimmed && !isGroupDuplicate) {
-      addGroup(trimmed);
-      setNewGroupName('');
-      setIsCreatingGroup(false);
-    }
-  };
-
-  const toggleCollapse = useCallback((id: string) => {
-    setCollapsedMap((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-  }, [setCollapsedMap]);
-
-  const checkHasCompleted = (itemList: ScratchpadItem[]): boolean => {
-    return itemList.some(
-      (item) =>
-        (!item.isGroup && item.isChecked) ||
-        (item.children && item.children.length > 0 && checkHasCompleted(item.children))
+export const ScratchpadView = forwardRef<ScratchpadViewHandle, ScratchpadViewProps>(
+  ({ onSyncTrigger, refreshKey }, ref) => {
+    const { t } = useTranslation();
+    const [newTaskText, setNewTaskText] = useState('');
+    const [isCreatingGroup, setIsCreatingGroup] = useState(false);
+    const [newGroupName, setNewGroupName] = useState('');
+    const [collapsedMap, setCollapsedMap] = usePersistedState<Record<string, boolean>>(
+      'scratchpad_collapsed_map',
+      {}
     );
-  };
 
-  const hasCompleted = checkHasCompleted(items);
+    const quickInputRef = useRef<HTMLInputElement>(null);
+    const groupInputRef = useRef<HTMLInputElement>(null);
+    const groupFormContainerRef = useRef<HTMLDivElement>(null);
+    const newGroupBtnRef = useRef<HTMLButtonElement>(null);
 
-  const handleDeleteRequest = useCallback((id: string, isGroup?: boolean, text?: string) => {
-    setDeleteConfirmTarget({
-      type: isGroup ? 'group' : 'item',
-      id,
-      name: text || '',
-    });
-  }, []);
+    const [deleteConfirmTarget, setDeleteConfirmTarget] = useState<DeleteConfirmState>(null);
 
-  const handleConfirmDelete = useCallback(() => {
-    if (!deleteConfirmTarget) return;
-    if (deleteConfirmTarget.type === 'clearCompleted') {
-      clearCompleted();
-    } else {
-      removeItem(deleteConfirmTarget.id);
-    }
-    setDeleteConfirmTarget(null);
-  }, [deleteConfirmTarget, clearCompleted, removeItem]);
+    const {
+      items,
+      loading,
+      toggleItemWithChildren,
+      addItem,
+      addChildItem,
+      addGroup,
+      updateItemText,
+      togglePinItem,
+      moveItem,
+      moveChildItem,
+      isDuplicate,
+      removeItem,
+      clearCompleted,
+    } = useScratchpad(true, onSyncTrigger, refreshKey);
 
-  const handleCancelDelete = useCallback(() => {
-    setDeleteConfirmTarget(null);
-  }, []);
+    useEffect(() => {
+      if (!isCreatingGroup) return;
+      groupInputRef.current?.focus();
 
-  const pinnedItems = items.filter((item) => Boolean(item.isPinned));
-  const unpinnedItems = items.filter((item) => !item.isPinned);
+      const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+        const target = e.target as Node;
+        if (
+          groupFormContainerRef.current &&
+          !groupFormContainerRef.current.contains(target) &&
+          !newGroupBtnRef.current?.contains(target)
+        ) {
+          setNewGroupName('');
+          setIsCreatingGroup(false);
+        }
+      };
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          setNewGroupName('');
+          setIsCreatingGroup(false);
+        }
+      };
 
-  return (
-    <div className="flex-1 flex flex-col h-full overflow-hidden bg-bg-app select-text">
-      {/* View Header Bar */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border-brand bg-bg-surface shrink-0 gap-2">
-        <div className="flex items-center gap-3 min-w-0">
-          <button
-            type="button"
-            onClick={onBack}
-            className="p-2 -ml-2 rounded-xl text-text-secondary hover:text-text-primary active:bg-bg-app transition-colors flex items-center gap-1 cursor-pointer shrink-0"
-            title={t('common.back', 'Back to Journal')}
-          >
-            <ArrowLeft size={20} />
-          </button>
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener('touchstart', handleClickOutside);
+        document.removeEventListener('keydown', handleKeyDown);
+      };
+    }, [isCreatingGroup]);
+
+    const isTaskDuplicate = Boolean(newTaskText.trim()) && isDuplicate(newTaskText);
+    const isGroupDuplicate = Boolean(newGroupName.trim()) && isDuplicate(newGroupName);
+
+    const handleAddTask = (e?: React.FormEvent) => {
+      if (e) e.preventDefault();
+      const trimmed = newTaskText.trim();
+      if (!trimmed || isTaskDuplicate) return;
+      addItem(trimmed);
+      setNewTaskText('');
+    };
+
+    const handleCreateGroup = (e?: React.FormEvent) => {
+      if (e) e.preventDefault();
+      const trimmed = newGroupName.trim();
+      if (trimmed && !isGroupDuplicate) {
+        addGroup(trimmed);
+        setNewGroupName('');
+        setIsCreatingGroup(false);
+      }
+    };
+
+    useImperativeHandle(ref, () => ({
+      triggerFloatingAdd: () => {
+        const trimmed = newTaskText.trim();
+        if (trimmed && !isTaskDuplicate) {
+          addItem(trimmed);
+          setNewTaskText('');
+        } else {
+          quickInputRef.current?.focus();
+        }
+      },
+    }), [newTaskText, isTaskDuplicate, addItem]);
+
+    const toggleCollapse = useCallback((id: string) => {
+      setCollapsedMap((prev) => ({
+        ...prev,
+        [id]: !prev[id],
+      }));
+    }, [setCollapsedMap]);
+
+    const checkHasCompleted = (itemList: ScratchpadItem[]): boolean => {
+      return itemList.some(
+        (item) =>
+          (!item.isGroup && item.isChecked) ||
+          (item.children && item.children.length > 0 && checkHasCompleted(item.children))
+      );
+    };
+
+    const hasCompleted = checkHasCompleted(items);
+
+    const handleDeleteRequest = useCallback((id: string, isGroup?: boolean, text?: string) => {
+      setDeleteConfirmTarget({
+        type: isGroup ? 'group' : 'item',
+        id,
+        name: text || '',
+      });
+    }, []);
+
+    const handleConfirmDelete = useCallback(() => {
+      if (!deleteConfirmTarget) return;
+      if (deleteConfirmTarget.type === 'clearCompleted') {
+        clearCompleted();
+      } else {
+        removeItem(deleteConfirmTarget.id);
+      }
+      setDeleteConfirmTarget(null);
+    }, [deleteConfirmTarget, clearCompleted, removeItem]);
+
+    const handleCancelDelete = useCallback(() => {
+      setDeleteConfirmTarget(null);
+    }, []);
+
+    const pinnedItems = items.filter((item) => Boolean(item.isPinned));
+    const unpinnedItems = items.filter((item) => !item.isPinned);
+
+    return (
+      <div className="flex-1 flex flex-col h-full overflow-hidden bg-bg-app select-text">
+        {/* View Header Bar */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border-brand bg-bg-surface shrink-0 gap-2">
           <div className="min-w-0">
             <h2 className="font-bold text-base text-text-primary leading-tight truncate">
               {t('scratchpad.title', 'Scratchpad & Notes')}
@@ -181,63 +182,55 @@ export const ScratchpadView: React.FC<ScratchpadViewProps> = ({ onBack, onSyncTr
               {t('scratchpad.subtitle', 'Quick persistent task list')}
             </p>
           </div>
-        </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            ref={newGroupBtnRef}
-            type="button"
-            onClick={() => setIsCreatingGroup((v) => !v)}
-            className="px-3 py-1.5 rounded-xl bg-bg-app border border-border-brand hover:border-accent-brand text-xs font-semibold text-text-primary flex items-center gap-1.5 active:scale-95 transition-all shadow-xs cursor-pointer"
-          >
-            <FolderPlus size={15} className="text-accent-brand" />
-            <span>{t('scratchpad.newGroup', 'Group')}</span>
-          </button>
-
-          {hasCompleted && (
+          <div className="flex items-center gap-2 shrink-0">
             <button
+              ref={newGroupBtnRef}
               type="button"
-              onClick={() => setDeleteConfirmTarget({ type: 'clearCompleted', id: '', name: '' })}
-              className="p-1.5 rounded-xl border border-border-brand hover:border-red-400 text-xs font-semibold text-text-secondary hover:text-red-400 flex items-center gap-1.5 cursor-pointer transition-colors bg-bg-app shadow-xs"
-              title={t('scratchpad.clearCompleted', 'Clear completed tasks')}
+              onClick={() => setIsCreatingGroup((v) => !v)}
+              className="px-3 py-1.5 rounded-xl bg-bg-app border border-border-brand hover:border-accent-brand text-xs font-semibold text-text-primary flex items-center gap-1.5 active:scale-95 transition-all shadow-xs cursor-pointer"
             >
-              <Trash2 size={15} />
+              <FolderPlus size={15} className="text-accent-brand" />
+              <span>{t('scratchpad.newGroup', 'Group')}</span>
             </button>
-          )}
-        </div>
-      </div>
 
-      {/* Main Content Scroll Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
-        {/* Quick Add Form */}
-        <div className="space-y-2.5">
-          <div className="space-y-1">
-            <form onSubmit={handleAddTask} className="flex items-center gap-2">
-              <input
-                ref={quickInputRef}
-                type="text"
-                value={newTaskText}
-                onChange={(e) => setNewTaskText(e.target.value)}
-                enterKeyHint="done"
-                placeholder={t('scratchpad.addPlaceholder', 'Quick scratch idea or todo...')}
-                className={`flex-1 bg-bg-surface border ${
-                  isTaskDuplicate ? 'border-red-400 focus:border-red-400' : 'border-border-brand focus:border-accent-brand'
-                } rounded-2xl px-4 py-2.5 text-sm text-text-primary placeholder:text-text-secondary/50 focus:outline-none shadow-xs`}
-              />
+            {hasCompleted && (
               <button
-                type="submit"
-                disabled={!newTaskText.trim() || isTaskDuplicate}
-                className="px-4 py-2.5 rounded-2xl bg-accent-brand text-bg-surface font-semibold hover:opacity-90 disabled:opacity-50 transition-all flex items-center gap-1 cursor-pointer shrink-0 shadow-xs"
+                type="button"
+                onClick={() => setDeleteConfirmTarget({ type: 'clearCompleted', id: '', name: '' })}
+                className="p-1.5 rounded-xl border border-border-brand hover:border-red-400 text-xs font-semibold text-text-secondary hover:text-red-400 flex items-center gap-1.5 cursor-pointer transition-colors bg-bg-app shadow-xs"
+                title={t('scratchpad.clearCompleted', 'Clear completed tasks')}
               >
-                <Plus size={18} />
+                <Trash2 size={15} />
               </button>
-            </form>
-            {isTaskDuplicate && (
-              <p className="text-xs text-red-400 pl-2">
-                {t('scratchpad.alreadyExists', 'An item with this name already exists')}
-              </p>
             )}
           </div>
+        </div>
+
+        {/* Main Content Scroll Area */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0 pb-24">
+          {/* Quick Add Form */}
+          <div className="space-y-2.5">
+            <div className="space-y-1">
+              <form onSubmit={handleAddTask} className="flex items-center w-full">
+                <input
+                  ref={quickInputRef}
+                  type="text"
+                  value={newTaskText}
+                  onChange={(e) => setNewTaskText(e.target.value)}
+                  enterKeyHint="done"
+                  placeholder={t('scratchpad.addPlaceholder', 'Quick scratch idea or todo...')}
+                  className={`w-full bg-bg-surface border ${
+                    isTaskDuplicate ? 'border-red-400 focus:border-red-400' : 'border-border-brand focus:border-accent-brand'
+                  } rounded-2xl px-4 py-2.5 text-sm text-text-primary placeholder:text-text-secondary/50 focus:outline-none shadow-xs`}
+                />
+              </form>
+              {isTaskDuplicate && (
+                <p className="text-xs text-red-400 pl-2">
+                  {t('scratchpad.alreadyExists', 'An item with this name already exists')}
+                </p>
+              )}
+            </div>
 
           {isCreatingGroup && (
             <div ref={groupFormContainerRef} className="space-y-1 animate-fade-in">
@@ -431,8 +424,11 @@ export const ScratchpadView: React.FC<ScratchpadViewProps> = ({ onBack, onSyncTr
           onConfirm={handleConfirmDelete}
         />
       )}
-    </div>
-  );
-};
+      </div>
+    );
+  }
+);
+
+ScratchpadView.displayName = 'ScratchpadView';
 
 export default ScratchpadView;

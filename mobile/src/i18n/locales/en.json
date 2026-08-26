@@ -7,7 +7,9 @@
     "syncSetupGoogle": "Setup Google Drive to sync",
     "syncWithGoogle": "Sync with Google Drive",
     "lastSynced": "Last synced: {{time}}",
-    "donateTooltip": "Support me :D"
+    "donateTooltip": "Support me :D",
+    "viewJournal": "Journal",
+    "viewScratchpad": "Scratchpad & Notes"
   },
   "journalList": {
     "searchPlaceholder": "Search diaries or tags (#work)...",
