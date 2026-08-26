@@ -343,7 +343,10 @@ export function ScratchpadItemRow({
       <div className="space-y-1 my-2">
         <div
           className="group flex items-center justify-between gap-2 p-2 rounded-xl bg-bg-surface/90 border border-border-brand/60 shadow-xs active:border-accent-brand/40 transition-all cursor-pointer"
-          onClick={() => { if (!isEditing) onToggleCollapse(item.id); }}
+          onClick={() => {
+            if (window.getSelection()?.toString()) return;
+            if (!isEditing) onToggleCollapse(item.id);
+          }}
         >
           <div className="flex items-center gap-2 flex-1 min-w-0">
             <button
@@ -423,6 +426,7 @@ export function ScratchpadItemRow({
                     onMoveChild(item.id, childId, dir);
                   }
                 }}
+                isDuplicate={isDuplicate}
                 onDelete={onDelete}
               />
             ))}
@@ -437,6 +441,7 @@ export function ScratchpadItemRow({
       <div
         className="group flex items-center justify-between gap-2 p-2 rounded-xl active:bg-bg-surface/70 transition-colors cursor-pointer"
         onClick={() => {
+          if (window.getSelection()?.toString()) return;
           if (!isEditing) onToggleCheck(item.id, !item.isChecked);
         }}
       >
@@ -475,7 +480,7 @@ export function ScratchpadItemRow({
           {isEditing ? editForm : (
             <div className="flex items-center gap-1.5 flex-1 min-w-0">
               <span
-                className={`text-sm break-words min-w-0 select-none leading-relaxed ${
+                className={`text-sm break-words min-w-0 leading-relaxed ${
                   item.isChecked ? 'line-through text-text-secondary/60' : 'text-text-primary'
                 }`}
               >
@@ -543,6 +548,7 @@ export function ScratchpadItemRow({
                   onMoveChild(item.id, childId, dir);
                 }
               }}
+              isDuplicate={isDuplicate}
               onDelete={onDelete}
             />
           ))}

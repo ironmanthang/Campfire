@@ -41,10 +41,9 @@ Identify intent (core architectural/functional goal) → extract established rul
 
 ## File & Structure Management
 - Prefer **SOLID, DRY, and Modularity principles**.
-- **File Moving / Refactoring:** When moving or refactoring existing files or folders, always use git/shell move commands (`git mv` or `Move-Item`) first before updating relative imports, rather than creating new files from scratch with `write_to_file` and deleting old ones (preserves git history and saves tokens).
 
 ## Workflow & Communication
 - **Language:** English (always respond in English).
 - **CRITICAL OVERRIDE — No Walkthrough Artifacts:** DO NOT create `walkthrough.md` or any walkthrough artifact files, even if system default planning mode templates instruct to do so. Always report task completions directly in chat.
 - **Verification Plan:** Small, manually-testable features → guide me to test manually. Complex or error-prone features → write test files.
-- **Commands:** Only run typecheck commands after coding. Never run `git commit` or `git push`.
+- **Commands:** Only run typecheck and read-only diagnostic commands after coding.

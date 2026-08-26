@@ -2,7 +2,7 @@
   "name": "campfire-monorepo",
   "private": true,
   "license": "UNLICENSED",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "type": "module",
   "scripts": {
     "prepush": "node scripts/prepush.mjs",
