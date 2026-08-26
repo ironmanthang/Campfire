@@ -48,7 +48,6 @@ export function useDraggableButton({
 
   const animFrameRef = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const tapCallbackRef = useRef<(() => void) | undefined>(undefined);
 
   const stopInertia = useCallback(() => {
     if (animFrameRef.current !== null) {
@@ -236,11 +235,9 @@ export function useDraggableButton({
     isDraggingRef.current = false;
     setIsDragging(false);
 
-    // Detect tap (not drag) — fire tap callback without saving position to localStorage
+    // Detect tap (not drag) — reset micro drag delta back to initial position before pointer down
     const isTap = dragInfo.current.totalDistance <= 6;
     if (isTap) {
-      tapCallbackRef.current?.();
-      // Reset micro drag delta back to initial position before pointer down
       if (position) {
         setPosition({
           x: dragInfo.current.initialX,
@@ -333,15 +330,16 @@ export function useDraggableButton({
     }
   };
 
-  // Register a tap callback — the actual tap is detected in onPointerUp.
-  // The returned onClick handler only prevents the browser click from
-  // double-firing or leaking through after a drag.
+  // Register a tap callback — fired inside native onClick so mobile browsers
+  // treat input.focus() and UI activation as a trusted user gesture.
   const handleTap = (callback?: () => void) => {
-    tapCallbackRef.current = callback;
     return (e: React.MouseEvent) => {
-      // Always prevent the native click; taps are handled in onPointerUp
-      e.preventDefault();
-      e.stopPropagation();
+      if (dragInfo.current.totalDistance > 6) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      callback?.();
     };
   };
 

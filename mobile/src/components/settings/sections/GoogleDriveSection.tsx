@@ -82,14 +82,14 @@ export const GoogleDriveSection: React.FC = () => {
 
       {/* Auth status */}
       <div className="p-4 rounded-xl bg-bg-app border border-border-brand flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col">
-            <span className="text-sm font-medium text-text-primary">{t("settings.googleAccountTitle")}</span>
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex flex-col min-w-0 flex-1">
+            <span className="text-sm font-medium text-text-primary leading-tight">{t("settings.googleAccountTitle")}</span>
             {isLoggedIn && userEmail && (
-              <span className="text-[11px] text-text-secondary mt-0.5">{userEmail}</span>
+              <span className="text-[11px] text-text-secondary mt-0.5 truncate">{userEmail}</span>
             )}
           </div>
-          <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold ${isLoggedIn ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20'}`}>
+          <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold whitespace-nowrap shrink-0 ${isLoggedIn ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20'}`}>
             {isLoggedIn ? t("settings.googleStatusConnected") : t("settings.googleStatusDisconnected")}
           </span>
         </div>

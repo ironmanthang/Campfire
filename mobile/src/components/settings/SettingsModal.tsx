@@ -32,18 +32,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md bg-bg-surface border border-border-brand rounded-2xl shadow-2xl flex flex-col max-h-[90vh] cursor-default"
+        className="w-full max-w-md bg-bg-surface border border-border-brand rounded-2xl shadow-2xl flex flex-col max-h-[85vh] max-h-[85dvh] cursor-default my-auto overflow-hidden"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border-brand">
+        <div className="flex items-center justify-between p-4 border-b border-border-brand shrink-0">
           <h2 className="text-xl font-bold tracking-tight text-text-primary m-0">{t("settings.title")}</h2>
-          <button onClick={handleManualClose} className="p-1.5 rounded-lg hover:bg-bg-app transition-colors text-text-secondary">
+          <button onClick={handleManualClose} className="p-1.5 rounded-lg hover:bg-bg-app transition-colors text-text-secondary cursor-pointer">
             <X size={20} />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-5 flex-1 overflow-y-auto space-y-6">
+        <div className="p-4 sm:p-5 flex-1 overflow-y-auto space-y-5">
           {/* Font Size setting */}
           <FontSizeSection />
 

@@ -20,26 +20,26 @@
 
 html[data-font-size="small"] {
   font-size: 14px;
-  --editor-font-size: 0.875rem;
-  --preview-font-size: 0.875rem;
+  --editor-font-size: 0.9rem;
+  --preview-font-size: 0.9rem;
 }
 
 html[data-font-size="medium"] {
-  font-size: 16px;
+  font-size: 15.5px;
   --editor-font-size: 1rem;
   --preview-font-size: 1rem;
 }
 
 html[data-font-size="large"] {
-  font-size: 18px;
-  --editor-font-size: 1.125rem;
-  --preview-font-size: 1.125rem;
+  font-size: 17px;
+  --editor-font-size: 1.15rem;
+  --preview-font-size: 1.15rem;
 }
 
 html[data-font-size="xlarge"] {
-  font-size: 20px;
-  --editor-font-size: 1.25rem;
-  --preview-font-size: 1.25rem;
+  font-size: 18.5px;
+  --editor-font-size: 1.3rem;
+  --preview-font-size: 1.3rem;
 }
 
 :root.dark {
