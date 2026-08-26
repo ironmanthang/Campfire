@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import ReactMarkdown from "react-markdown";
 import {
@@ -8,13 +8,13 @@ import {
   RefreshCw
 } from "lucide-react";
 import { OllamaMessage, streamAIResponse } from "../services/ollama";
-import { getLocalYYYYMMDD } from "../lib/dateUtils";
 import { ModelSelector } from "../components/ai/ModelSelector";
 import { useResizer } from "../hooks/useResizer";
 import { useTranslation } from "react-i18next";
 import { SidebarToggleButton } from "../components/layout/SidebarToggleButton";
 import { usePersistedState } from "../hooks/usePersistedState";
 import { useEarliestEntryDate } from "../hooks/useEarliestEntryDate";
+import { useDateRangeFilter } from "../hooks/useDateRangeFilter";
 import { DateRangePicker } from "../components/common/DateRangePicker";
 import { DragHandles } from "../components/common/DragHandles";
 import { useAppStore } from "../store/useAppStore";
@@ -23,15 +23,18 @@ import { useOllamaStore } from "../store/useOllamaStore";
 export function ReflectionView() {
   const { t } = useTranslation();
   const earliestDate = useEarliestEntryDate();
-  const [refStartDate, setRefStartDate] = usePersistedState("reflection_filter_start", earliestDate);
-
-  useEffect(() => {
-    if (refStartDate === "2010-01-01") {
-      setRefStartDate(earliestDate);
-    }
-  }, [earliestDate, refStartDate, setRefStartDate]);
-
-  const [refEndDate, setRefEndDate] = usePersistedState("reflection_filter_end", getLocalYYYYMMDD);
+  const {
+    startDate: refStartDate,
+    endDate: refEndDate,
+    activePresetLabel,
+    onStartChange: setRefStartDate,
+    onEndChange: setRefEndDate,
+    onPresetLabelChange,
+  } = useDateRangeFilter({
+    keyPrefix: "reflection",
+    earliestDate,
+    defaultPreset: "30d",
+  });
   const [reflectionReport, setReflectionReport] = usePersistedState("reflection_report_text", "");
   const [generatingReflection, setGeneratingReflection] = useState(false);
 
@@ -140,6 +143,8 @@ export function ReflectionView() {
             endDate={refEndDate}
             onStartChange={setRefStartDate}
             onEndChange={setRefEndDate}
+            activePresetLabel={activePresetLabel}
+            onPresetLabelChange={onPresetLabelChange}
             labelPrefix={t("reflectionView.analyzePeriod")}
             earliestDate={earliestDate}
           />

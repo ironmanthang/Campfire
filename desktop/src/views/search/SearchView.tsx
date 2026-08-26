@@ -11,11 +11,11 @@ import {
   performSemanticSearch,
   isEmbeddingModel
 } from "../../services/embeddings";
-import { getLocalYYYYMMDD } from "../../lib/dateUtils";
 import { useTranslation } from "react-i18next";
 import { usePersistedState } from "../../hooks/usePersistedState";
 import { useEarliestEntryDate } from "../../hooks/useEarliestEntryDate";
 import { useAutoFocus } from "../../hooks/useAutoFocus";
+import { useDateRangeFilter } from "../../hooks/useDateRangeFilter";
 import { SearchHeader, SearchHelpModal } from "../../components/search";
 import { useAppStore } from "../../store/useAppStore";
 import { useOllamaStore } from "../../store/useOllamaStore";
@@ -109,16 +109,18 @@ export function SearchView() {
   const [indexProgress, setIndexProgress] = useState("");
 
   const earliestDate = useEarliestEntryDate();
-  const [searchStartDate, setSearchStartDate] = usePersistedState("search_filter_start", earliestDate);
-
-  useEffect(() => {
-    if (searchStartDate === "2010-01-01") {
-      setSearchStartDate(earliestDate);
-    }
-  }, [earliestDate, searchStartDate, setSearchStartDate]);
-
-  const [searchEndDate, setSearchEndDate] = usePersistedState("search_filter_end", getLocalYYYYMMDD);
-  const [activePresetLabel, setActivePresetLabel] = usePersistedState("search_active_preset", "All");
+  const {
+    startDate: searchStartDate,
+    endDate: searchEndDate,
+    activePresetLabel,
+    onStartChange: onSearchStartChange,
+    onEndChange: onSearchEndChange,
+    onPresetLabelChange: onSearchPresetLabelChange,
+  } = useDateRangeFilter({
+    keyPrefix: "search",
+    earliestDate,
+    defaultPreset: "All",
+  });
   const [sortOrder, setSortOrder] = usePersistedState<SortOrder>("search_sort_order", "newest");
   const [clickMode, setClickMode] = usePersistedState<"open" | "select">("search_click_mode", "open");
 
@@ -260,11 +262,11 @@ export function SearchView() {
     searchInputRef,
     earliestDate,
     searchStartDate,
-    setSearchStartDate,
+    setSearchStartDate: onSearchStartChange,
     searchEndDate,
-    setSearchEndDate,
+    setSearchEndDate: onSearchEndChange,
     activePresetLabel,
-    setActivePresetLabel,
+    setActivePresetLabel: onSearchPresetLabelChange,
     sortOrder,
     setSortOrder,
     searchResultsLength: searchResults.length,
@@ -287,12 +289,13 @@ export function SearchView() {
     embeddingModel,
     setEmbeddingModel,
     embeddingModels,
+    earliestDate,
     searchStartDate,
-    setSearchStartDate,
+    onSearchStartChange,
     searchEndDate,
-    setSearchEndDate,
+    onSearchEndChange,
     activePresetLabel,
-    setActivePresetLabel,
+    onSearchPresetLabelChange,
     sortOrder,
     setSortOrder,
     searchResults.length,

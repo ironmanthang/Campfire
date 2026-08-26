@@ -3,7 +3,6 @@ import { invoke } from "@tauri-apps/api/core";
 import { BookOpen, Loader2, AlertCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { JournalEntryMetadata } from "../../types";
-import { getLocalYYYYMMDD } from "../../lib/dateUtils";
 import { useResizer } from "../../hooks/useResizer";
 import { useEntrySelection } from "../../hooks/useEntrySelection";
 import { DeleteConfirmModal } from "../../components/modals/data_management/DeleteConfirmModal";
@@ -11,6 +10,7 @@ import { usePersistedState } from "../../hooks/usePersistedState";
 import { useEarliestEntryDate } from "../../hooks/useEarliestEntryDate";
 import { useAppStore } from "../../store/useAppStore";
 import { useSearchStore } from "../../store/useSearchStore";
+import { useDateRangeFilter } from "../../hooks/useDateRangeFilter";
 import { TimelineHeader } from "./TimelineHeader";
 import { TimelineEntryList } from "./TimelineEntryList";
 
@@ -38,16 +38,18 @@ export function TimelineView() {
   const { searchQuery, handleTagClick } = useSearchStore();
 
   const earliestDate = useEarliestEntryDate();
-  const [filterStartDate, setFilterStartDate] = usePersistedState("timeline_filter_start", earliestDate);
-
-  useEffect(() => {
-    if (filterStartDate === "2010-01-01") {
-      setFilterStartDate(earliestDate);
-    }
-  }, [earliestDate, filterStartDate, setFilterStartDate]);
-
-  const [filterEndDate, setFilterEndDate] = usePersistedState("timeline_filter_end", getLocalYYYYMMDD);
-  const [activePresetLabel, setActivePresetLabel] = usePersistedState("timeline_active_preset", "All");
+  const {
+    startDate: filterStartDate,
+    endDate: filterEndDate,
+    activePresetLabel,
+    onStartChange: onFilterStartChange,
+    onEndChange: onFilterEndChange,
+    onPresetLabelChange,
+  } = useDateRangeFilter({
+    keyPrefix: "timeline",
+    earliestDate,
+    defaultPreset: "All",
+  });
   const [sortOrder, setSortOrder] = usePersistedState<SortOrder>("timeline_sort_order", "newest");
   const [clickMode, setClickMode] = usePersistedState<"open" | "select">("timeline_click_mode", "open");
 
@@ -210,16 +212,10 @@ export function TimelineView() {
         }}
         filterStartDate={filterStartDate}
         filterEndDate={filterEndDate}
-        onFilterStartChange={(val) => {
-          setFilterStartDate(val);
-          setActivePresetLabel("");
-        }}
-        onFilterEndChange={(val) => {
-          setFilterEndDate(val);
-          setActivePresetLabel("");
-        }}
+        onFilterStartChange={onFilterStartChange}
+        onFilterEndChange={onFilterEndChange}
         activePresetLabel={activePresetLabel}
-        onPresetLabelChange={setActivePresetLabel}
+        onPresetLabelChange={onPresetLabelChange}
         earliestDate={earliestDate}
         sortOrder={sortOrder}
         onSortOrderChange={setSortOrder}

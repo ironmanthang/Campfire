@@ -237,14 +237,8 @@ export function SearchHeader() {
               <DateRangePicker
                 startDate={searchStartDate}
                 endDate={searchEndDate}
-                onStartChange={(val) => {
-                  setSearchStartDate(val);
-                  setActivePresetLabel("");
-                }}
-                onEndChange={(val) => {
-                  setSearchEndDate(val);
-                  setActivePresetLabel("");
-                }}
+                onStartChange={setSearchStartDate}
+                onEndChange={setSearchEndDate}
                 activePresetLabel={activePresetLabel}
                 onPresetLabelChange={setActivePresetLabel}
                 earliestDate={earliestDate}
