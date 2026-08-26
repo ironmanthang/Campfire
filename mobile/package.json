@@ -6,9 +6,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && pnpm exec javascript-obfuscator dist/assets --output dist/assets --compact true --string-array true --string-array-encoding base64",
+    "build": "tsc -b && vite build",
     "i18n:check": "node scripts/i18n-check.js",
-    "lint": "oxlint",
+    "lint": "oxlint --deny-warnings",
     "preview": "vite preview",
     "test": "vitest run --passWithNoTests",
     "typecheck": "tsc -b"
@@ -27,7 +27,6 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.2",
     "@types/node": "^24.13.2",
-    "javascript-obfuscator": "^4.1.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",

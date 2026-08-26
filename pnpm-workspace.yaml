@@ -2,6 +2,9 @@ packages:
   - core
   - mobile
   - desktop
+  - worker
 allowBuilds:
   esbuild: true
+  sharp: true
   skia-canvas: true
+  workerd: true

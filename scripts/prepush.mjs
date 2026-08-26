@@ -34,13 +34,13 @@ async function runPrepush() {
       runCommand('pnpm', ['--filter', '*', 'test'], 'Tests'),
       runCommand('pnpm', ['--filter', '*', 'typecheck'], 'Typecheck'),
       runCommand('pnpm', ['--filter', 'desktop', '--filter', 'mobile', 'i18n:check'], 'i18n Check'),
-      runCommand('pnpm', ['--filter', 'mobile', 'lint'], 'Oxlint Check'),
+      runCommand('pnpm', ['--filter', 'desktop', '--filter', 'mobile', 'lint'], 'Oxlint Check'),
       runCommand('cargo', ['check', '--manifest-path', 'desktop/src-tauri/Cargo.toml'], 'Rust Cargo Check'),
     ]);
 
 
     // Phase 2: Run production builds sequentially once validation checks pass
-    console.log('\n--- Phase 2: Production Builds & Obfuscation ---');
+    console.log('\n--- Phase 2: Production Builds ---');
     await runCommand('pnpm', ['--filter', '*', 'build'], 'Build');
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);

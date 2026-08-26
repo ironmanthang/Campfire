@@ -161,6 +161,9 @@ export function useGoogleSync({
     }
   };
 
+  const handleSyncRef = useRef(handleSync);
+  handleSyncRef.current = handleSync;
+
   const debouncedSyncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const triggerDebouncedSync = useCallback((delayMs: number = 1000) => {
@@ -169,7 +172,7 @@ export function useGoogleSync({
       const auth = getStoredAuthState();
       const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';
       if (autoSync && (auth.accessToken || auth.sessionId)) {
-        handleSync();
+        handleSyncRef.current();
       }
     }, delayMs);
   }, []);
