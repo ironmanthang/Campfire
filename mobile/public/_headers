@@ -1,0 +1,14 @@
+# Root and HTML files: revalidate immediately
+/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Hashed assets: cache permanently (Vite includes content hashes in filename)
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Service Worker & Manifest: never serve stale SW scripts
+/sw.js
+  Cache-Control: public, max-age=0, must-revalidate
+
+/manifest.webmanifest
+  Cache-Control: public, max-age=0, must-revalidate
