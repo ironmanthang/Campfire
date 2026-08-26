@@ -24,7 +24,7 @@ function ReportSection({
     <div className="space-y-1.5">
       <div className="flex items-center justify-between text-xs font-semibold text-text-primary">
         <span>{title}</span>
-        <span className="px-2 py-0.5 rounded-full bg-bg-app border border-border-brand/50 text-[11px]">
+        <span className="px-2 py-0.5 rounded-full bg-bg-app border border-border-brand/50 text-xs">
           {count}
         </span>
       </div>

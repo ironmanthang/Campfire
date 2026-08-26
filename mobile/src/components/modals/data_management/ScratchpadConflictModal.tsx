@@ -48,7 +48,7 @@ export const ScratchpadConflictModal: React.FC<ScratchpadConflictModalProps> = (
                 <div className="text-xs font-bold text-text-primary">
                   {t('scratchpadConflict.keepLocal', 'Keep Local Version')}
                 </div>
-                <div className="text-[11px] text-text-secondary">
+                <div className="text-xs text-text-secondary">
                   {t('scratchpadConflict.keepLocalDesc', 'Overwrite cloud with this device')}
                 </div>
               </div>
@@ -66,7 +66,7 @@ export const ScratchpadConflictModal: React.FC<ScratchpadConflictModalProps> = (
                 <div className="text-xs font-bold text-text-primary">
                   {t('scratchpadConflict.keepRemote', 'Keep Cloud Version')}
                 </div>
-                <div className="text-[11px] text-text-secondary">
+                <div className="text-xs text-text-secondary">
                   {t('scratchpadConflict.keepRemoteDesc', 'Overwrite this device with cloud')}
                 </div>
               </div>
@@ -84,7 +84,7 @@ export const ScratchpadConflictModal: React.FC<ScratchpadConflictModalProps> = (
                 <div className="text-xs font-bold text-text-primary">
                   {t('scratchpadConflict.keepBoth', 'Keep Both (Recommended)')}
                 </div>
-                <div className="text-[11px] text-text-secondary">
+                <div className="text-xs text-text-secondary">
                   {t('scratchpadConflict.keepBothDesc', 'Combine notes from both versions')}
                 </div>
               </div>

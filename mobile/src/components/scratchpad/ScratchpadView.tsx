@@ -178,7 +178,7 @@ export const ScratchpadView = forwardRef<ScratchpadViewHandle, ScratchpadViewPro
             <h2 className="font-bold text-base text-text-primary leading-tight truncate">
               {t('scratchpad.title', 'Scratchpad & Notes')}
             </h2>
-            <p className="text-[11px] text-text-secondary truncate">
+            <p className="text-xs text-text-secondary truncate">
               {t('scratchpad.subtitle', 'Quick persistent task list')}
             </p>
           </div>
@@ -306,7 +306,7 @@ export const ScratchpadView = forwardRef<ScratchpadViewHandle, ScratchpadViewPro
                     <div className="flex items-center gap-1.5 px-2 py-1 text-xs font-bold text-accent-brand uppercase tracking-wider select-none">
                       <Pin size={13} className="fill-current" />
                       <span>{t('scratchpad.pinned', 'Pinned')}</span>
-                      <span className="text-[11px] font-semibold px-1.5 py-0.2 rounded-md bg-accent-brand/10 border border-accent-brand/30 ml-1">
+                      <span className="text-xs font-semibold px-1.5 py-0.5 rounded-md bg-accent-brand/10 border border-accent-brand/30 ml-1">
                         {pinnedItems.length}
                       </span>
                     </div>
@@ -337,7 +337,7 @@ export const ScratchpadView = forwardRef<ScratchpadViewHandle, ScratchpadViewPro
                     <div className="space-y-1 pt-3 border-t border-border-brand/30">
                       <div className="flex items-center gap-1.5 px-2 pb-1 text-xs font-bold text-text-secondary uppercase tracking-wider select-none">
                         <span>{t('scratchpad.other', 'Other Notes')}</span>
-                        <span className="text-[11px] font-semibold px-1.5 py-0.2 rounded-md bg-bg-app border border-border-brand/40 ml-1">
+                        <span className="text-xs font-semibold px-1.5 py-0.5 rounded-md bg-bg-app border border-border-brand/40 ml-1">
                           {unpinnedItems.length}
                         </span>
                       </div>

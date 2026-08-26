@@ -290,7 +290,7 @@ export function ScratchpadItemRow({
 
   // Shared completion badge positioned inline
   const badge = hasChildren ? (
-    <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md bg-bg-app text-text-secondary border border-border-brand/40 select-none shrink-0">
+    <span className="text-xs font-semibold px-1.5 py-0.5 rounded-md bg-bg-app text-text-secondary border border-border-brand/40 select-none shrink-0">
       {completedChildCount}/{totalChildCount}
     </span>
   ) : null;

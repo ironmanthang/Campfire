@@ -267,27 +267,27 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({
             </div>
             <div className="flex flex-col">
               <span className="text-xs font-bold text-text-primary">{t("journalEditor.conflictTitle")}</span>
-              <span className="text-[10px] text-text-secondary leading-normal">{t("journalEditor.conflictBody")}</span>
+              <span className="text-xs text-text-secondary leading-normal">{t("journalEditor.conflictBody")}</span>
             </div>
           </div>
           <div className="grid grid-cols-3 gap-1.5">
             <button
               onClick={() => onResolveConflict("local")}
-              className="py-2 px-1 rounded-xl bg-accent-brand text-bg-app text-[10px] font-bold shadow-sm transition-all active:scale-95 cursor-pointer text-center truncate"
+              className="py-2 px-1 rounded-xl bg-accent-brand text-bg-app text-xs font-bold shadow-sm transition-all active:scale-95 cursor-pointer text-center truncate"
               title={t("journalEditor.conflictKeepMineTitle")}
             >
               {t("journalEditor.conflictKeepMine")}
             </button>
             <button
               onClick={() => onResolveConflict("remote")}
-              className="py-2 px-1 rounded-xl bg-bg-surface border border-border-brand hover:border-accent-brand text-text-primary text-[10px] font-bold shadow-sm transition-all active:scale-95 cursor-pointer text-center truncate"
+              className="py-2 px-1 rounded-xl bg-bg-surface border border-border-brand hover:border-accent-brand text-text-primary text-xs font-bold shadow-sm transition-all active:scale-95 cursor-pointer text-center truncate"
               title={t("journalEditor.conflictKeepCloudTitle")}
             >
               {t("journalEditor.conflictKeepCloud")}
             </button>
             <button
               onClick={() => onResolveConflict("both")}
-              className="py-2 px-1 rounded-xl bg-bg-surface border border-border-brand hover:border-accent-brand text-text-primary text-[10px] font-bold shadow-sm transition-all active:scale-95 cursor-pointer text-center truncate"
+              className="py-2 px-1 rounded-xl bg-bg-surface border border-border-brand hover:border-accent-brand text-text-primary text-xs font-bold shadow-sm transition-all active:scale-95 cursor-pointer text-center truncate"
               title={t("journalEditor.conflictKeepBothTitle")}
             >
               {t("journalEditor.conflictKeepBoth")}

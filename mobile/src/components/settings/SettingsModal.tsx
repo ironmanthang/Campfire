@@ -75,7 +75,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
 
           {/* Privacy & Terms & Version Links */}
-          <div className="flex justify-center items-center gap-3 pt-6 border-t border-border-brand/40 text-[11px] text-text-secondary">
+          <div className="flex justify-center items-center gap-3 pt-6 border-t border-border-brand/40 text-xs text-text-secondary">
             <a
               href="/privacy/"
               target="_blank"

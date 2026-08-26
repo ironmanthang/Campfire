@@ -262,27 +262,29 @@ export const HeartSection: React.FC = () => {
 
       {/* Custom heart image row */}
       <div className="flex items-center justify-between gap-3 p-3 bg-bg-surface/40 border border-border-brand/40 rounded-xl">
-        <div className="flex items-center gap-2 min-w-0 flex-1">
-          <ImageIcon className="h-3.5 w-3.5 shrink-0 text-text-primary" />
-          <span className="text-xs font-semibold text-text-primary shrink-0">
-            {t("settingsView.heartCustomImageLabel", { defaultValue: "Custom heart image" })}
-          </span>
-          {customImage ? (
-            <div className="flex items-center gap-1.5 min-w-0">
-              <img
-                src={customImage}
-                alt=""
-                className="h-5 w-5 object-contain rounded border border-border-brand/40 bg-bg-app/40 shrink-0"
-              />
-              <span className="text-[0.625rem] text-text-secondary truncate">
-                {t("settingsView.heartCustomImageSet", { defaultValue: "Custom image set" })}
-              </span>
-            </div>
-          ) : (
-            <span className="text-[0.625rem] text-text-secondary italic truncate">
-              {t("settingsView.heartCustomImageEmpty", { defaultValue: "Using default red heart" })}
+        <div className="flex items-start gap-2.5 min-w-0 flex-1">
+          <ImageIcon className="h-4 w-4 shrink-0 text-text-primary mt-0.5" />
+          <div className="flex flex-col min-w-0">
+            <span className="text-xs font-semibold text-text-primary leading-tight">
+              {t("settingsView.heartCustomImageLabel", { defaultValue: "Custom heart image" })}
             </span>
-          )}
+            {customImage ? (
+              <div className="flex items-center gap-1.5 mt-1 min-w-0">
+                <img
+                  src={customImage}
+                  alt=""
+                  className="h-5 w-5 object-contain rounded border border-border-brand/40 bg-bg-app/40 shrink-0"
+                />
+                <span className="text-xs text-text-secondary truncate">
+                  {t("settingsView.heartCustomImageSet", { defaultValue: "Custom image set" })}
+                </span>
+              </div>
+            ) : (
+              <span className="text-xs text-text-secondary italic mt-0.5 leading-snug">
+                {t("settingsView.heartCustomImageEmpty", { defaultValue: "Using default red heart" })}
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">

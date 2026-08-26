@@ -24,12 +24,12 @@ export const DebugLogsSection: React.FC = () => {
       <div className="flex items-center justify-between">
         <h4 className="text-xs font-semibold text-text-primary uppercase tracking-wider">{t("settings.debugLogsTitle")}</h4>
         {logs.length > 0 && (
-          <button onClick={handleClearLogs} className="text-[10px] text-red-500 hover:underline">
+          <button onClick={handleClearLogs} className="text-xs text-red-500 hover:underline">
             {t("settings.debugClearLogs")}
           </button>
         )}
       </div>
-      <div className="bg-bg-app border border-border-brand rounded-xl p-3 max-h-48 overflow-y-auto font-mono text-[9px] text-text-secondary whitespace-pre-wrap leading-relaxed">
+      <div className="bg-bg-app border border-border-brand rounded-xl p-3 max-h-48 overflow-y-auto font-mono text-[0.6875rem] text-text-secondary whitespace-pre-wrap leading-relaxed">
         {logs.length > 0 ? (
           logs.slice().reverse().join('\n')
         ) : (

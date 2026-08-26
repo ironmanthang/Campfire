@@ -130,12 +130,6 @@ function App() {
   const switchMainView = (view: 'journal' | 'scratchpad') => {
     localStorage.setItem('campfire_mobile_active_view', view);
     setActiveMainView(view);
-    if (view === 'journal') {
-      const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';
-      if (autoSync && isLoggedIn) {
-        handleSync();
-      }
-    }
   };
 
   const handleFloatingAdd = () => {
@@ -204,7 +198,7 @@ function App() {
               onClick={() => {
                 setIsDonateOpen(true);
               }}
-              className="px-3 py-1.5 rounded-xl bg-accent-brand text-bg-app font-bold text-[10px] shadow hover:bg-accent-brand/90 transition-all cursor-pointer"
+              className="px-3 py-1.5 rounded-xl bg-accent-brand text-bg-app font-bold text-xs shadow hover:bg-accent-brand/90 transition-all cursor-pointer"
             >
               {t("donateBanner.supportButton")}
             </button>
@@ -213,7 +207,7 @@ function App() {
                 sessionStorage.setItem("donate-reminder-maybe-later", "true");
                 setShowDonateBanner(false);
               }}
-              className="px-3 py-1.5 rounded-xl bg-bg-surface border border-border-brand hover:border-accent-brand text-[10px] font-bold text-text-primary transition-all cursor-pointer"
+              className="px-3 py-1.5 rounded-xl bg-bg-surface border border-border-brand hover:border-accent-brand text-xs font-bold text-text-primary transition-all cursor-pointer"
             >
               {t("donateBanner.maybeLater")}
             </button>
@@ -222,7 +216,7 @@ function App() {
                 localStorage.setItem("donate-reminder-never-ask", "true");
                 setShowDonateBanner(false);
               }}
-              className="px-3 py-1.5 rounded-xl bg-bg-surface border border-border-brand hover:border-accent-brand text-[10px] font-bold text-text-primary transition-all cursor-pointer"
+              className="px-3 py-1.5 rounded-xl bg-bg-surface border border-border-brand hover:border-accent-brand text-xs font-bold text-text-primary transition-all cursor-pointer"
             >
               {t("donateBanner.dontAskAgain")}
             </button>

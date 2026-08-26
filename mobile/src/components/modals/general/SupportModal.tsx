@@ -127,7 +127,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
 
                 {/* Custom Support Message Input (VietQR only) */}
                 <div className="space-y-1 text-left bg-bg-app/40 border border-border-brand/30 rounded-xl p-3">
-                  <label className="block text-[10px] font-bold text-text-secondary uppercase tracking-wider">
+                  <label className="block text-xs font-bold text-text-secondary uppercase tracking-wider">
                     {t("donate.supportMessageLabel")}
                   </label>
                   <input
@@ -159,7 +159,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
                   </button>
                 </div>
 
-                <div className="text-[10px] text-left text-text-secondary space-y-1 bg-bg-app/40 p-3 rounded-lg border border-border-brand/10 font-mono">
+                <div className="text-xs text-left text-text-secondary space-y-1 bg-bg-app/40 p-3 rounded-lg border border-border-brand/10 font-mono">
                   <div><strong>{t("donate.vietQrBank")}:</strong> Vietcombank</div>
                   <div><strong>{t("donate.vietQrAccount")}:</strong> 9949420500</div>
                   <div><strong>{t("donate.vietQrOwner")}:</strong> NGUYEN NHU THANG</div>
@@ -183,8 +183,8 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
                 {/* Trust Badges */}
                 <div className="flex flex-col items-center justify-center gap-1">
                   <div className="flex items-center gap-1.5 opacity-80">
-                    <span className="text-[9px] text-text-secondary font-semibold uppercase tracking-wider">{t("donate.kofiSupports")}:</span>
-                    <span className="text-[9px] text-text-secondary font-medium">{t("donate.kofiSupportsList")}</span>
+                    <span className="text-xs text-text-secondary font-semibold uppercase tracking-wider">{t("donate.kofiSupports")}:</span>
+                    <span className="text-xs text-text-secondary font-medium">{t("donate.kofiSupportsList")}</span>
                   </div>
                 </div>
               </div>

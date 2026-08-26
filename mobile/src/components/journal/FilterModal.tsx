@@ -49,7 +49,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
 
         {/* Date Range Selection */}
         <div className="space-y-2">
-          <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">{t("journalList.filterDateRangeLabel")}</label>
+          <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">{t("journalList.filterDateRangeLabel")}</label>
           <div className="grid grid-cols-4 gap-2">
             {[
               { value: 'all', label: t("journalList.filterDateAll") },
@@ -74,7 +74,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
 
         {/* Sort Order Selection */}
         <div className="space-y-2">
-          <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">{t("journalList.filterSortLabel")}</label>
+          <label className="text-xs font-bold text-text-secondary uppercase tracking-wider">{t("journalList.filterSortLabel")}</label>
           <div className="grid grid-cols-2 gap-2">
             {[
               { value: 'newest', label: t("journalList.filterSortNewest") },

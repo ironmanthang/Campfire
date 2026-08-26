@@ -120,8 +120,9 @@ export const createSyncSlice: StateCreator<
       return;
     }
     if (typeof navigator !== "undefined" && !navigator.onLine) {
-      set({ syncProgress: { status: "error", message: "No internet connection.", filesProcessed: 0, totalFiles: 0 } });
-      if (isManual) get().showNotification("Sync failed: No internet connection.", "error");
+      if (isManual) {
+        get().showNotification("Offline — changes are saved locally and will sync once reconnected.", "success");
+      }
       return;
     }
 
@@ -170,9 +171,16 @@ export const createSyncSlice: StateCreator<
       }
     } catch (err: any) {
       console.error("Sync error:", err);
+      const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
       const errMsg = typeof err === "string" ? err : err.message || "Sync failed";
-      set({ syncProgress: { status: "error", message: errMsg, filesProcessed: 0, totalFiles: 0 } });
-      if (isManual) get().showNotification(errMsg, "error");
+      const isNetworkError = isOffline || errMsg.toLowerCase().includes("failed to fetch") || errMsg.toLowerCase().includes("networkerror");
+
+      if (isNetworkError && !isManual) {
+        set({ syncProgress: { status: "idle", message: "Offline — changes saved locally", filesProcessed: 0, totalFiles: 0 } });
+      } else {
+        set({ syncProgress: { status: "error", message: errMsg, filesProcessed: 0, totalFiles: 0 } });
+        if (isManual) get().showNotification(errMsg, "error");
+      }
     } finally {
       if (isStartupSync) {
         set({ initialSyncInProgress: false });

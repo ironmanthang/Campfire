@@ -38,7 +38,7 @@ export const FontSizeSection: React.FC = () => {
       </div>
       {/* Live Text Preview Box */}
       <div className="p-3 rounded-xl bg-bg-app border border-border-brand">
-        <span className="text-[10px] uppercase font-bold text-text-secondary block mb-1">
+        <span className="text-xs uppercase font-bold text-text-secondary block mb-1 tracking-wider">
           {t("settings.fontSizePreviewLabel", { defaultValue: "Preview" })}
         </span>
         <p 

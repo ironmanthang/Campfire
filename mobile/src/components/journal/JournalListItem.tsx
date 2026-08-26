@@ -72,12 +72,12 @@ export const JournalListItem: React.FC<JournalListItemProps> = ({
         
         {/* Sync status dot & word count */}
         <div className="flex items-center gap-2 shrink-0">
-          <span className="text-[10px] text-text-secondary flex items-center gap-0.5">
+          <span className="text-xs text-text-secondary flex items-center gap-0.5">
             <FileText size={10} /> {words === 1 ? t("journalList.wordCount", { count: words }) : t("journalList.wordCountPlural", { count: words })}
           </span>
           {!entry.synced ? (
             <span
-              className="flex items-center gap-1 text-[10px] font-medium text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded-full"
+              className="flex items-center gap-1 text-xs font-medium text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded-full"
               title={t("journalList.unsyncedTooltip")}
               aria-label={t("journalList.unsyncedTooltip")}
             >
@@ -86,7 +86,7 @@ export const JournalListItem: React.FC<JournalListItemProps> = ({
             </span>
           ) : (
             <span
-              className="flex items-center gap-1 text-[10px] font-medium text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded-full"
+              className="flex items-center gap-1 text-xs font-medium text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded-full"
               title={t("journalList.syncedTooltip")}
               aria-label={t("journalList.syncedTooltip")}
             >
@@ -107,7 +107,7 @@ export const JournalListItem: React.FC<JournalListItemProps> = ({
           {tags.map((tag) => (
             <span 
               key={tag} 
-              className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-accent-brand/10 text-accent-brand border border-accent-brand/10"
+              className="text-xs font-semibold px-2 py-0.5 rounded-md bg-accent-brand/10 text-accent-brand border border-accent-brand/10"
             >
               #{tag}
             </span>

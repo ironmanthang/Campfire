@@ -163,7 +163,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, classNa
             {/* Weekdays */}
             <div className="grid grid-cols-7 gap-1 mb-2">
               {WEEKDAYS.map((w) => (
-                <div key={w} className="text-center text-[10px] font-bold text-text-secondary/70 uppercase">
+                <div key={w} className="text-center text-xs font-bold text-text-secondary/70 uppercase">
                   {w}
                 </div>
               ))}
@@ -198,7 +198,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, classNa
           </div>
 
           {/* Swipe Instructions */}
-          <p className="text-[9px] text-text-secondary/50 text-center mt-2.5 italic">
+          <p className="text-xs text-text-secondary/50 text-center mt-2.5 italic">
             {t("datePicker.swipeHint")}
           </p>
 

@@ -69,7 +69,7 @@ export const GoogleDriveSection: React.FC = () => {
         <div className="flex items-center justify-between py-2 border-t border-border-brand/40">
           <div>
             <h4 className="text-sm font-semibold text-text-primary">{t("settings.autoSyncTitle")}</h4>
-            <p className="text-[11px] text-text-secondary">{t("settings.autoSyncDesc")}</p>
+            <p className="text-xs text-text-secondary leading-normal">{t("settings.autoSyncDesc")}</p>
           </div>
           <input
             type="checkbox"
@@ -86,7 +86,7 @@ export const GoogleDriveSection: React.FC = () => {
           <div className="flex flex-col min-w-0 flex-1">
             <span className="text-sm font-medium text-text-primary leading-tight">{t("settings.googleAccountTitle")}</span>
             {isLoggedIn && userEmail && (
-              <span className="text-[11px] text-text-secondary mt-0.5 truncate">{userEmail}</span>
+              <span className="text-xs text-text-secondary mt-0.5 truncate">{userEmail}</span>
             )}
           </div>
           <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold whitespace-nowrap shrink-0 ${isLoggedIn ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20'}`}>

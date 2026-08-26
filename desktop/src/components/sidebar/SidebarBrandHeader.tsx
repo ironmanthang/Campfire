@@ -115,7 +115,7 @@ export function SidebarBrandHeader({ isCollapsed, onToggle }: SidebarBrandHeader
         className="p-1.5 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-app/40 transition-colors cursor-pointer shrink-0"
         title={isCollapsed ? t("sidebar.expandSidebar") : t("sidebar.collapseSidebar")}
       >
-        <ChevronLeft className={`h-4.5 w-4.5 transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`} />
+        <ChevronLeft className={`h-4.5 w-4.5 transition-transform duration-150 ${isCollapsed ? 'rotate-180' : ''}`} />
       </button>
 
       {isLogoModalOpen && (

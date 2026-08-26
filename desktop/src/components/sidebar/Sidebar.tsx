@@ -82,7 +82,7 @@ export function Sidebar({
       hideTimeoutRef.current = setTimeout(() => {
         setHoverPeekVisible(false);
         hideTimeoutRef.current = null;
-      }, 300);
+      }, 100);
     }
   };
 
@@ -98,7 +98,7 @@ export function Sidebar({
       hideTimeoutRef.current = setTimeout(() => {
         setHoverPeekVisible(false);
         hideTimeoutRef.current = null;
-      }, 300);
+      }, 100);
     }
   };
 
@@ -106,7 +106,7 @@ export function Sidebar({
     <>
       {/* Spacer div to reserve space in flex layout when sidebar is permanently expanded */}
       <div
-        className={`shrink-0 transition-all duration-300 ease-in-out ${
+        className={`shrink-0 transition-all duration-150 ease-out ${
           isCollapsed ? "w-0" : "w-64"
         }`}
       />
@@ -114,7 +114,7 @@ export function Sidebar({
       <aside
         onMouseEnter={isCollapsed ? handleMouseEnterSidebar : undefined}
         onMouseLeave={isCollapsed ? handleMouseLeaveSidebar : undefined}
-        className={`w-64 border-r border-border-brand bg-bg-surface flex flex-col justify-between transition-all duration-300 ease-in-out ${
+        className={`w-64 border-r border-border-brand bg-bg-surface flex flex-col justify-between transition-all duration-150 ease-out ${
           isCollapsed
             ? hoverPeekVisible
               ? "fixed left-0 top-0 bottom-0 z-50 shadow-2xl translate-x-0"
@@ -207,25 +207,27 @@ export function Sidebar({
                   className="p-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-surface transition-colors flex items-center justify-center cursor-pointer disabled:opacity-85"
                   title={
                     !isDriveConnected
-                      ? t("journalEditor.driveNotConnected")
+                      ? t("journalEditor.driveNotConnected", "Google Drive not connected")
+                      : typeof navigator !== "undefined" && !navigator.onLine
+                      ? t("sidebar.driveOffline", "Offline — changes saved locally")
                       : syncProgress.status === "idle"
-                      ? t("journalEditor.driveClickToSync")
+                      ? t("journalEditor.driveClickToSync", "Click to sync with Google Drive")
                       : syncProgress.message ||
                         (syncProgress.status === "syncing"
-                          ? t("journalEditor.statusSyncing")
+                          ? t("journalEditor.statusSyncing", "Syncing...")
                           : syncProgress.status === "connecting"
-                          ? t("journalEditor.statusConnecting")
+                          ? t("journalEditor.statusConnecting", "Connecting...")
                           : syncProgress.status === "error"
-                          ? t("journalEditor.statusError")
-                          : t("journalEditor.statusSynced"))
+                          ? t("journalEditor.statusError", "Sync error")
+                          : t("journalEditor.statusSynced", "Synced"))
                   }
                 >
-                  {!isDriveConnected ? (
+                  {!isDriveConnected || (typeof navigator !== "undefined" && !navigator.onLine) ? (
                     <CloudOff className="h-4.5 w-4.5 text-text-secondary/70" />
                   ) : syncProgress.status === "syncing" || syncProgress.status === "connecting" ? (
                     <RefreshCw className="h-4.5 w-4.5 text-accent-brand animate-spin" />
                   ) : syncProgress.status === "error" ? (
-                    <AlertTriangle className="h-4.5 w-4.5 text-red-500 animate-pulse" />
+                    <AlertTriangle className="h-4.5 w-4.5 text-red-500" />
                   ) : (
                     <Cloud className="h-4.5 w-4.5 text-emerald-500" />
                   )}
