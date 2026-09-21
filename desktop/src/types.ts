@@ -41,6 +41,11 @@ export interface AppConfig {
    * to it.
    */
   heart_custom_image: string;
+  sound_sfx_enabled: boolean;
+  sound_sfx_volume: number; // 0-100
+  sound_ambient_enabled: boolean;
+  sound_ambient_type: 'campfire' | 'rain' | 'night-forest';
+  sound_ambient_volume: number; // 0-100
   locked_entries?: Record<string, boolean>;
 }
 

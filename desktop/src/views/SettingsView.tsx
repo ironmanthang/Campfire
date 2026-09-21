@@ -10,12 +10,13 @@ import {
   IdentitySection,
   OllamaSection,
   PwaSection,
+  SoundSection,
   LegacyExportSection
 } from "../components/settings";
 import { useAppStore } from "../store/useAppStore";
 import { useOllamaStore } from "../store/useOllamaStore";
 
-const AVAILABLE_SECTIONS = ["identity", "pwa", "ollama", "heart", "legacy"];
+const AVAILABLE_SECTIONS = ["identity", "sound", "pwa", "ollama", "heart", "legacy"];
 
 export function SettingsView() {
   const { t } = useTranslation();
@@ -93,6 +94,15 @@ export function SettingsView() {
         title = t("settingsView.identityTitle");
         badge = t("settingsView.identityBadge");
         content = <IdentitySection />;
+        break;
+
+      case "sound":
+        title = t("soundSection.title", { defaultValue: "Sound & Ambiance" });
+        badge = t("soundSection.badge", { defaultValue: "Audio" });
+        description = t("soundSection.description", {
+          defaultValue: "Customize tactile sound effects and looping ambient audio soundscapes.",
+        });
+        content = <SoundSection />;
         break;
 
       case "ollama":

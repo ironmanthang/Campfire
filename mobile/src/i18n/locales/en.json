@@ -226,5 +226,26 @@
     "keepRemoteDesc": "Overwrite this device with cloud",
     "keepBoth": "Keep Both (Recommended)",
     "keepBothDesc": "Combine notes from both versions"
+  },
+  "soundSection": {
+    "title": "Sound & Ambiance",
+    "badge": "Audio",
+    "description": "Configure sound effects for scratchpad actions and cozy ambient background soundscapes.",
+    "sfxTitle": "Sound Effects",
+    "enableSfxLabel": "Scratchpad & Heart Sounds",
+    "enableSfxDesc": "Play a pencil-tick when completing tasks and a sparkle when clicking the heart.",
+    "volumeLabel": "Volume",
+    "testSfxTooltip": "Preview pencil tick sound",
+    "testButton": "Preview",
+    "ambientTitle": "Ambient Background Sound",
+    "enableAmbientLabel": "Enable Ambiance",
+    "enableAmbientDesc": "Loop a relaxing atmosphere in the background while you focus and write.",
+    "trackCampfire": "Campfire",
+    "trackCampfireDesc": "Cozy crackling fireplace",
+    "trackRain": "Light Rain",
+    "trackRainDesc": "Gentle soothing rain",
+    "trackNightForest": "Night Breeze",
+    "trackNightForestDesc": "Wind rustling through tall grass",
+    "ambientVolumeLabel": "Ambiance"
   }
 }

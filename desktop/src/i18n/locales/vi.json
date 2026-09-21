@@ -1012,5 +1012,26 @@
     "keepRemoteDesc": "Ghi đè bản trên thiết bị này bằng bản đám mây",
     "keepBoth": "Giữ cả hai (Khuyên dùng)",
     "keepBothDesc": "Gộp tất cả ghi chú từ cả hai phiên bản"
+  },
+  "soundSection": {
+    "title": "Âm thanh & Không gian",
+    "badge": "Âm thanh",
+    "description": "Tùy chỉnh hiệu ứng âm thanh cho việc hoàn thành công việc và âm thanh nền thư giãn.",
+    "sfxTitle": "Hiệu ứng âm thanh",
+    "enableSfxLabel": "Âm thanh ghi chú & Trái tim",
+    "enableSfxDesc": "Phát tiếng bút chì khi đánh dấu hoàn thành tác vụ và tiếng lấp lánh khi nhấp vào trái tim.",
+    "volumeLabel": "Âm lượng",
+    "testSfxTooltip": "Nghe thử âm thanh bút chì",
+    "testButton": "Nghe thử",
+    "ambientTitle": "Âm thanh nền không gian",
+    "enableAmbientLabel": "Bật âm thanh nền",
+    "enableAmbientDesc": "Âm thanh thư giãn giúp bạn tập trung khi viết nhật ký.",
+    "trackCampfire": "Lửa trại",
+    "trackCampfireDesc": "Tiếng lửa",
+    "trackRain": "Mưa rào nhẹ",
+    "trackRainDesc": "Tiếng mưa",
+    "trackNightForest": "Gió đêm",
+    "trackNightForestDesc": "Gió thổi qua đồng cỏ",
+    "ambientVolumeLabel": "Âm lượng nền"
   }
 }

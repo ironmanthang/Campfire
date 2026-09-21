@@ -6,4 +6,5 @@ export * from './FontSizeSection';
 export * from './GoogleDriveSection';
 export * from './HeartSection';
 export * from './LanguageSection';
+export * from './SoundSection';
 export * from './ThemeSection';

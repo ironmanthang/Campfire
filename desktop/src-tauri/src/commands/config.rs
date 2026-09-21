@@ -44,6 +44,11 @@ pub struct AppConfig {
     /// Optional `data:` URL (e.g. `data:image/png;base64,...`) for a custom
     /// image used in place of the default red heart. Empty string = default.
     pub heart_custom_image: String,
+    pub sound_sfx_enabled: bool,
+    pub sound_sfx_volume: u32,
+    pub sound_ambient_enabled: bool,
+    pub sound_ambient_type: String,
+    pub sound_ambient_volume: u32,
     #[serde(default)]
     pub locked_entries: std::collections::HashMap<String, bool>,
 }
@@ -58,6 +63,7 @@ fn default_section_order() -> Vec<String> {
     vec![
         "identity".to_string(),
         "ollama".to_string(),
+        "sound".to_string(),
         "pwa".to_string(),
         "web_search".to_string(),
         "legacy".to_string(),
@@ -99,6 +105,11 @@ impl Default for AppConfig {
             heart_gate_dismissed: false,
             heart_shortcut: String::new(),
             heart_custom_image: String::new(),
+            sound_sfx_enabled: false,
+            sound_sfx_volume: 70,
+            sound_ambient_enabled: false,
+            sound_ambient_type: "campfire".to_string(),
+            sound_ambient_volume: 50,
             locked_entries: std::collections::HashMap::new(),
         }
     }

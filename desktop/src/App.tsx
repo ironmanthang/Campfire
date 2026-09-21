@@ -23,6 +23,7 @@ import i18n from "i18next";
 import { useTranslation } from "react-i18next";
 import { useAppStore } from "./store/useAppStore";
 import { useOllamaStore } from "./store/useOllamaStore";
+import { useAmbientAudio } from "./hooks/useAmbientAudio";
 import { matchesShortcut } from "./components/heart/shortcut";
 import { ImportReportModal } from "./components/modals/data_management/ImportReportModal";
 import { invoke } from "@tauri-apps/api/core";
@@ -79,6 +80,8 @@ function App() {
   const {
     verifyOllamaConnection
   } = useOllamaStore();
+
+  useAmbientAudio();
 
   // Global heart shortcut. When the configured combo is pressed anywhere in
   // the app, fire the same action the floating heart's click would: open the

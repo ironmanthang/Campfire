@@ -5,6 +5,7 @@ import { APP_VERSION } from '../../lib/appVersion';
 import {
   FontSizeSection,
   LanguageSection,
+  SoundSection,
   GoogleDriveSection,
   DesktopSection,
   ExportSection,
@@ -51,6 +52,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
           {/* Language setting */}
           <LanguageSection />
+
+          <hr className="border-border-brand" />
+
+          {/* Sound & Ambiance setting */}
+          <SoundSection />
 
           <hr className="border-border-brand" />
 

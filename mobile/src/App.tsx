@@ -13,6 +13,7 @@ import { useJournalDb } from './hooks/useJournalDb';
 import { useJournalNavigation } from './hooks/useJournalNavigation';
 import { useGoogleSync } from './hooks/useGoogleSync';
 import { useFallingHearts } from './hooks/useFallingHearts';
+import { useAmbientAudio } from './hooks/useAmbientAudio';
 import { FallingHearts } from './components/heart';
 
 // Utils
@@ -47,6 +48,9 @@ function App() {
 
   // Initialize font size preference
   useFontSize();
+
+  // Initialize background ambiance audio
+  useAmbientAudio();
 
   // Ensure the persisted language is applied even if localStorage was read
   // before the i18n module initialized.

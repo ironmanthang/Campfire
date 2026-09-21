@@ -36,6 +36,11 @@ export function useConfig(showNotification: (text: string, type: "success" | "er
     heart_gate_dismissed: false,
     heart_shortcut: "",
     heart_custom_image: "",
+    sound_sfx_enabled: false,
+    sound_sfx_volume: 70,
+    sound_ambient_enabled: false,
+    sound_ambient_type: "campfire",
+    sound_ambient_volume: 50,
   });
 
   useEffect(() => {

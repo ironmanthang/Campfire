@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Heart } from "lucide-react";
 import { useAppStore } from "../../store/useAppStore";
+import { playSfx } from "../../services/audioService";
 
 interface DraggableHeartProps {
   onClick: () => void;
@@ -221,6 +222,7 @@ export function DraggableHeart({ onClick }: DraggableHeartProps) {
         });
       } else {
         // It was a click, not a drag
+        playSfx("sparkle");
         if (clickFalls) {
           const durationMs = (config.heart_rain_duration ?? 5) * 1000;
           startHeartRain(durationMs);

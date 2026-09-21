@@ -18,6 +18,7 @@ import {
   MoreHorizontal,
 } from 'lucide-react';
 import { type ScratchpadItem, getItemCheckStatus } from '@campfire/core';
+import { playSfx } from '../../services/audioService';
 
 export interface ScratchpadItemRowProps {
   item: ScratchpadItem;
@@ -445,7 +446,10 @@ export function ScratchpadItemRow({
         className="group flex items-center justify-between gap-2 p-2 rounded-xl active:bg-bg-surface/70 transition-colors cursor-pointer"
         onClick={() => {
           if (window.getSelection()?.toString()) return;
-          if (!isEditing) onToggleCheck(item.id, checkStatus !== 'checked');
+          if (!isEditing) {
+            if (checkStatus !== 'checked') playSfx('pencil-tick');
+            onToggleCheck(item.id, checkStatus !== 'checked');
+          }
         }}
       >
         <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -472,6 +476,7 @@ export function ScratchpadItemRow({
             type="button"
             onClick={(e) => {
               e.stopPropagation();
+              if (checkStatus !== 'checked') playSfx('pencil-tick');
               onToggleCheck(item.id, checkStatus !== 'checked');
             }}
             className="text-accent-brand focus:outline-none cursor-pointer shrink-0"

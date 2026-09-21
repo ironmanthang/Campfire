@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Plus, Heart } from 'lucide-react';
 import { useDraggableButton } from '../../hooks/useDraggableButton';
 import { DEFAULT_HEART_SIZE } from '../../constants/heart';
+import { playSfx } from '../../services/audioService';
 
 interface FloatingActionButtonsProps {
   onAddClick: () => void;
@@ -84,6 +85,7 @@ export const FloatingActionButtons: React.FC<FloatingActionButtonsProps> = ({
   }, [donateBtn]);
 
   const handleHeartClick = () => {
+    playSfx('sparkle');
     if (heartClickFalls) {
       onStartHeartRain?.(heartRainDuration * 1000);
     } else {
