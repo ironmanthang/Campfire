@@ -1,4 +1,11 @@
+import {
+  getLocalYYYYMMDD,
+  getYesterdayYYYYMMDD,
+  isOlderThanYesterday,
+} from "@campfire/core";
 import i18n from "../i18n";
+
+export { getLocalYYYYMMDD, getYesterdayYYYYMMDD, isOlderThanYesterday };
 
 export const formatToDDMMYY = (dateStr: string): string => {
   if (!dateStr || dateStr.length < 10) return dateStr;
@@ -15,25 +22,6 @@ export const formatToDDMMYY = (dateStr: string): string => {
     month: "2-digit",
     day: "2-digit"
   }).format(date);
-};
-
-export const getLocalYYYYMMDD = (date: Date = new Date()): string => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
-export const getYesterdayYYYYMMDD = (): string => {
-  const d = new Date();
-  d.setDate(d.getDate() - 1);
-  return getLocalYYYYMMDD(d);
-};
-
-export const isOlderThanYesterday = (dateStr: string): boolean => {
-  if (!dateStr || dateStr === 'scratchpad') return false;
-  const yesterday = getYesterdayYYYYMMDD();
-  return dateStr < yesterday;
 };
 
 export type DatePreset = { label: string; start: string; end: string };
@@ -55,4 +43,3 @@ export const getDatePresets = (earliestDate?: string): DatePreset[] => {
     { label: "This yr", start: thisYearStart, end: today },
   ];
 };
-

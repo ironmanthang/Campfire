@@ -6,3 +6,5 @@ export * from "./SelectionToolbar";
 export * from "./HelpModal";
 export * from "./FullscreenHoverExit";
 export * from "./SortOrderToggle";
+export * from "./DonateBanner";
+

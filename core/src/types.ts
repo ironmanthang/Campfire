@@ -11,3 +11,7 @@ export interface SyncConfig {
   /** Label used in conflict blocks (e.g. "Desktop", "Mobile"). */
   conflictLabel: string;
 }
+
+export type SfxType = "pencil-tick" | "sparkle";
+export type AmbientType = "campfire" | "rain" | "night-forest";
+

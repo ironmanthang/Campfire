@@ -1,5 +1,6 @@
-export type SfxType = "pencil-tick" | "sparkle";
-export type AmbientType = "campfire" | "rain" | "night-forest";
+import type { SfxType, AmbientType } from "@campfire/core";
+
+export type { SfxType, AmbientType };
 
 export const SOUND_STORAGE_KEYS = {
   sfxEnabled: "campfire_mobile_sound_sfx_enabled",

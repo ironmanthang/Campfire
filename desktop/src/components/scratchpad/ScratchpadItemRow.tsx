@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { type ScratchpadItem, getItemCheckStatus } from "@campfire/core";
-import { playSfx } from "../services/audioService";
+import { playSfx } from "../../services/audioService";
 
 export interface ScratchpadItemRowProps {
   item: ScratchpadItem;

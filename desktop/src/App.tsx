@@ -8,9 +8,9 @@ import { ErrorModal } from "./components/modals/general/ErrorModal";
 import { HeartGateModal } from "./components/modals/general/HeartGateModal";
 import { DraggableHeart } from "./components/heart/DraggableHeart";
 import { FallingHearts } from "./components/heart/FallingHearts";
-import { HelpModal, FullscreenHoverExit } from "./components/common";
+import { HelpModal, FullscreenHoverExit, DonateBanner } from "./components/common";
 import { ScratchpadView } from "./views/ScratchpadView";
-import { ToolExecutorTestPanel } from "./services/toolExecutorPanel";
+import { ToolExecutorTestPanel } from "./components/dev/ToolExecutorPanel";
 import { SyncResultModal } from "./components/modals/data_management/SyncResultModal";
 import { ScratchpadConflictModal } from "./components/modals/data_management/ScratchpadConflictModal";
 import { SettingsView } from "./views/SettingsView";
@@ -24,10 +24,10 @@ import { useTranslation } from "react-i18next";
 import { useAppStore } from "./store/useAppStore";
 import { useOllamaStore } from "./store/useOllamaStore";
 import { useAmbientAudio } from "./hooks/useAmbientAudio";
+import { useBannerLogic } from "./hooks/useBannerLogic";
+import { useTextZoom } from "./hooks/useTextZoom";
 import { matchesShortcut } from "./components/heart/shortcut";
 import { ImportReportModal } from "./components/modals/data_management/ImportReportModal";
-import { invoke } from "@tauri-apps/api/core";
-import { calculateStreak } from "@campfire/core";
 
 function App() {
   const t = useTranslation().t;
@@ -37,8 +37,6 @@ function App() {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [showDevPanel, setShowDevPanel] = useState(false);
 
-  const [showDonateBanner, setShowDonateBanner] = useState(false);
-  const [bannerReason, setBannerReason] = useState<"count" | "streak" | null>(null);
 
   // Toggle tool executor panel on Ctrl + Alt + T (development only)
   useEffect(() => {
@@ -123,41 +121,14 @@ function App() {
     loadConfig();
   }, [loadConfig]);
 
-  useEffect(() => {
-    if (!config.journal_dir) return;
+  const {
+    showDonateBanner,
+    bannerReason,
+    dismissMaybeLater,
+    dismissNeverAsk,
+  } = useBannerLogic(config.journal_dir, journalRefreshKey);
 
-    const checkStats = async () => {
-      const neverAsk = localStorage.getItem("donate-reminder-never-ask") === "true";
-      const maybeLater = sessionStorage.getItem("donate-reminder-maybe-later") === "true";
-      if (neverAsk || maybeLater) {
-        setShowDonateBanner(false);
-        return;
-      }
-
-      try {
-        const list: { date: string }[] = await invoke("list_entries", {
-          dirPath: config.journal_dir,
-        });
-        const count = list.length;
-        const dates = list.map((e) => e.date);
-        const streak = calculateStreak(dates);
-
-        if (count >= 10 || streak >= 30) {
-          setShowDonateBanner(true);
-          setBannerReason(count >= 10 ? "count" : "streak");
-        } else {
-          setShowDonateBanner(false);
-        }
-      } catch (err) {
-        console.error("Failed to check stats for donation banner:", err);
-      }
-    };
-
-    checkStats();
-
-    window.addEventListener("donate-banner-refresh", checkStats);
-    return () => window.removeEventListener("donate-banner-refresh", checkStats);
-  }, [config.journal_dir, journalRefreshKey]);
+  useTextZoom();
 
   // Poll Ollama status on active view updates
   useEffect(() => {
@@ -206,69 +177,6 @@ function App() {
     };
   }, [goBack, goForward]);
 
-  // Global Ctrl + Mouse Wheel listener for zoom in/out text
-  useEffect(() => {
-    // Load initial zoom level from localStorage
-    const savedZoom = localStorage.getItem("text-zoom-level");
-    let currentZoom = savedZoom ? parseInt(savedZoom, 10) : 100;
-    
-    // Apply initial zoom
-    document.documentElement.style.fontSize = `${currentZoom}%`;
-
-    const applyZoom = (zoom: number) => {
-      document.documentElement.style.fontSize = `${zoom}%`;
-      localStorage.setItem("text-zoom-level", zoom.toString());
-      window.dispatchEvent(new Event("text-zoom-change"));
-    };
-
-    const handleWheel = (e: WheelEvent) => {
-      if (e.ctrlKey) {
-        // Prevent default browser/webview zoom behavior
-        e.preventDefault();
-
-        // Determine zoom direction
-        const delta = e.deltaY;
-        if (delta < 0) {
-          // Zoom in
-          currentZoom = Math.min(200, currentZoom + 5);
-        } else if (delta > 0) {
-          // Zoom out
-          currentZoom = Math.max(70, currentZoom - 5);
-        }
-
-        // Apply and persist zoom level
-        applyZoom(currentZoom);
-      }
-    };
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey) {
-        if (e.key === "=" || e.key === "+") {
-          e.preventDefault();
-          currentZoom = Math.min(200, currentZoom + 5);
-          applyZoom(currentZoom);
-        } else if (e.key === "-") {
-          e.preventDefault();
-          currentZoom = Math.max(70, currentZoom - 5);
-          applyZoom(currentZoom);
-        } else if (e.key === "0") {
-          e.preventDefault();
-          currentZoom = 100;
-          applyZoom(currentZoom);
-        }
-      }
-    };
-
-    // Note: { passive: false } is critical to allow preventing the default scroll/zoom event
-    window.addEventListener("wheel", handleWheel, { passive: false });
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("wheel", handleWheel);
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
-
-
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-bg-app text-text-primary">
       {/* Top Hover Exit Button in Fullscreen Mode */}
@@ -284,44 +192,13 @@ function App() {
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col h-full overflow-hidden relative">
         {/* Soft Donation Reminder Banner */}
-        {showDonateBanner && (
-          <div className="bg-accent-brand/10 border-b border-border-brand/40 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fade-in shrink-0">
-            <div className="flex items-center gap-3">
-              <span className="text-lg">🎉</span>
-              <p className="text-xs font-semibold leading-relaxed text-text-primary">
-                {bannerReason === "count"
-                  ? t("donateBanner.countMessage", { count: 10 })
-                  : t("donateBanner.streakMessage", { streak: 30 })}
-              </p>
-            </div>
-            <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto flex-wrap">
-              <button
-                onClick={() => setIsSupportOpen(true)}
-                className="px-3.5 py-1.5 rounded-lg bg-accent-brand text-bg-app font-bold text-xs shadow hover:bg-accent-brand/90 transition-all cursor-pointer"
-              >
-                {t("donateBanner.supportBtn")}
-              </button>
-              <button
-                onClick={() => {
-                  sessionStorage.setItem("donate-reminder-maybe-later", "true");
-                  setShowDonateBanner(false);
-                }}
-                className="px-3 py-1.5 rounded-lg bg-bg-surface border border-border-brand hover:border-accent-brand text-xs font-bold text-text-primary transition-all cursor-pointer"
-              >
-                {t("donateBanner.maybeLaterBtn")}
-              </button>
-              <button
-                onClick={() => {
-                  localStorage.setItem("donate-reminder-never-ask", "true");
-                  setShowDonateBanner(false);
-                }}
-                className="px-3 py-1.5 rounded-lg bg-bg-surface border border-border-brand hover:border-accent-brand text-xs font-bold text-text-primary transition-all cursor-pointer"
-              >
-                {t("donateBanner.dontAskBtn", { defaultValue: "Don't Ask Again" })}
-              </button>
-            </div>
-          </div>
-        )}
+        <DonateBanner
+          show={showDonateBanner}
+          reason={bannerReason}
+          onSupport={() => setIsSupportOpen(true)}
+          onMaybeLater={dismissMaybeLater}
+          onNeverAsk={dismissNeverAsk}
+        />
 
         {/* Success toast notification */}
         {statusMessage && statusMessage.type === "success" && (

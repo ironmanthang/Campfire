@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
   type ScratchpadItem,
+  type UseScratchpadReturn,
   toDocument,
   toggleItemWithChildren as coreToggleItemWithChildren,
   addItem as coreAddItem,
@@ -19,23 +20,8 @@ import {
 import { readScratchpadDoc, writeScratchpadDoc } from "../services/scratchpad";
 import { useAppStore } from "../store/useAppStore";
 
-export interface UseScratchpadReturn {
-  items: ScratchpadItem[];
-  loading: boolean;
-  toggleItemWithChildren: (id: string, checked?: boolean) => void;
-  addItem: (text: string) => void;
-  addChildItem: (parentId: string, text: string) => void;
-  addGroup: (name: string) => void;
-  renameGroup: (id: string, name: string) => void;
-  updateItemText: (id: string, text: string) => void;
-  togglePinItem: (id: string) => void;
-  moveItem: (id: string, direction: 'up' | 'down') => void;
-  moveChildItem: (parentId: string, childId: string, direction: 'up' | 'down') => void;
-  isDuplicate: (text: string, excludeId?: string) => boolean;
-  removeItem: (id: string) => void;
-  clearCompleted: () => void;
-  clearSelectedCompleted: (idsToDelete: Set<string>, idsToUncheck: Set<string>) => void;
-}
+export type { UseScratchpadReturn };
+
 
 export function useScratchpad(isOpen: boolean = true): UseScratchpadReturn {
   const { config, journalRefreshKey, triggerDebouncedSync } = useAppStore();

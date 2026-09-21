@@ -1,7 +1,7 @@
+import type { SfxType, AmbientType } from "@campfire/core";
 import { useAppStore } from "../store/useAppStore";
 
-export type SfxType = "pencil-tick" | "sparkle";
-export type AmbientType = "campfire" | "rain" | "night-forest";
+export type { SfxType, AmbientType };
 
 let ambientAudio: HTMLAudioElement | null = null;
 let currentAmbientType: AmbientType | null = null;
