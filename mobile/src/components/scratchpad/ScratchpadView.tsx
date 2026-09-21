@@ -8,16 +8,16 @@ import {
   Sparkles,
   Pin,
 } from 'lucide-react';
-import { type ScratchpadItem } from '@campfire/core';
+import { getCompletedItems, countCompletedTasks } from '@campfire/core';
 import { useScratchpad } from '../../hooks/useScratchpad';
 import { usePersistedState } from '../../hooks/usePersistedState';
 import { ScratchpadItemRow } from './ScratchpadItemRow';
 import { DeleteConfirmModal } from '../modals/DeleteConfirmModal';
+import { ClearCompletedModal } from '../modals/ClearCompletedModal';
 
 type DeleteConfirmState =
   | { type: 'item'; id: string; name: string }
   | { type: 'group'; id: string; name: string }
-  | { type: 'clearCompleted'; id: string; name: string }
   | null;
 
 export interface ScratchpadViewHandle {
@@ -46,6 +46,7 @@ export const ScratchpadView = forwardRef<ScratchpadViewHandle, ScratchpadViewPro
     const newGroupBtnRef = useRef<HTMLButtonElement>(null);
 
     const [deleteConfirmTarget, setDeleteConfirmTarget] = useState<DeleteConfirmState>(null);
+    const [isClearCompletedModalOpen, setIsClearCompletedModalOpen] = useState(false);
 
     const {
       items,
@@ -60,7 +61,7 @@ export const ScratchpadView = forwardRef<ScratchpadViewHandle, ScratchpadViewPro
       moveChildItem,
       isDuplicate,
       removeItem,
-      clearCompleted,
+      clearSelectedCompleted,
     } = useScratchpad(true, onSyncTrigger, refreshKey);
 
     useEffect(() => {
@@ -135,15 +136,7 @@ export const ScratchpadView = forwardRef<ScratchpadViewHandle, ScratchpadViewPro
       }));
     }, [setCollapsedMap]);
 
-    const checkHasCompleted = (itemList: ScratchpadItem[]): boolean => {
-      return itemList.some(
-        (item) =>
-          (!item.isGroup && item.isChecked) ||
-          (item.children && item.children.length > 0 && checkHasCompleted(item.children))
-      );
-    };
-
-    const hasCompleted = checkHasCompleted(items);
+    const completedCount = countCompletedTasks(items);
 
     const handleDeleteRequest = useCallback((id: string, isGroup?: boolean, text?: string) => {
       setDeleteConfirmTarget({
@@ -155,13 +148,9 @@ export const ScratchpadView = forwardRef<ScratchpadViewHandle, ScratchpadViewPro
 
     const handleConfirmDelete = useCallback(() => {
       if (!deleteConfirmTarget) return;
-      if (deleteConfirmTarget.type === 'clearCompleted') {
-        clearCompleted();
-      } else {
-        removeItem(deleteConfirmTarget.id);
-      }
+      removeItem(deleteConfirmTarget.id);
       setDeleteConfirmTarget(null);
-    }, [deleteConfirmTarget, clearCompleted, removeItem]);
+    }, [deleteConfirmTarget, removeItem]);
 
     const handleCancelDelete = useCallback(() => {
       setDeleteConfirmTarget(null);
@@ -184,6 +173,18 @@ export const ScratchpadView = forwardRef<ScratchpadViewHandle, ScratchpadViewPro
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            {completedCount > 0 && (
+              <button
+                type="button"
+                onClick={() => setIsClearCompletedModalOpen(true)}
+                className="px-2.5 py-1.5 rounded-xl border border-border-brand hover:border-red-400 text-xs font-semibold text-text-secondary hover:text-red-400 flex items-center gap-1.5 cursor-pointer transition-colors bg-bg-app shadow-xs"
+                title={t('scratchpad.clearCompleted', 'Clear completed tasks')}
+              >
+                <Trash2 size={15} />
+                <span>({completedCount})</span>
+              </button>
+            )}
+
             <button
               ref={newGroupBtnRef}
               type="button"
@@ -193,17 +194,6 @@ export const ScratchpadView = forwardRef<ScratchpadViewHandle, ScratchpadViewPro
               <FolderPlus size={15} className="text-accent-brand" />
               <span>{t('scratchpad.newGroup', 'Group')}</span>
             </button>
-
-            {hasCompleted && (
-              <button
-                type="button"
-                onClick={() => setDeleteConfirmTarget({ type: 'clearCompleted', id: '', name: '' })}
-                className="p-1.5 rounded-xl border border-border-brand hover:border-red-400 text-xs font-semibold text-text-secondary hover:text-red-400 flex items-center gap-1.5 cursor-pointer transition-colors bg-bg-app shadow-xs"
-                title={t('scratchpad.clearCompleted', 'Clear completed tasks')}
-              >
-                <Trash2 size={15} />
-              </button>
-            )}
           </div>
         </div>
 
@@ -393,19 +383,28 @@ export const ScratchpadView = forwardRef<ScratchpadViewHandle, ScratchpadViewPro
       </div>
 
       {/* Delete Confirmation Modal */}
+      {/* Clear Completed Interactive Review Modal */}
+      {isClearCompletedModalOpen && (
+        <ClearCompletedModal
+          completedItems={getCompletedItems(items)}
+          onCancel={() => setIsClearCompletedModalOpen(false)}
+          onConfirm={(idsToDelete, idsToUncheck) => {
+            clearSelectedCompleted(idsToDelete, idsToUncheck);
+            setIsClearCompletedModalOpen(false);
+          }}
+        />
+      )}
+
+      {/* Delete Confirmation Modal for Groups/Items */}
       {deleteConfirmTarget && (
         <DeleteConfirmModal
           title={
-            deleteConfirmTarget.type === 'clearCompleted'
-              ? t('scratchpad.clearCompletedConfirmTitle', 'Clear Completed Tasks')
-              : deleteConfirmTarget.type === 'group'
+            deleteConfirmTarget.type === 'group'
               ? t('scratchpad.deleteGroupConfirmTitle', 'Delete Group')
               : t('scratchpad.deleteTaskConfirmTitle', 'Delete Note')
           }
           message={
-            deleteConfirmTarget.type === 'clearCompleted'
-              ? t('scratchpad.clearCompletedConfirmMessage', 'Are you sure you want to permanently clear all completed tasks? This action cannot be undone.')
-              : deleteConfirmTarget.type === 'group'
+            deleteConfirmTarget.type === 'group'
               ? t('scratchpad.deleteGroupConfirmMessage', {
                   defaultValue: 'Are you sure you want to permanently delete the group "{{name}}" and all of its tasks? This action cannot be undone.',
                   name: deleteConfirmTarget.name,
@@ -415,11 +414,7 @@ export const ScratchpadView = forwardRef<ScratchpadViewHandle, ScratchpadViewPro
                   name: deleteConfirmTarget.name,
                 })
           }
-          confirmLabel={
-            deleteConfirmTarget.type === 'clearCompleted'
-              ? t('scratchpad.clearConfirmButton', 'Clear Completed')
-              : t('deleteConfirmModal.deleteButton', 'Delete Permanent')
-          }
+          confirmLabel={t('deleteConfirmModal.deleteButton', 'Delete Permanent')}
           onCancel={handleCancelDelete}
           onConfirm={handleConfirmDelete}
         />

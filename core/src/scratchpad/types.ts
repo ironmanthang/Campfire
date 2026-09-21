@@ -1,3 +1,11 @@
+export type ItemCheckStatus = 'unchecked' | 'indeterminate' | 'checked';
+
+export interface CompletedItemSummary {
+  id: string;
+  text: string;
+  parentPath?: string;
+}
+
 export interface ScratchpadItem {
   id: string;
   text: string;

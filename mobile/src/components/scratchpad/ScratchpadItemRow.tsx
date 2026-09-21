@@ -4,6 +4,7 @@ import {
   Plus,
   Trash2,
   CheckSquare,
+  MinusSquare,
   Square,
   ChevronDown,
   ChevronRight,
@@ -16,7 +17,7 @@ import {
   CornerDownRight,
   MoreHorizontal,
 } from 'lucide-react';
-import { type ScratchpadItem } from '@campfire/core';
+import { type ScratchpadItem, getItemCheckStatus } from '@campfire/core';
 
 export interface ScratchpadItemRowProps {
   item: ScratchpadItem;
@@ -436,13 +437,15 @@ export function ScratchpadItemRow({
     );
   }
 
+  const checkStatus = getItemCheckStatus(item);
+
   return (
     <div className="space-y-1">
       <div
         className="group flex items-center justify-between gap-2 p-2 rounded-xl active:bg-bg-surface/70 transition-colors cursor-pointer"
         onClick={() => {
           if (window.getSelection()?.toString()) return;
-          if (!isEditing) onToggleCheck(item.id, !item.isChecked);
+          if (!isEditing) onToggleCheck(item.id, checkStatus !== 'checked');
         }}
       >
         <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -467,11 +470,16 @@ export function ScratchpadItemRow({
           {/* Checkbox */}
           <button
             type="button"
-            onClick={(e) => { e.stopPropagation(); onToggleCheck(item.id, !item.isChecked); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleCheck(item.id, checkStatus !== 'checked');
+            }}
             className="text-accent-brand focus:outline-none cursor-pointer shrink-0"
           >
-            {item.isChecked ? (
+            {checkStatus === 'checked' ? (
               <CheckSquare className="h-4.5 w-4.5 opacity-80" />
+            ) : checkStatus === 'indeterminate' ? (
+              <MinusSquare className="h-4.5 w-4.5 opacity-90 text-accent-brand" />
             ) : (
               <Square className="h-4.5 w-4.5 text-text-secondary" />
             )}
@@ -481,7 +489,7 @@ export function ScratchpadItemRow({
             <div className="flex items-center gap-1.5 flex-1 min-w-0">
               <span
                 className={`text-sm break-words min-w-0 leading-relaxed ${
-                  item.isChecked ? 'line-through text-text-secondary/60' : 'text-text-primary'
+                  checkStatus === 'checked' ? 'line-through text-text-secondary/60' : 'text-text-primary'
                 }`}
               >
                 {item.text}
@@ -495,7 +503,7 @@ export function ScratchpadItemRow({
           className="flex items-center gap-1 shrink-0"
           onClick={(e) => e.stopPropagation()}
         >
-          {!item.isChecked ? (
+          {checkStatus !== 'checked' ? (
             <button
               type="button"
               onClick={(e) => {

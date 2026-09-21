@@ -1,6 +1,6 @@
-# Store listing copy for v0.1.9
+# Store listing copy for v0.1.12
 
-Use this file as the canonical copy to paste into Microsoft Partner Center for the v0.1.9 release.
+Use this file as a 100% ready to copy-paste directly into Microsoft Partner Center for the v0.1.12 release.
 
 **Description**:
 
@@ -25,12 +25,13 @@ KEY FEATURES:
 
 Take a break from noisy feeds and public social media. Step into your private sanctuary and write for yourself.
 
-**What's new in v0.1.9**:
+**What's new in v0.1.12**:
 
-Major update:
-- First-Class Scratchpad View: Promoted the quick notes scratchpad into a dedicated, full-page view on desktop and mobile for capturing thoughts, daily tasks, and brainstorms.
-- Hierarchical Tasks & Subtasks: Support for nested task hierarchies with collapsible parent-child subtasks, progress counters, and visual indentation guides.
-- Custom Named Groups: Organize tasks and notes into custom named groups with full create, rename, reorder, and deletion controls.
+- Streamlined Navigation & Sync: Relocated Google Drive cloud sync status and controls to the sidebar footer, decluttering the editor header and providing clear offline indicators.
+- AI Chat Auto-Scroll Refinements: Improved auto-scroll anchoring and snapping in the AI reflection companion for smoother streaming responses.
+- Dynamic Timeline Date Presets: Synchronized dynamic date range presets on launch and view mount for faster chronological filtering.
+- Responsive Typography & Mobile Enhancements: Full dynamic font scaling across all views and dialogs, resilient settings layouts, and first-class scratchpad navigation.
+- Performance & Polish: Snappier sidebar transitions, optimized hover-peek animations, and robust offline sync resilience.
 
 **Product features (Partner Center - add as bullets)**:
 
@@ -39,7 +40,7 @@ Hierarchical Scratchpad & Tasks: Dedicated task manager with multi-level nested 
 Private AI Assistant: Chat with your journal locally to reflect on past memories, ask questions, and receive personalized insights.
 Smart Search by Meaning: Find entries by context and concepts rather than exact keywords.
 Interactive Life Timeline: Browse your entry history chronologically and filter by date ranges.
-Automatic Google Drive Sync: Optional background backup directly to your personal Google Drive account.
+Automatic Google Drive Sync: Optional background backup directly to your personal Google Drive account with offline resilience.
 Entry Lock Protection: Past entries auto-lock and open read-only to prevent accidental edits; unlock any entry using the header toggle.
 No Subscriptions: Enjoy complete access to all features with zero monthly fees or hidden costs.
 
@@ -68,6 +69,6 @@ Campfire Journal is a native Windows desktop application built with Tauri (Rust 
 
 Notes for release process:
 
-- Ensure `package.json`, `core/package.json`, `desktop/package.json`, `mobile/package.json`, and `desktop/src-tauri/Cargo.toml` are bumped to `0.1.9` (the repo's `scripts/bump-version.mjs` handles this via `pnpm version:bump 0.1.9`).
-- Build and validate the new Windows package before submission (`pnpm prepush` then `pnpm tauri:windows:build`).
-- Update Partner Center: paste Description, replace "What's new" with the v0.1.9 text above, update Product features with the new Scratchpad feature, and upload the new package.
+- Ensure `package.json`, `core/package.json`, `desktop/package.json`, `mobile/package.json`, and `desktop/src-tauri/Cargo.toml` are bumped to `0.1.12` (the repo's `scripts/bump-version.mjs` handles this via `pnpm version:bump patch`).
+- Build and validate the new Windows package before submission (`pnpm prepush` then `pnpm --filter desktop tauri:windows:build`).
+- Update Partner Center: paste Description, replace "What's new" with the v0.1.12 text above, update Product features, and upload the new package.

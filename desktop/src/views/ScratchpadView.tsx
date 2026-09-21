@@ -9,7 +9,7 @@ import {
   Pin,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { type ScratchpadItem } from "@campfire/core";
+import { getCompletedItems, countCompletedTasks } from "@campfire/core";
 import { useScratchpad } from "../hooks/useScratchpad";
 import { useResizer } from "../hooks/useResizer";
 import { usePersistedState } from "../hooks/usePersistedState";
@@ -18,11 +18,11 @@ import { DragHandles } from "../components/common";
 import { useAppStore } from "../store/useAppStore";
 import { ScratchpadItemRow } from "./ScratchpadItemRow";
 import { DeleteConfirmModal } from "../components/modals/data_management/DeleteConfirmModal";
+import { ClearCompletedModal } from "../components/modals/data_management/ClearCompletedModal";
 
 type DeleteConfirmState =
   | { type: 'item'; id: string; name: string }
   | { type: 'group'; id: string; name: string }
-  | { type: 'clearCompleted'; id: string; name: string }
   | null;
 
 export function ScratchpadView() {
@@ -43,6 +43,7 @@ export function ScratchpadView() {
   const { sidebarCollapsed, toggleSidebar } = useAppStore();
 
   const [deleteConfirmTarget, setDeleteConfirmTarget] = useState<DeleteConfirmState>(null);
+  const [isClearCompletedModalOpen, setIsClearCompletedModalOpen] = useState(false);
 
   const {
     items,
@@ -57,7 +58,7 @@ export function ScratchpadView() {
     moveChildItem,
     isDuplicate,
     removeItem,
-    clearCompleted,
+    clearSelectedCompleted,
   } = useScratchpad(true);
 
   const [scratchpadWidth, startDrag] = useResizer({
@@ -128,15 +129,7 @@ export function ScratchpadView() {
     }));
   }, [setCollapsedMap]);
 
-  const checkHasCompleted = (itemList: ScratchpadItem[]): boolean => {
-    return itemList.some(
-      (item) =>
-        (!item.isGroup && item.isChecked) ||
-        (item.children && item.children.length > 0 && checkHasCompleted(item.children))
-    );
-  };
-
-  const hasCompleted = checkHasCompleted(items);
+  const completedCount = countCompletedTasks(items);
 
   const handleDeleteRequest = useCallback((id: string, isGroup?: boolean, text?: string) => {
     setDeleteConfirmTarget({
@@ -148,13 +141,9 @@ export function ScratchpadView() {
 
   const handleConfirmDelete = useCallback(() => {
     if (!deleteConfirmTarget) return;
-    if (deleteConfirmTarget.type === 'clearCompleted') {
-      clearCompleted();
-    } else {
-      removeItem(deleteConfirmTarget.id);
-    }
+    removeItem(deleteConfirmTarget.id);
     setDeleteConfirmTarget(null);
-  }, [deleteConfirmTarget, clearCompleted, removeItem]);
+  }, [deleteConfirmTarget, removeItem]);
 
   const handleCancelDelete = useCallback(() => {
     setDeleteConfirmTarget(null);
@@ -190,6 +179,18 @@ export function ScratchpadView() {
           </div>
 
           <div className="flex items-center gap-2">
+            {completedCount > 0 && (
+              <button
+                onClick={() => setIsClearCompletedModalOpen(true)}
+                className="px-3.5 py-2 rounded-xl border border-border-brand hover:border-red-400 text-xs font-semibold text-text-secondary hover:text-red-400 flex items-center gap-2 cursor-pointer transition-colors bg-bg-surface shadow-xs"
+              >
+                <Trash2 className="h-4 w-4" />
+                <span>
+                  {t("scratchpad.clearCompleted", "Clear completed tasks")} ({completedCount})
+                </span>
+              </button>
+            )}
+
             <button
               ref={newGroupBtnRef}
               onClick={() => setIsCreatingGroup((v) => !v)}
@@ -198,16 +199,6 @@ export function ScratchpadView() {
               <FolderPlus className="h-4 w-4 text-accent-brand" />
               <span>{t("scratchpad.newGroup", "New Group")}</span>
             </button>
-
-            {hasCompleted && (
-              <button
-                onClick={() => setDeleteConfirmTarget({ type: 'clearCompleted', id: '', name: '' })}
-                className="px-3.5 py-2 rounded-xl border border-border-brand hover:border-red-400 text-xs font-semibold text-text-secondary hover:text-red-400 flex items-center gap-2 cursor-pointer transition-colors bg-bg-surface shadow-xs"
-              >
-                <Trash2 className="h-4 w-4" />
-                {t("scratchpad.clearCompleted", "Clear completed tasks")}
-              </button>
-            )}
           </div>
         </div>
 
@@ -398,20 +389,28 @@ export function ScratchpadView() {
         </div>
       </div>
 
-      {/* Delete Confirmation Modal */}
+      {/* Clear Completed Interactive Review Modal */}
+      {isClearCompletedModalOpen && (
+        <ClearCompletedModal
+          completedItems={getCompletedItems(items)}
+          onCancel={() => setIsClearCompletedModalOpen(false)}
+          onConfirm={(idsToDelete, idsToUncheck) => {
+            clearSelectedCompleted(idsToDelete, idsToUncheck);
+            setIsClearCompletedModalOpen(false);
+          }}
+        />
+      )}
+
+      {/* Delete Confirmation Modal for Groups/Items */}
       {deleteConfirmTarget && (
         <DeleteConfirmModal
           title={
-            deleteConfirmTarget.type === 'clearCompleted'
-              ? t("scratchpad.clearCompletedConfirmTitle", "Clear Completed Tasks")
-              : deleteConfirmTarget.type === 'group'
+            deleteConfirmTarget.type === 'group'
               ? t("scratchpad.deleteGroupConfirmTitle", "Delete Group")
               : t("scratchpad.deleteTaskConfirmTitle", "Delete Note")
           }
           message={
-            deleteConfirmTarget.type === 'clearCompleted'
-              ? t("scratchpad.clearCompletedConfirmMessage", "Are you sure you want to permanently clear all completed tasks? This action is permanent and cannot be undone.")
-              : deleteConfirmTarget.type === 'group'
+            deleteConfirmTarget.type === 'group'
               ? t("scratchpad.deleteGroupConfirmMessage", {
                   defaultValue: "Are you sure you want to permanently delete the group \"{{name}}\" and all of its subtasks? This action is permanent and cannot be undone.",
                   name: deleteConfirmTarget.name,
@@ -421,11 +420,7 @@ export function ScratchpadView() {
                   name: deleteConfirmTarget.name,
                 })
           }
-          confirmLabel={
-            deleteConfirmTarget.type === 'clearCompleted'
-              ? t("scratchpad.clearConfirmButton", "Clear Completed")
-              : t("deleteConfirmModal.deleteButton", "Delete Permanent")
-          }
+          confirmLabel={t("deleteConfirmModal.deleteButton", "Delete Permanent")}
           onCancel={handleCancelDelete}
           onConfirm={handleConfirmDelete}
         />

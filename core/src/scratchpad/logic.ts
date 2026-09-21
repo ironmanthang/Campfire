@@ -1,4 +1,4 @@
-import type { ScratchpadItem, ScratchpadDocument } from './types';
+import type { ScratchpadItem, ScratchpadDocument, ItemCheckStatus, CompletedItemSummary } from './types';
 
 function generateId(): string {
   if (typeof globalThis !== 'undefined' && globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function') {
@@ -84,16 +84,159 @@ export function fromDocument(raw: string): ScratchpadItem[] {
     const parsed = JSON.parse(raw);
     if (parsed && typeof parsed === 'object') {
       if (Array.isArray(parsed.items)) {
-        return sanitizeItems(parsed.items);
+        return syncParentCheckStates(sanitizeItems(parsed.items));
       }
       if (Array.isArray(parsed)) {
-        return sanitizeItems(parsed);
+        return syncParentCheckStates(sanitizeItems(parsed));
       }
     }
-    return parseLegacyMarkdown(raw);
+    return syncParentCheckStates(parseLegacyMarkdown(raw));
   } catch {
-    return parseLegacyMarkdown(raw);
+    return syncParentCheckStates(parseLegacyMarkdown(raw));
   }
+}
+
+export function syncParentCheckStates(items: ScratchpadItem[], now: number = Date.now()): ScratchpadItem[] {
+  return items.map((item) => {
+    if (!item.children || item.children.length === 0) {
+      return item;
+    }
+
+    const updatedChildren = syncParentCheckStates(item.children, now);
+    if (item.isGroup) {
+      return {
+        ...item,
+        children: updatedChildren,
+      };
+    }
+
+    const checkableChildren = updatedChildren.filter((c) => !c.isGroup);
+    if (checkableChildren.length === 0) {
+      return {
+        ...item,
+        children: updatedChildren,
+      };
+    }
+
+    const allChecked = checkableChildren.every((c) => c.isChecked);
+    const hasChanged = item.isChecked !== allChecked;
+
+    return {
+      ...item,
+      isChecked: allChecked,
+      updatedAt: hasChanged ? now : item.updatedAt,
+      children: updatedChildren,
+    };
+  });
+}
+
+export function getItemCheckStatus(item: ScratchpadItem): ItemCheckStatus {
+  if (item.isGroup) return 'unchecked';
+
+  const checkableChildren = (item.children || []).filter((c) => !c.isGroup);
+  if (checkableChildren.length === 0) {
+    return item.isChecked ? 'checked' : 'unchecked';
+  }
+
+  let hasCheckedOrIndeterminate = false;
+  let hasUncheckedOrIndeterminate = false;
+
+  for (const child of checkableChildren) {
+    const childStatus = getItemCheckStatus(child);
+    if (childStatus === 'checked') {
+      hasCheckedOrIndeterminate = true;
+    } else if (childStatus === 'unchecked') {
+      hasUncheckedOrIndeterminate = true;
+    } else if (childStatus === 'indeterminate') {
+      hasCheckedOrIndeterminate = true;
+      hasUncheckedOrIndeterminate = true;
+    }
+  }
+
+  if (hasCheckedOrIndeterminate && !hasUncheckedOrIndeterminate) {
+    return 'checked';
+  }
+  if (hasCheckedOrIndeterminate && hasUncheckedOrIndeterminate) {
+    return 'indeterminate';
+  }
+  return 'unchecked';
+}
+
+export function getCompletedItems(items: ScratchpadItem[], currentPath: string = ''): CompletedItemSummary[] {
+  const result: CompletedItemSummary[] = [];
+
+  for (const item of items) {
+    const path = currentPath ? `${currentPath} > ${item.text}` : item.text;
+
+    if (!item.isGroup && item.isChecked) {
+      result.push({
+        id: item.id,
+        text: item.text,
+        parentPath: currentPath || undefined,
+      });
+    }
+
+    if (item.children && item.children.length > 0) {
+      result.push(...getCompletedItems(item.children, item.isGroup ? currentPath : path));
+    }
+  }
+
+  return result;
+}
+
+export function countCompletedTasks(items: ScratchpadItem[]): number {
+  let count = 0;
+  for (const item of items) {
+    if (!item.isGroup && item.isChecked) {
+      count++;
+    }
+    if (item.children && item.children.length > 0) {
+      count += countCompletedTasks(item.children);
+    }
+  }
+  return count;
+}
+
+export function clearSelectedCompleted(
+  items: ScratchpadItem[],
+  idsToDelete: Set<string>,
+  idsToUncheck: Set<string>
+): ScratchpadItem[] {
+  const now = Date.now();
+
+  function processList(list: ScratchpadItem[]): ScratchpadItem[] {
+    const result: ScratchpadItem[] = [];
+
+    for (const item of list) {
+      const nextChildren = item.children && item.children.length > 0
+        ? processList(item.children)
+        : [];
+
+      const shouldDelete = !item.isGroup && idsToDelete.has(item.id) && nextChildren.length === 0;
+
+      if (!shouldDelete) {
+        let isChecked = item.isChecked;
+        let updatedAt = item.updatedAt;
+
+        if (idsToUncheck.has(item.id)) {
+          isChecked = false;
+          updatedAt = now;
+        }
+
+        result.push({
+          ...item,
+          isChecked,
+          updatedAt,
+          children: nextChildren,
+        });
+      }
+    }
+
+    return result;
+  }
+
+  const processed = processList(items);
+  return syncParentCheckStates(processed, now);
 }
 
 export function toggleItem(items: ScratchpadItem[], id: string): ScratchpadItem[] {
@@ -127,33 +270,40 @@ function setCheckedRecursively(item: ScratchpadItem, checked: boolean, now: numb
 
 export function toggleItemWithChildren(items: ScratchpadItem[], id: string, checked?: boolean): ScratchpadItem[] {
   const now = Date.now();
-  return items.map((item) => {
-    if (item.id === id) {
-      const targetChecked = checked !== undefined ? checked : !item.isChecked;
-      return setCheckedRecursively(item, targetChecked, now);
-    }
-    if (item.children && item.children.length > 0) {
-      return {
-        ...item,
-        children: toggleItemWithChildren(item.children, id, checked),
-      };
-    }
-    return item;
-  });
-}
-
-export function removeItem(items: ScratchpadItem[], id: string): ScratchpadItem[] {
-  return items
-    .filter((item) => item.id !== id)
-    .map((item) => {
+  function toggle(list: ScratchpadItem[]): ScratchpadItem[] {
+    return list.map((item) => {
+      if (item.id === id) {
+        const targetChecked = checked !== undefined ? checked : !item.isChecked;
+        return setCheckedRecursively(item, targetChecked, now);
+      }
       if (item.children && item.children.length > 0) {
         return {
           ...item,
-          children: removeItem(item.children, id),
+          children: toggle(item.children),
         };
       }
       return item;
     });
+  }
+  return syncParentCheckStates(toggle(items), now);
+}
+
+export function removeItem(items: ScratchpadItem[], id: string): ScratchpadItem[] {
+  const now = Date.now();
+  function remove(list: ScratchpadItem[]): ScratchpadItem[] {
+    return list
+      .filter((item) => item.id !== id)
+      .map((item) => {
+        if (item.children && item.children.length > 0) {
+          return {
+            ...item,
+            children: remove(item.children),
+          };
+        }
+        return item;
+      });
+  }
+  return syncParentCheckStates(remove(items), now);
 }
 
 export function isRootDuplicate(items: ScratchpadItem[], text: string, excludeId?: string): boolean {
@@ -201,22 +351,26 @@ export function addChildItem(items: ScratchpadItem[], parentId: string, text: st
     updatedAt: now,
   };
 
-  return items.map((item) => {
-    if (item.id === parentId) {
-      return {
-        ...item,
-        updatedAt: now,
-        children: [...(item.children || []), newChild],
-      };
-    }
-    if (item.children && item.children.length > 0) {
-      return {
-        ...item,
-        children: addChildItem(item.children, parentId, text),
-      };
-    }
-    return item;
-  });
+  function add(list: ScratchpadItem[]): ScratchpadItem[] {
+    return list.map((item) => {
+      if (item.id === parentId) {
+        return {
+          ...item,
+          updatedAt: now,
+          children: [...(item.children || []), newChild],
+        };
+      }
+      if (item.children && item.children.length > 0) {
+        return {
+          ...item,
+          children: add(item.children),
+        };
+      }
+      return item;
+    });
+  }
+
+  return syncParentCheckStates(add(items), now);
 }
 
 export function addGroup(items: ScratchpadItem[], name: string): ScratchpadItem[] {
@@ -375,17 +529,21 @@ export function moveChildItem(
 }
 
 export function clearCompleted(items: ScratchpadItem[]): ScratchpadItem[] {
-  return items
-    .filter((item) => item.isGroup || !item.isChecked)
-    .map((item) => {
-      if (item.children && item.children.length > 0) {
-        return {
-          ...item,
-          children: clearCompleted(item.children),
-        };
-      }
-      return item;
-    });
+  const now = Date.now();
+  function clear(list: ScratchpadItem[]): ScratchpadItem[] {
+    return list
+      .filter((item) => item.isGroup || !item.isChecked)
+      .map((item) => {
+        if (item.children && item.children.length > 0) {
+          return {
+            ...item,
+            children: clear(item.children),
+          };
+        }
+        return item;
+      });
+  }
+  return syncParentCheckStates(clear(items), now);
 }
 
 export interface ScratchpadMergeResult {

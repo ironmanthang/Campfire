@@ -18,6 +18,11 @@ import {
   moveChildItem,
   mergeScratchpadDocs,
   mergeScratchpadKeepBoth,
+  getItemCheckStatus,
+  syncParentCheckStates,
+  getCompletedItems,
+  countCompletedTasks,
+  clearSelectedCompleted,
   type ScratchpadItem,
 } from '../src';
 
@@ -777,6 +782,183 @@ describe('Scratchpad Core Logic', () => {
       expect(items[0].text).toBe('Local version');
       expect(items[1].id).not.toBe('1'); // New ID generated for remote copy
       expect(items[1].text).toBe('Remote version');
+    });
+  });
+
+  describe('Auto-complete, Tri-state Indeterminate, and Interactive Clear Completed', () => {
+    it('returns correct ItemCheckStatus for leaf and parent items', () => {
+      const leafUnchecked: ScratchpadItem = {
+        id: 'l1',
+        text: 'Leaf 1',
+        isChecked: false,
+        children: [],
+        createdAt: 1000,
+        updatedAt: 1000,
+      };
+      expect(getItemCheckStatus(leafUnchecked)).toBe('unchecked');
+
+      const leafChecked: ScratchpadItem = {
+        id: 'l2',
+        text: 'Leaf 2',
+        isChecked: true,
+        children: [],
+        createdAt: 1000,
+        updatedAt: 1000,
+      };
+      expect(getItemCheckStatus(leafChecked)).toBe('checked');
+
+      const parentPartial: ScratchpadItem = {
+        id: 'p1',
+        text: 'Parent 1',
+        isChecked: false,
+        children: [leafChecked, leafUnchecked],
+        createdAt: 1000,
+        updatedAt: 1000,
+      };
+      expect(getItemCheckStatus(parentPartial)).toBe('indeterminate');
+
+      const parentFull: ScratchpadItem = {
+        id: 'p2',
+        text: 'Parent 2',
+        isChecked: true,
+        children: [leafChecked, { ...leafChecked, id: 'l3' }],
+        createdAt: 1000,
+        updatedAt: 1000,
+      };
+      expect(getItemCheckStatus(parentFull)).toBe('checked');
+    });
+
+    it('auto-completes parent when all children are toggled on', () => {
+      const initial: ScratchpadItem[] = [
+        {
+          id: 'p',
+          text: 'Parent',
+          isChecked: false,
+          children: [
+            { id: 'c1', text: 'Child 1', isChecked: false, children: [], createdAt: 1000, updatedAt: 1000 },
+            { id: 'c2', text: 'Child 2', isChecked: false, children: [], createdAt: 1000, updatedAt: 1000 },
+          ],
+          createdAt: 1000,
+          updatedAt: 1000,
+        },
+      ];
+
+      // Check first child: parent becomes indeterminate, isChecked is false
+      const step1 = toggleItemWithChildren(initial, 'c1', true);
+      expect(step1[0].isChecked).toBe(false);
+      expect(getItemCheckStatus(step1[0])).toBe('indeterminate');
+
+      // Check second child: all children checked, parent auto-completes to isChecked: true
+      const step2 = toggleItemWithChildren(step1, 'c2', true);
+      expect(step2[0].isChecked).toBe(true);
+      expect(getItemCheckStatus(step2[0])).toBe('checked');
+
+      // Uncheck one child: parent automatically reverts to isChecked: false and indeterminate
+      const step3 = toggleItemWithChildren(step2, 'c1', false);
+      expect(step3[0].isChecked).toBe(false);
+      expect(getItemCheckStatus(step3[0])).toBe('indeterminate');
+    });
+
+    it('bubbles indeterminate status up through multiple levels (grandparent)', () => {
+      const tree: ScratchpadItem[] = [
+        {
+          id: 'gp',
+          text: 'Grandparent',
+          isChecked: false,
+          children: [
+            {
+              id: 'parent',
+              text: 'Parent',
+              isChecked: false,
+              children: [
+                { id: 'child', text: 'Child', isChecked: false, children: [], createdAt: 1000, updatedAt: 1000 },
+                { id: 'child2', text: 'Child 2', isChecked: false, children: [], createdAt: 1000, updatedAt: 1000 },
+              ],
+              createdAt: 1000,
+              updatedAt: 1000,
+            },
+          ],
+          createdAt: 1000,
+          updatedAt: 1000,
+        },
+      ];
+
+      const step1 = toggleItemWithChildren(tree, 'child', true);
+      expect(getItemCheckStatus(step1[0].children[0])).toBe('indeterminate');
+      expect(getItemCheckStatus(step1[0])).toBe('indeterminate');
+    });
+
+    it('adds a child and properly resets parent to incomplete', () => {
+      const tree: ScratchpadItem[] = [
+        {
+          id: 'p',
+          text: 'Parent',
+          isChecked: true,
+          children: [
+            { id: 'c1', text: 'Child 1', isChecked: true, children: [], createdAt: 1000, updatedAt: 1000 },
+          ],
+          createdAt: 1000,
+          updatedAt: 1000,
+        },
+      ];
+
+      const updated = addChildItem(tree, 'p', 'New Incomplete Child');
+      expect(updated[0].isChecked).toBe(false);
+      expect(getItemCheckStatus(updated[0])).toBe('indeterminate');
+    });
+
+    it('collects completed items with hierarchy paths via getCompletedItems', () => {
+      const tree: ScratchpadItem[] = [
+        {
+          id: 'p',
+          text: 'Project',
+          isChecked: false,
+          children: [
+            { id: 'c1', text: 'Task 1', isChecked: true, children: [], createdAt: 1000, updatedAt: 1000 },
+            { id: 'c2', text: 'Task 2', isChecked: false, children: [], createdAt: 1000, updatedAt: 1000 },
+          ],
+          createdAt: 1000,
+          updatedAt: 1000,
+        },
+      ];
+
+      const completed = getCompletedItems(tree);
+      expect(completed).toHaveLength(1);
+      expect(completed[0]).toEqual({
+        id: 'c1',
+        text: 'Task 1',
+        parentPath: 'Project',
+      });
+      expect(countCompletedTasks(tree)).toBe(1);
+    });
+
+    it('clearSelectedCompleted deletes selected items while reverting unselected items to unchecked', () => {
+      const tree: ScratchpadItem[] = [
+        {
+          id: 'p',
+          text: 'Project',
+          isChecked: false,
+          children: [
+            { id: 'c1', text: 'Task 1', isChecked: true, children: [], createdAt: 1000, updatedAt: 1000 },
+            { id: 'c2', text: 'Task 2', isChecked: true, children: [], createdAt: 1000, updatedAt: 1000 },
+          ],
+          createdAt: 1000,
+          updatedAt: 1000,
+        },
+      ];
+
+      // User unchecks c1 (wants to rescue it), keeps c2 checked (wants to delete it)
+      const idsToDelete = new Set(['c2']);
+      const idsToUncheck = new Set(['c1']);
+
+      const result = clearSelectedCompleted(tree, idsToDelete, idsToUncheck);
+      expect(result).toHaveLength(1);
+      expect(result[0].text).toBe('Project');
+      expect(result[0].children).toHaveLength(1);
+      expect(result[0].children[0].id).toBe('c1');
+      expect(result[0].children[0].isChecked).toBe(false); // Rescued back to unchecked!
+      expect(result[0].isChecked).toBe(false);
+      expect(getItemCheckStatus(result[0])).toBe('unchecked');
     });
   });
 });

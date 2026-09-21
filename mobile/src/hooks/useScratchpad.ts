@@ -10,6 +10,7 @@ import {
   updateItemText as coreUpdateItemText,
   removeItem as coreRemoveItem,
   clearCompleted as coreClearCompleted,
+  clearSelectedCompleted as coreClearSelectedCompleted,
   togglePinItem as coreTogglePinItem,
   moveItem as coreMoveItem,
   moveChildItem as coreMoveChildItem,
@@ -32,6 +33,7 @@ export interface UseScratchpadReturn {
   isDuplicate: (text: string, excludeId?: string) => boolean;
   removeItem: (id: string) => void;
   clearCompleted: () => void;
+  clearSelectedCompleted: (idsToDelete: Set<string>, idsToUncheck: Set<string>) => void;
 }
 
 export function useScratchpad(
@@ -188,6 +190,17 @@ export function useScratchpad(
     });
   }, [saveAndSync]);
 
+  const clearSelectedCompleted = useCallback(
+    (idsToDelete: Set<string>, idsToUncheck: Set<string>) => {
+      setItems((prev) => {
+        const next = coreClearSelectedCompleted(prev, idsToDelete, idsToUncheck);
+        saveAndSync(next);
+        return next;
+      });
+    },
+    [saveAndSync]
+  );
+
   return {
     items,
     loading,
@@ -203,5 +216,6 @@ export function useScratchpad(
     isDuplicate,
     removeItem,
     clearCompleted,
+    clearSelectedCompleted,
   };
 }
