@@ -44,6 +44,7 @@ export function getActiveChatTools(
   const toolMapping: Record<string, string[]> = {
     get_system_resources: ["get_system_resources"],
     read_journal_entries: ["read_journal_entries"],
+    search_journal: ["search_journal"],
     navigate_to_journal_date: ["navigate_to_journal_date"],
     scan_for_garbage: ["scan_for_garbage"],
   };

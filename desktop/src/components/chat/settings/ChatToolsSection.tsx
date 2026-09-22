@@ -7,7 +7,8 @@ import {
   BookOpen,
   Compass,
   Trash2,
-  Globe
+  Globe,
+  Search,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAppStore } from "../../../store/useAppStore";
@@ -41,6 +42,7 @@ export function ChatToolsSection() {
   const allToolsNames = [
     "get_system_resources",
     "read_journal_entries",
+    "search_journal",
     "navigate_to_journal_date",
     "scan_for_garbage",
     "web_search",
@@ -115,6 +117,14 @@ export function ChatToolsSection() {
               label: t("chatView.toolArchive"),
               desc: t("chatView.toolArchiveDesc"),
               icon: BookOpen,
+              hasSubSettings: false
+            },
+            {
+              id: "search-journal",
+              name: "search_journal",
+              label: t("chatView.toolSearch"),
+              desc: t("chatView.toolSearchDesc"),
+              icon: Search,
               hasSubSettings: false
             },
             {

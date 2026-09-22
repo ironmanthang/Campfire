@@ -1,12 +1,13 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useMemo, useEffect } from "react";
 import {
   Trash2,
   FolderPlus,
   Sparkles,
   Pin,
+  Search,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { getCompletedItems, countCompletedTasks } from "@campfire/core";
+import { getCompletedItems, countCompletedTasks, ScratchpadItem } from "@campfire/core";
 import { useScratchpad } from "../hooks/useScratchpad";
 import { useResizer } from "../hooks/useResizer";
 import { usePersistedState } from "../hooks/usePersistedState";
@@ -15,6 +16,8 @@ import { DragHandles } from "../components/common";
 import { useAppStore } from "../store/useAppStore";
 import { ScratchpadItemRow } from "../components/scratchpad/ScratchpadItemRow";
 import { ScratchpadQuickAdd } from "../components/scratchpad/ScratchpadQuickAdd";
+import { ScratchpadSearchBar } from "../components/scratchpad/ScratchpadSearchBar";
+import { filterItemTree, countMatches } from "../components/scratchpad/scratchpadSearchUtils";
 import { DeleteConfirmModal } from "../components/modals/data_management/DeleteConfirmModal";
 import { ClearCompletedModal } from "../components/modals/data_management/ClearCompletedModal";
 
@@ -32,6 +35,10 @@ export function ScratchpadView() {
     "scratchpad_collapsed_map",
     {}
   );
+
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchFilter, setSearchFilter] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const newGroupBtnRef = useRef<HTMLButtonElement>(null);
 
@@ -61,6 +68,51 @@ export function ScratchpadView() {
     defaultVal: 768,
     mode: "px",
   });
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f") {
+        e.preventDefault();
+        setIsSearching(true);
+        setTimeout(() => searchInputRef.current?.focus(), 50);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const { displayItems, expandedGroupIds, matchedCount } = useMemo(() => {
+    const q = searchFilter.trim().toLowerCase();
+    if (!q) {
+      return {
+        displayItems: items,
+        expandedGroupIds: new Set<string>(),
+        matchedCount: 0,
+      };
+    }
+    const expIds = new Set<string>();
+    const res: ScratchpadItem[] = [];
+    for (const item of items) {
+      const matchRes = filterItemTree(item, q, expIds);
+      if (matchRes.matched) {
+        res.push(matchRes.filteredItem);
+      }
+    }
+    return {
+      displayItems: res,
+      expandedGroupIds: expIds,
+      matchedCount: countMatches(res),
+    };
+  }, [items, searchFilter]);
+
+  const effectiveCollapsedMap = useMemo(() => {
+    if (!searchFilter.trim() || expandedGroupIds.size === 0) return collapsedMap;
+    const merged = { ...collapsedMap };
+    expandedGroupIds.forEach((id) => {
+      merged[id] = false;
+    });
+    return merged;
+  }, [collapsedMap, searchFilter, expandedGroupIds]);
 
   const isTaskDuplicate = Boolean(newTaskText.trim()) && isDuplicate(newTaskText);
   const isGroupDuplicate = Boolean(newGroupName.trim()) && isDuplicate(newGroupName);
@@ -110,8 +162,28 @@ export function ScratchpadView() {
     setDeleteConfirmTarget(null);
   }, []);
 
-  const pinnedItems = items.filter((item) => Boolean(item.isPinned));
-  const unpinnedItems = items.filter((item) => !item.isPinned);
+  const displayPinned = displayItems.filter((item) => Boolean(item.isPinned));
+  const displayUnpinned = displayItems.filter((item) => !item.isPinned);
+
+  const renderItemRow = (item: ScratchpadItem, idx: number, list: ScratchpadItem[]) => (
+    <ScratchpadItemRow
+      key={item.id}
+      item={item}
+      depth={0}
+      isFirst={idx === 0}
+      isLast={idx === list.length - 1}
+      collapsedMap={effectiveCollapsedMap}
+      onToggleCollapse={toggleCollapse}
+      onToggleCheck={toggleItemWithChildren}
+      onAddChild={addChildItem}
+      onUpdateText={updateItemText}
+      onTogglePin={togglePinItem}
+      onMove={moveItem}
+      onMoveChild={moveChildItem}
+      isDuplicate={isDuplicate}
+      onDelete={handleDeleteRequest}
+    />
+  );
 
   return (
     <div className="flex-1 overflow-y-auto">
@@ -140,6 +212,26 @@ export function ScratchpadView() {
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                setIsSearching((prev) => {
+                  const next = !prev;
+                  if (!next) setSearchFilter("");
+                  else setTimeout(() => searchInputRef.current?.focus(), 50);
+                  return next;
+                });
+              }}
+              className={`px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer shadow-xs ${
+                isSearching || searchFilter
+                  ? "bg-accent-brand/10 border-accent-brand text-accent-brand"
+                  : "bg-bg-surface border-border-brand hover:border-accent-brand text-text-primary"
+              }`}
+              title={t("scratchpad.searchTooltip", "Filter notes (Ctrl+F)")}
+            >
+              <Search className="h-4 w-4" />
+              <span>{t("scratchpad.search", "Search")}</span>
+            </button>
+
             {completedCount > 0 && (
               <button
                 onClick={() => setIsClearCompletedModalOpen(true)}
@@ -162,6 +254,17 @@ export function ScratchpadView() {
             </button>
           </div>
         </div>
+
+        {/* Search Bar */}
+        {isSearching && (
+          <ScratchpadSearchBar
+            searchInputRef={searchInputRef}
+            searchFilter={searchFilter}
+            setSearchFilter={setSearchFilter}
+            onClose={() => setIsSearching(false)}
+            matchedCount={matchedCount}
+          />
+        )}
 
         {/* Quick Add Form */}
         <ScratchpadQuickAdd
@@ -192,9 +295,21 @@ export function ScratchpadView() {
                 {t("scratchpad.emptyHint", "Add a quick thought above before you forget!")}
               </p>
             </div>
+          ) : displayItems.length === 0 ? (
+            <div className="flex-1 flex flex-col items-center justify-center text-center text-text-secondary py-16 select-none">
+              <Search className="h-8 w-8 text-border-brand mb-2 opacity-60" />
+              <p className="text-sm font-semibold">{t("scratchpad.noSearchResults", "No notes match your filter.")}</p>
+              <button
+                type="button"
+                onClick={() => setSearchFilter("")}
+                className="mt-2 text-xs text-accent-brand hover:underline cursor-pointer"
+              >
+                {t("scratchpad.clearFilter", "Clear filter")}
+              </button>
+            </div>
           ) : (
             <div className="space-y-3">
-              {pinnedItems.length > 0 ? (
+              {displayPinned.length > 0 ? (
                 <>
                   {/* Pinned Section */}
                   <div className="space-y-1">
@@ -202,84 +317,30 @@ export function ScratchpadView() {
                       <Pin className="h-3.5 w-3.5 fill-current" />
                       <span>{t("scratchpad.pinned", "Pinned")}</span>
                       <span className="text-[11px] font-semibold px-1.5 py-0.2 rounded-md bg-accent-brand/10 border border-accent-brand/30 ml-1">
-                        {pinnedItems.length}
+                        {displayPinned.length}
                       </span>
                     </div>
 
-                    {pinnedItems.map((item, idx) => (
-                      <ScratchpadItemRow
-                        key={item.id}
-                        item={item}
-                        depth={0}
-                        isFirst={idx === 0}
-                        isLast={idx === pinnedItems.length - 1}
-                        collapsedMap={collapsedMap}
-                        onToggleCollapse={toggleCollapse}
-                        onToggleCheck={toggleItemWithChildren}
-                        onAddChild={addChildItem}
-                        onUpdateText={updateItemText}
-                        onTogglePin={togglePinItem}
-                        onMove={moveItem}
-                        onMoveChild={moveChildItem}
-                        isDuplicate={isDuplicate}
-                        onDelete={handleDeleteRequest}
-                      />
-                    ))}
+                    {displayPinned.map((item, idx) => renderItemRow(item, idx, displayPinned))}
                   </div>
 
                   {/* Unpinned Section */}
-                  {unpinnedItems.length > 0 && (
+                  {displayUnpinned.length > 0 && (
                     <div className="space-y-1 pt-3 border-t border-border-brand/30">
                       <div className="flex items-center gap-1.5 px-2 pb-1 text-xs font-bold text-text-secondary uppercase tracking-wider select-none">
                         <span>{t("scratchpad.other", "Other Notes")}</span>
                         <span className="text-[11px] font-semibold px-1.5 py-0.2 rounded-md bg-bg-app border border-border-brand/40 ml-1">
-                          {unpinnedItems.length}
+                          {displayUnpinned.length}
                         </span>
                       </div>
 
-                      {unpinnedItems.map((item, idx) => (
-                        <ScratchpadItemRow
-                          key={item.id}
-                          item={item}
-                          depth={0}
-                          isFirst={idx === 0}
-                          isLast={idx === unpinnedItems.length - 1}
-                          collapsedMap={collapsedMap}
-                          onToggleCollapse={toggleCollapse}
-                          onToggleCheck={toggleItemWithChildren}
-                          onAddChild={addChildItem}
-                          onUpdateText={updateItemText}
-                          onTogglePin={togglePinItem}
-                          onMove={moveItem}
-                          onMoveChild={moveChildItem}
-                          isDuplicate={isDuplicate}
-                          onDelete={handleDeleteRequest}
-                        />
-                      ))}
+                      {displayUnpinned.map((item, idx) => renderItemRow(item, idx, displayUnpinned))}
                     </div>
                   )}
                 </>
               ) : (
                 <div className="space-y-1">
-                  {items.map((item, idx) => (
-                    <ScratchpadItemRow
-                      key={item.id}
-                      item={item}
-                      depth={0}
-                      isFirst={idx === 0}
-                      isLast={idx === items.length - 1}
-                      collapsedMap={collapsedMap}
-                      onToggleCollapse={toggleCollapse}
-                      onToggleCheck={toggleItemWithChildren}
-                      onAddChild={addChildItem}
-                      onUpdateText={updateItemText}
-                      onTogglePin={togglePinItem}
-                      onMove={moveItem}
-                      onMoveChild={moveChildItem}
-                      isDuplicate={isDuplicate}
-                      onDelete={handleDeleteRequest}
-                    />
-                  ))}
+                  {displayItems.map((item, idx) => renderItemRow(item, idx, displayItems))}
                 </div>
               )}
             </div>

@@ -74,6 +74,28 @@ export const LOCAL_TOOLS: OllamaTool[] = [
         required: ["start_date", "end_date"]
       }
     }
+  },
+  {
+    type: "function",
+    function: {
+      name: "search_journal",
+      description: "Search journal entries by keywords, topics, or #tags (e.g. '#tag', '#deep', 'meeting', 'project launch') within your clone memory range. Returns matching dates with line numbers and snippet lines. Use this tool whenever the user asks about specific tags, topics, keywords, or asks what entries mention a concept. IMPORTANT: You are only allowed to query date ranges within your clone memory range.",
+      parameters: {
+        type: "object",
+        properties: {
+          query: {
+            type: "string",
+            description: "The search query. Can contain words, phrases, and/or hashtags like '#work', '#deep'."
+          },
+          tag_mode: {
+            type: "string",
+            enum: ["and", "or"],
+            description: "Optional matching strategy when multiple tags are queried ('and' requires all tags, 'or' matches any tag). Defaults to 'and'."
+          }
+        },
+        required: ["query"]
+      }
+    }
   }
 ];
 

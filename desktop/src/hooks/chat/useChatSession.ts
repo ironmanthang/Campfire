@@ -44,6 +44,7 @@ export function useChatSession({ visible }: { visible: boolean }) {
   const [enabledTools, setEnabledTools] = usePersistedState("chat_enabled_tools", [
     "get_system_resources",
     "read_journal_entries",
+    "search_journal",
     "navigate_to_journal_date",
     "scan_for_garbage",
     "web_search",

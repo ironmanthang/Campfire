@@ -178,6 +178,8 @@ export function ChatMessageBubble({
                       ? t("chatView.statusCheckingHardware")
                       : activeToolName === "read_journal_entries"
                       ? t("chatView.statusReadingHistory")
+                      : activeToolName === "search_journal"
+                      ? t("chatView.statusSearchingJournal", "Searching journal entries...")
                       : activeToolName === "navigate_to_journal_date"
                       ? t("chatView.statusNavigatingDate")
                       : activeToolName === "scan_for_garbage"

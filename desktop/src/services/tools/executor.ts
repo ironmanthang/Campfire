@@ -158,6 +158,66 @@ export async function executeToolCall(
       }
     }
 
+    case "search_journal": {
+      const query = args.query;
+      const tagMode = args.tag_mode || "and";
+      if (!query || typeof query !== "string" || query.trim() === "") {
+        return {
+          role: "tool",
+          content: "Error: Query parameter is required for search_journal.",
+          name: "search_journal"
+        };
+      }
+
+      try {
+        const res = await invoke<Array<{ date: string; line_number: number; snippet: string }>>("search_entries", {
+          dirPath: context.config.journal_dir,
+          query: query.trim(),
+          tagMode
+        });
+
+        // Strictly enforce clone memory date range boundary
+        const filtered = (res || []).filter(
+          (r) => r.date >= context.chatStartDate && r.date <= context.chatEndDate
+        );
+
+        if (filtered.length === 0) {
+          return {
+            role: "tool",
+            content: `No journal entries found matching "${query}" within your clone memory range (${context.chatStartDate} to ${context.chatEndDate}).`,
+            name: "search_journal"
+          };
+        }
+
+        const maxResults = 30;
+        const totalMatches = filtered.length;
+        const displayed = filtered.slice(0, maxResults);
+
+        let output = `### Journal Search Results for: "${query}" (within ${context.chatStartDate} to ${context.chatEndDate})\nFound ${totalMatches} matching line(s)${totalMatches > maxResults ? ` (showing top ${maxResults})` : ""}:\n\n`;
+
+        displayed.forEach((item) => {
+          output += `- **${item.date}** (line ${item.line_number}): ${item.snippet}\n`;
+        });
+
+        if (totalMatches > maxResults) {
+          output += `\n*...and ${totalMatches - maxResults} more matches truncated to preserve context window.*`;
+        }
+
+        return {
+          role: "tool",
+          content: output.trim(),
+          name: "search_journal"
+        };
+      } catch (err: any) {
+        console.error("Failed to run search_journal tool:", err);
+        return {
+          role: "tool",
+          content: `Error searching journal entries: ${err.message || err}`,
+          name: "search_journal"
+        };
+      }
+    }
+
     case "navigate_to_journal_date": {
       const targetDate = args.date;
       if (targetDate < context.chatStartDate || targetDate > context.chatEndDate) {
