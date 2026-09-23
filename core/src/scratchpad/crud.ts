@@ -162,7 +162,7 @@ export function addChildItem(items: ScratchpadItem[], parentId: string, text: st
         return {
           ...item,
           updatedAt: now,
-          children: [...(item.children || []), newChild],
+          children: [newChild, ...(item.children || [])],
         };
       }
       if (item.children && item.children.length > 0) {

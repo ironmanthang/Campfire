@@ -218,6 +218,32 @@ describe('Scratchpad Core Logic', () => {
       expect(withChild[1].children[0].isChecked).toBe(false);
     });
 
+    it('prepends new child items to the top of existing children', () => {
+      const parentWithChildren: ScratchpadItem[] = [
+        {
+          id: 'p1',
+          text: 'Parent',
+          isChecked: false,
+          children: [
+            { id: 'c1', text: 'Old First Child', isChecked: false, children: [], createdAt: 1, updatedAt: 1 },
+          ],
+          createdAt: 1,
+          updatedAt: 1,
+        },
+      ];
+
+      const step1 = addChildItem(parentWithChildren, 'p1', 'New Top Child 1');
+      expect(step1[0].children).toHaveLength(2);
+      expect(step1[0].children[0].text).toBe('New Top Child 1');
+      expect(step1[0].children[1].text).toBe('Old First Child');
+
+      const step2 = addChildItem(step1, 'p1', 'New Top Child 2');
+      expect(step2[0].children).toHaveLength(3);
+      expect(step2[0].children[0].text).toBe('New Top Child 2');
+      expect(step2[0].children[1].text).toBe('New Top Child 1');
+      expect(step2[0].children[2].text).toBe('Old First Child');
+    });
+
     it('removes item by id (top-level or nested)', () => {
       const withoutTop = removeItem(initialItems, '2');
       expect(withoutTop).toHaveLength(1);
@@ -450,11 +476,11 @@ describe('Scratchpad Core Logic', () => {
       // Subtasks can match root items
       const withSubtask = addChildItem(rootItems, 'group-1', 'Buy Groceries');
       expect(withSubtask[2].children).toHaveLength(2);
-      expect(withSubtask[2].children[1].text).toBe('Buy Groceries');
+      expect(withSubtask[2].children[0].text).toBe('Buy Groceries');
 
       // Updating a subtask to match another item is permitted
       const updatedSubtask = updateItemText(withSubtask, 'subtask-1', 'Buy Groceries');
-      expect(updatedSubtask[2].children[0].text).toBe('Buy Groceries');
+      expect(updatedSubtask[2].children[1].text).toBe('Buy Groceries');
     });
   });
 
