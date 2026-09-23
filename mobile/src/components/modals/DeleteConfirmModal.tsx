@@ -1,10 +1,11 @@
-import { AlertCircle } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export interface DeleteConfirmModalProps {
   title: string;
   message: string;
+  itemPreview?: string;
   confirmLabel?: string;
   cancelLabel?: string;
   onCancel: () => void;
@@ -14,6 +15,7 @@ export interface DeleteConfirmModalProps {
 export function DeleteConfirmModal({
   title,
   message,
+  itemPreview,
   confirmLabel,
   cancelLabel,
   onCancel,
@@ -64,28 +66,49 @@ export function DeleteConfirmModal({
       }}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fade-in"
     >
-      <div ref={modalRef} className="bg-bg-surface border border-border-brand rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4">
-        <div className="flex items-center gap-3 text-red-500">
-          <AlertCircle className="h-6 w-6 shrink-0" />
-          <h3 className="text-lg font-bold text-text-primary">{title}</h3>
+      <div
+        ref={modalRef}
+        className="bg-bg-surface border border-border-brand rounded-2xl p-6 max-w-sm w-full max-h-[85vh] flex flex-col shadow-2xl space-y-4"
+      >
+        {/* Header */}
+        <div className="flex items-center gap-2.5 text-text-primary shrink-0">
+          <Trash2 className="h-5 w-5 shrink-0 text-accent-brand" />
+          <h3 className="text-base font-bold text-text-primary">
+            {title}
+          </h3>
         </div>
 
-        <p className="text-sm text-text-secondary leading-relaxed">
-          {message}
-        </p>
+        {/* Warning message / instruction */}
+        {message && (
+          <p className="text-xs text-text-secondary leading-relaxed shrink-0">
+            {message}
+          </p>
+        )}
 
-        <div className="flex justify-end gap-3 pt-2">
+        {/* Framed card content area */}
+        {itemPreview && (
+          <div className="flex-1 overflow-y-auto pr-1 border border-border-brand/40 bg-bg-app/40 rounded-xl p-2.5 min-h-0 max-h-56">
+            <div className="p-2 bg-bg-surface border border-border-brand/40 rounded-lg">
+              <p className="text-xs text-text-primary leading-relaxed break-words font-medium">
+                {itemPreview}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Actions Footer */}
+        <div className="flex items-center justify-end gap-2.5 pt-2 shrink-0 border-t border-border-brand/30">
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 rounded-lg border border-border-brand hover:border-accent-brand text-xs font-semibold text-text-primary active:bg-bg-surface/50 transition-all cursor-pointer"
+            className="px-4 py-2 rounded-xl border border-border-brand hover:border-accent-brand text-xs font-semibold text-text-primary active:bg-bg-surface/50 transition-all cursor-pointer"
           >
             {modalCancel}
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className="px-4 py-2 rounded-lg bg-red-600 active:bg-red-700 text-xs font-semibold text-white shadow-sm transition-all cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-red-600 active:bg-red-700 text-xs font-semibold text-white shadow-sm transition-all cursor-pointer"
           >
             {modalConfirm}
           </button>

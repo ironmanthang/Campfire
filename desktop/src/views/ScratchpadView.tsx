@@ -369,15 +369,14 @@ export function ScratchpadView() {
               ? t("scratchpad.deleteGroupConfirmTitle", "Delete Group")
               : t("scratchpad.deleteTaskConfirmTitle", "Delete Note")
           }
+          itemPreview={deleteConfirmTarget.name}
           message={
             deleteConfirmTarget.type === 'group'
-              ? t("scratchpad.deleteGroupConfirmMessage", {
-                  defaultValue: "Are you sure you want to permanently delete the group \"{{name}}\" and all of its subtasks? This action is permanent and cannot be undone.",
-                  name: deleteConfirmTarget.name,
+              ? t("scratchpad.deleteGroupConfirmMessageClean", {
+                  defaultValue: "Are you sure you want to permanently delete this group and all of its tasks? This action is permanent and cannot be undone.",
                 })
-              : t("scratchpad.deleteTaskConfirmMessage", {
-                  defaultValue: "Are you sure you want to permanently delete \"{{name}}\"? This action is permanent and cannot be undone.",
-                  name: deleteConfirmTarget.name,
+              : t("scratchpad.deleteTaskConfirmMessageClean", {
+                  defaultValue: "Are you sure you want to permanently delete this note? This action is permanent and cannot be undone.",
                 })
           }
           confirmLabel={t("deleteConfirmModal.deleteButton", "Delete Permanent")}

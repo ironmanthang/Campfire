@@ -214,8 +214,10 @@
     "clearConfirmButton": "Xóa việc hoàn thành",
     "deleteGroupConfirmTitle": "Xóa nhóm",
     "deleteGroupConfirmMessage": "Bạn có chắc muốn xóa vĩnh viễn nhóm \"{{name}}\" và toàn bộ việc trong đó? Hành động này không thể hoàn tác.",
+    "deleteGroupConfirmMessageClean": "Bạn có chắc muốn xóa vĩnh viễn nhóm này cùng toàn bộ việc con? Hành động này không thể hoàn tác.",
     "deleteTaskConfirmTitle": "Xóa ghi chú",
     "deleteTaskConfirmMessage": "Bạn có chắc muốn xóa vĩnh viễn \"{{name}}\"? Hành động này không thể hoàn tác.",
+    "deleteTaskConfirmMessageClean": "Bạn có chắc muốn xóa vĩnh viễn ghi chú này? Hành động này không thể hoàn tác.",
     "showMore": "Xem thêm",
     "showLess": "Thu gọn"
   },

@@ -214,8 +214,10 @@
     "clearConfirmButton": "Clear Completed",
     "deleteGroupConfirmTitle": "Delete Group",
     "deleteGroupConfirmMessage": "Are you sure you want to permanently delete the group \"{{name}}\" and all of its tasks? This action cannot be undone.",
+    "deleteGroupConfirmMessageClean": "Are you sure you want to permanently delete this group and all of its tasks? This action cannot be undone.",
     "deleteTaskConfirmTitle": "Delete Note",
     "deleteTaskConfirmMessage": "Are you sure you want to permanently delete \"{{name}}\"? This action cannot be undone.",
+    "deleteTaskConfirmMessageClean": "Are you sure you want to permanently delete this note? This action cannot be undone.",
     "showMore": "Show more",
     "showLess": "Show less"
   },
