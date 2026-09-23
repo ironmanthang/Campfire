@@ -84,9 +84,16 @@ if (typeof window !== "undefined") {
 export function playSfx(type: SfxType) {
   try {
     const config = useAppStore.getState().config;
-    if (!config.sound_sfx_enabled || (config.sound_sfx_volume ?? 70) <= 0) return;
+    if (!config.sound_sfx_enabled) return;
 
-    const normalizedVolume = Math.min(1, Math.max(0, (config.sound_sfx_volume ?? 70) / 100));
+    const rawVolume =
+      type === "pencil-tick"
+        ? (config.sound_sfx_scratchpad_volume ?? config.sound_sfx_volume ?? 70)
+        : (config.sound_sfx_heart_volume ?? config.sound_sfx_volume ?? 70);
+
+    if (rawVolume <= 0) return;
+
+    const normalizedVolume = Math.min(1, Math.max(0, rawVolume / 100));
     const ctx = getAudioContext();
 
     if (!ctx) {

@@ -1,14 +1,15 @@
 import { useTranslation } from "react-i18next";
-import { Volume2, VolumeX, Flame, CloudRain, Wind, Sparkles } from "lucide-react";
+import { Volume2, VolumeX, Flame, CloudRain, Wind } from "lucide-react";
 import { useAppStore } from "../../store/useAppStore";
-import { playSfx, type AmbientType } from "../../services/audioService";
+import { type AmbientType } from "../../services/audioService";
 
 export function SoundSection() {
   const { t } = useTranslation();
   const { config, updateConfigField } = useAppStore();
 
   const sfxEnabled = config.sound_sfx_enabled ?? false;
-  const sfxVolume = config.sound_sfx_volume ?? 70;
+  const scratchpadVolume = config.sound_sfx_scratchpad_volume ?? config.sound_sfx_volume ?? 70;
+  const heartVolume = config.sound_sfx_heart_volume ?? config.sound_sfx_volume ?? 70;
   const ambientEnabled = config.sound_ambient_enabled ?? false;
   const ambientType = (config.sound_ambient_type as AmbientType) ?? "campfire";
   const ambientVolume = config.sound_ambient_volume ?? 50;
@@ -43,8 +44,7 @@ export function SoundSection() {
     <div className="space-y-6">
       {/* Sound Effects Group */}
       <div className="space-y-3">
-        <h4 className="text-xs font-bold uppercase tracking-wider text-accent-brand flex items-center gap-1.5">
-          <Volume2 className="h-3.5 w-3.5" />
+        <h4 className="text-xs font-bold uppercase tracking-wider text-accent-brand">
           <span>{t("soundSection.sfxTitle", { defaultValue: "Sound Effects" })}</span>
         </h4>
 
@@ -68,38 +68,47 @@ export function SoundSection() {
           />
         </div>
 
-        {/* SFX Volume Slider & Test Button */}
+        {/* SFX Volume Sliders */}
         {sfxEnabled && (
-          <div className="flex items-center gap-4 p-3.5 bg-bg-surface/30 border border-border-brand/40 rounded-xl animate-fade-in">
-            <label className="text-xs font-semibold text-text-primary shrink-0 w-24">
-              {t("soundSection.volumeLabel", { defaultValue: "Volume" })}: {sfxVolume}%
-            </label>
-            <input
-              type="range"
-              min={0}
-              max={100}
-              step={1}
-              value={sfxVolume}
-              onChange={(e) => updateConfigField("sound_sfx_volume", parseInt(e.target.value, 10))}
-              className="flex-1 accent-accent-brand cursor-pointer"
-            />
-            <button
-              type="button"
-              onClick={() => playSfx("pencil-tick")}
-              className="px-2.5 py-1 text-xs font-medium rounded-lg border border-border-brand/60 hover:bg-bg-app hover:border-accent-brand/50 text-text-secondary hover:text-text-primary transition-all cursor-pointer shrink-0 flex items-center gap-1"
-              title={t("soundSection.testSfxTooltip", { defaultValue: "Preview pencil tick sound" })}
-            >
-              <Sparkles className="h-3 w-3 text-accent-brand" />
-              <span>{t("soundSection.testButton", { defaultValue: "Preview" })}</span>
-            </button>
+          <div className="space-y-3 p-3.5 bg-bg-surface/30 border border-border-brand/40 rounded-xl animate-fade-in">
+            {/* Scratchpad Volume Slider */}
+            <div className="flex items-center gap-4">
+              <label className="text-xs font-semibold text-text-primary shrink-0 w-28">
+                {t("soundSection.scratchpadVolumeLabel", { defaultValue: "Scratchpad" })}: {scratchpadVolume}%
+              </label>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                step={1}
+                value={scratchpadVolume}
+                onChange={(e) => updateConfigField("sound_sfx_scratchpad_volume", parseInt(e.target.value, 10))}
+                className="flex-1 accent-accent-brand cursor-pointer"
+              />
+            </div>
+
+            {/* Heart Volume Slider */}
+            <div className="flex items-center gap-4 pt-2 border-t border-border-brand/20">
+              <label className="text-xs font-semibold text-text-primary shrink-0 w-28">
+                {t("soundSection.heartVolumeLabel", { defaultValue: "Heart" })}: {heartVolume}%
+              </label>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                step={1}
+                value={heartVolume}
+                onChange={(e) => updateConfigField("sound_sfx_heart_volume", parseInt(e.target.value, 10))}
+                className="flex-1 accent-accent-brand cursor-pointer"
+              />
+            </div>
           </div>
         )}
       </div>
 
       {/* Ambient Soundscapes Group */}
       <div className="space-y-3 pt-2 border-t border-border-brand/20">
-        <h4 className="text-xs font-bold uppercase tracking-wider text-accent-brand flex items-center gap-1.5">
-          <Flame className="h-3.5 w-3.5" />
+        <h4 className="text-xs font-bold uppercase tracking-wider text-accent-brand">
           <span>{t("soundSection.ambientTitle", { defaultValue: "Ambient Background Sound" })}</span>
         </h4>
 

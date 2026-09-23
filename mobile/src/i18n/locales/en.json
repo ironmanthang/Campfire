@@ -239,6 +239,8 @@
     "enableSfxLabel": "Scratchpad & Heart Sounds",
     "enableSfxDesc": "Play a pencil-tick when completing tasks and a sparkle when clicking the heart.",
     "volumeLabel": "Volume",
+    "scratchpadVolumeLabel": "Scratchpad",
+    "heartVolumeLabel": "Heart",
     "testSfxTooltip": "Preview pencil tick sound",
     "testButton": "Preview",
     "ambientTitle": "Ambient Background Sound",

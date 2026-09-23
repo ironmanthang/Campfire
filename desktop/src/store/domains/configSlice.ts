@@ -75,6 +75,8 @@ export const createConfigSlice: StateCreator<
     heart_custom_image: "",
     sound_sfx_enabled: false,
     sound_sfx_volume: 70,
+    sound_sfx_scratchpad_volume: 70,
+    sound_sfx_heart_volume: 70,
     sound_ambient_enabled: false,
     sound_ambient_type: "campfire",
     sound_ambient_volume: 50,

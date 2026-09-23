@@ -239,6 +239,8 @@
     "enableSfxLabel": "Âm thanh ghi chú & Trái tim",
     "enableSfxDesc": "Phát tiếng bút chì khi đánh dấu hoàn thành tác vụ và tiếng lấp lánh khi nhấp vào trái tim.",
     "volumeLabel": "Âm lượng",
+    "scratchpadVolumeLabel": "Bản nháp",
+    "heartVolumeLabel": "Trái tim",
     "testSfxTooltip": "Nghe thử âm thanh bút chì",
     "testButton": "Nghe thử",
     "ambientTitle": "Âm thanh nền không gian",

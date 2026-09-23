@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Volume2, VolumeX, Flame, CloudRain, Wind, Sparkles } from 'lucide-react';
+import { Volume2, VolumeX, Flame, CloudRain, Wind } from 'lucide-react';
 import { useSoundSettings } from '../../../hooks/useSoundSettings';
-import { playSfx, type AmbientType } from '../../../services/audioService';
+import { type AmbientType } from '../../../services/audioService';
 
 export const SoundSection: React.FC = () => {
   const { t } = useTranslation();
@@ -39,8 +39,7 @@ export const SoundSection: React.FC = () => {
       {/* Sound Effects Section */}
       <div className="space-y-2.5">
         <div>
-          <h3 className="font-semibold text-text-primary flex items-center gap-1.5 text-sm">
-            <Volume2 size={16} className="text-accent-brand" />
+          <h3 className="font-semibold text-text-primary text-sm">
             <span>{t('soundSection.sfxTitle', { defaultValue: 'Sound Effects' })}</span>
           </h3>
           <p className="text-xs text-text-secondary">
@@ -63,29 +62,40 @@ export const SoundSection: React.FC = () => {
           />
         </div>
 
-        {/* SFX Volume & Preview */}
+        {/* SFX Volume Sliders */}
         {config.sfxEnabled && (
-          <div className="flex items-center gap-3 p-3 bg-bg-surface/40 border border-border-brand/40 rounded-xl">
-            <label className="text-xs font-semibold text-text-primary shrink-0 w-20">
-              {t('soundSection.volumeLabel', { defaultValue: 'Volume' })}: {config.sfxVolume}%
-            </label>
-            <input
-              type="range"
-              min={0}
-              max={100}
-              step={1}
-              value={config.sfxVolume}
-              onChange={(e) => updateConfig({ sfxVolume: parseInt(e.target.value, 10) })}
-              className="flex-1 accent-accent-brand cursor-pointer"
-            />
-            <button
-              type="button"
-              onClick={() => playSfx('pencil-tick')}
-              className="px-2.5 py-1 text-xs font-medium rounded-lg border border-border-brand/60 active:bg-bg-app text-text-secondary hover:text-text-primary transition-all cursor-pointer shrink-0 flex items-center gap-1"
-            >
-              <Sparkles size={12} className="text-accent-brand" />
-              <span>{t('soundSection.testButton', { defaultValue: 'Test' })}</span>
-            </button>
+          <div className="space-y-2.5 p-3 bg-bg-surface/40 border border-border-brand/40 rounded-xl animate-fade-in">
+            {/* Scratchpad Volume Slider */}
+            <div className="flex items-center gap-3">
+              <label className="text-xs font-semibold text-text-primary shrink-0 w-24">
+                {t('soundSection.scratchpadVolumeLabel', { defaultValue: 'Scratchpad' })}: {config.sfxScratchpadVolume}%
+              </label>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                step={1}
+                value={config.sfxScratchpadVolume}
+                onChange={(e) => updateConfig({ sfxScratchpadVolume: parseInt(e.target.value, 10) })}
+                className="flex-1 accent-accent-brand cursor-pointer"
+              />
+            </div>
+
+            {/* Heart Volume Slider */}
+            <div className="flex items-center gap-3 pt-2 border-t border-border-brand/20">
+              <label className="text-xs font-semibold text-text-primary shrink-0 w-24">
+                {t('soundSection.heartVolumeLabel', { defaultValue: 'Heart' })}: {config.sfxHeartVolume}%
+              </label>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                step={1}
+                value={config.sfxHeartVolume}
+                onChange={(e) => updateConfig({ sfxHeartVolume: parseInt(e.target.value, 10) })}
+                className="flex-1 accent-accent-brand cursor-pointer"
+              />
+            </div>
           </div>
         )}
       </div>
@@ -95,8 +105,7 @@ export const SoundSection: React.FC = () => {
       {/* Ambient Soundscapes Section */}
       <div className="space-y-2.5">
         <div>
-          <h3 className="font-semibold text-text-primary flex items-center gap-1.5 text-sm">
-            <Flame size={16} className="text-accent-brand" />
+          <h3 className="font-semibold text-text-primary text-sm">
             <span>{t('soundSection.ambientTitle', { defaultValue: 'Ambient Soundscape' })}</span>
           </h3>
           <p className="text-xs text-text-secondary">

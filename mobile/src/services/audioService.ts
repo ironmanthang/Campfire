@@ -5,6 +5,8 @@ export type { SfxType, AmbientType };
 export const SOUND_STORAGE_KEYS = {
   sfxEnabled: "campfire_mobile_sound_sfx_enabled",
   sfxVolume: "campfire_mobile_sound_sfx_volume",
+  sfxScratchpadVolume: "campfire_mobile_sound_sfx_scratchpad_volume",
+  sfxHeartVolume: "campfire_mobile_sound_sfx_heart_volume",
   ambientEnabled: "campfire_mobile_sound_ambient_enabled",
   ambientType: "campfire_mobile_sound_ambient_type",
   ambientVolume: "campfire_mobile_sound_ambient_volume",
@@ -12,7 +14,9 @@ export const SOUND_STORAGE_KEYS = {
 
 export interface SoundConfig {
   sfxEnabled: boolean;
-  sfxVolume: number; // 0-100
+  sfxVolume: number; // 0-100 (legacy/fallback)
+  sfxScratchpadVolume: number; // 0-100
+  sfxHeartVolume: number; // 0-100
   ambientEnabled: boolean;
   ambientType: AmbientType;
   ambientVolume: number; // 0-100
@@ -23,6 +27,22 @@ export function getSoundConfig(): SoundConfig {
   const sfxVolumeStr = localStorage.getItem(SOUND_STORAGE_KEYS.sfxVolume);
   const sfxVolume = sfxVolumeStr !== null ? parseInt(sfxVolumeStr, 10) : 70;
 
+  const sfxScratchpadVolumeStr = localStorage.getItem(SOUND_STORAGE_KEYS.sfxScratchpadVolume);
+  const sfxScratchpadVolume =
+    sfxScratchpadVolumeStr !== null
+      ? parseInt(sfxScratchpadVolumeStr, 10)
+      : isNaN(sfxVolume)
+        ? 70
+        : sfxVolume;
+
+  const sfxHeartVolumeStr = localStorage.getItem(SOUND_STORAGE_KEYS.sfxHeartVolume);
+  const sfxHeartVolume =
+    sfxHeartVolumeStr !== null
+      ? parseInt(sfxHeartVolumeStr, 10)
+      : isNaN(sfxVolume)
+        ? 70
+        : sfxVolume;
+
   const ambientEnabled = localStorage.getItem(SOUND_STORAGE_KEYS.ambientEnabled) === "true";
   const ambientType = (localStorage.getItem(SOUND_STORAGE_KEYS.ambientType) as AmbientType) || "campfire";
   const ambientVolumeStr = localStorage.getItem(SOUND_STORAGE_KEYS.ambientVolume);
@@ -31,6 +51,8 @@ export function getSoundConfig(): SoundConfig {
   return {
     sfxEnabled,
     sfxVolume: isNaN(sfxVolume) ? 70 : sfxVolume,
+    sfxScratchpadVolume: isNaN(sfxScratchpadVolume) ? 70 : sfxScratchpadVolume,
+    sfxHeartVolume: isNaN(sfxHeartVolume) ? 70 : sfxHeartVolume,
     ambientEnabled,
     ambientType,
     ambientVolume: isNaN(ambientVolume) ? 50 : ambientVolume,
@@ -43,6 +65,12 @@ export function saveSoundConfig(config: Partial<SoundConfig>) {
   }
   if (config.sfxVolume !== undefined) {
     localStorage.setItem(SOUND_STORAGE_KEYS.sfxVolume, String(config.sfxVolume));
+  }
+  if (config.sfxScratchpadVolume !== undefined) {
+    localStorage.setItem(SOUND_STORAGE_KEYS.sfxScratchpadVolume, String(config.sfxScratchpadVolume));
+  }
+  if (config.sfxHeartVolume !== undefined) {
+    localStorage.setItem(SOUND_STORAGE_KEYS.sfxHeartVolume, String(config.sfxHeartVolume));
   }
   if (config.ambientEnabled !== undefined) {
     localStorage.setItem(SOUND_STORAGE_KEYS.ambientEnabled, String(config.ambientEnabled));
@@ -139,9 +167,16 @@ if (typeof window !== "undefined") {
 export function playSfx(type: SfxType) {
   try {
     const config = getSoundConfig();
-    if (!config.sfxEnabled || config.sfxVolume <= 0) return;
+    if (!config.sfxEnabled) return;
 
-    const normalizedVolume = Math.min(1, Math.max(0, config.sfxVolume / 100));
+    const rawVolume =
+      type === "pencil-tick"
+        ? (config.sfxScratchpadVolume ?? config.sfxVolume ?? 70)
+        : (config.sfxHeartVolume ?? config.sfxVolume ?? 70);
+
+    if (rawVolume <= 0) return;
+
+    const normalizedVolume = Math.min(1, Math.max(0, rawVolume / 100));
     const ctx = getAudioContext();
 
     if (!ctx) {

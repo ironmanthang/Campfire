@@ -42,7 +42,9 @@ export interface AppConfig {
    */
   heart_custom_image: string;
   sound_sfx_enabled: boolean;
-  sound_sfx_volume: number; // 0-100
+  sound_sfx_volume: number; // 0-100 (legacy/fallback)
+  sound_sfx_scratchpad_volume?: number; // 0-100
+  sound_sfx_heart_volume?: number; // 0-100
   sound_ambient_enabled: boolean;
   sound_ambient_type: 'campfire' | 'rain' | 'night-forest';
   sound_ambient_volume: number; // 0-100
