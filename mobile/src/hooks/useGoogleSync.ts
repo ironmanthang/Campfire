@@ -74,43 +74,51 @@ export function useGoogleSync({
     setIsLoggedIn(true);
   };
 
+  const isSyncingRef = useRef(false);
+  const syncPendingRef = useRef<'none' | 'manual' | 'auto'>('none');
+
   // Initial load sync
   useEffect(() => {
     checkAuthStatus().then(() => {
       const auth = getStoredAuthState();
       const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';
       if (autoSync && (auth.accessToken || auth.sessionId)) {
-        handleSync();
+        handleSync(false, true);
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSync = async () => {
-    const auth = getStoredAuthState();
-    const needsRefresh = !auth.accessToken || Date.now() >= auth.expiresAt - 10 * 60 * 1000;
-    
-    if (needsRefresh) {
-      if (auth.sessionId) {
-        setSyncProgress({ status: 'authenticating', message: t("sync.authenticating"), filesProcessed: 0, totalFiles: 0 });
-        try {
-          await refreshAccessToken();
-          setIsLoggedIn(true);
-        } catch (refreshErr: any) {
-          setIsLoggedIn(false);
-          setSyncProgress({ status: 'error', message: refreshErr.message || t("sync.authFailed"), filesProcessed: 0, totalFiles: 0 });
-          return;
-        }
-      } else {
-        setIsLoggedIn(false);
-        if (onOpenSettings) onOpenSettings();
-        setSyncProgress({ status: 'error', message: t("sync.authFailed"), filesProcessed: 0, totalFiles: 0 });
-        return;
-      }
+  const handleSync = async (isManual: boolean = false, isStartupSync: boolean = false) => {
+    if (isSyncingRef.current) {
+      syncPendingRef.current = isManual || syncPendingRef.current === 'manual' ? 'manual' : 'auto';
+      return;
     }
-
+    isSyncingRef.current = true;
 
     try {
+      const auth = getStoredAuthState();
+      const needsRefresh = !auth.accessToken || Date.now() >= auth.expiresAt - 10 * 60 * 1000;
+      
+      if (needsRefresh) {
+        if (auth.sessionId) {
+          setSyncProgress({ status: 'authenticating', message: t("sync.authenticating"), filesProcessed: 0, totalFiles: 0 });
+          try {
+            await refreshAccessToken();
+            setIsLoggedIn(true);
+          } catch (refreshErr: any) {
+            setIsLoggedIn(false);
+            setSyncProgress({ status: 'error', message: refreshErr.message || t("sync.authFailed"), filesProcessed: 0, totalFiles: 0 });
+            return;
+          }
+        } else {
+          setIsLoggedIn(false);
+          if (onOpenSettings) onOpenSettings();
+          setSyncProgress({ status: 'error', message: t("sync.authFailed"), filesProcessed: 0, totalFiles: 0 });
+          return;
+        }
+      }
+
       const { modifiedDates, conflictedDates, scratchpadConflict } = await runSync((progress) => {
         setSyncProgress(progress);
       });
@@ -134,11 +142,19 @@ export function useGoogleSync({
         setPendingScratchpadConflict(scratchpadConflict);
       }
 
-      if (conflictedDates && conflictedDates.length > 0) {
-        setSyncResultDates(conflictedDates);
-      } else if (modifiedDates && modifiedDates.length > 0) {
+      // Filter out scratchpad from conflictedDates if scratchpadConflict modal is handling it
+      const activeConflictedDates = conflictedDates
+        ? conflictedDates.filter((d) => !(d === 'scratchpad' && scratchpadConflict))
+        : [];
+
+      const hasDownloads = modifiedDates && modifiedDates.length > 0;
+      const shouldShowModal = hasDownloads && (isStartupSync || isManual);
+
+      if (activeConflictedDates.length > 0) {
+        setSyncResultDates(activeConflictedDates);
+      } else if (shouldShowModal) {
         setSyncResultDates(modifiedDates);
-      } else {
+      } else if (isManual && !hasDownloads) {
         setToastMessage(t("sync.completedToast"));
         setTimeout(() => setToastMessage(null), 3000);
       }
@@ -155,8 +171,19 @@ export function useGoogleSync({
           filesProcessed: 0,
           totalFiles: 0
         });
-        setToastMessage(errorMsg);
-        setTimeout(() => setToastMessage(null), 4000);
+        if (isManual) {
+          setToastMessage(errorMsg);
+          setTimeout(() => setToastMessage(null), 4000);
+        }
+      }
+    } finally {
+      isSyncingRef.current = false;
+      const pending = syncPendingRef.current;
+      if (pending !== 'none') {
+        syncPendingRef.current = 'none';
+        setTimeout(() => {
+          handleSyncRef.current(pending === 'manual', false);
+        }, 500);
       }
     }
   };
@@ -172,7 +199,7 @@ export function useGoogleSync({
       const auth = getStoredAuthState();
       const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';
       if (autoSync && (auth.accessToken || auth.sessionId)) {
-        handleSyncRef.current();
+        handleSyncRef.current(false, false);
       }
     }, delayMs);
   }, []);

@@ -64,7 +64,7 @@ function App() {
   // Refs to break circular hook dependencies
   const activeDateRef = useRef<string | null>(null);
   const loadEntriesRef = useRef<() => void>(() => {});
-  const handleSyncRef = useRef<() => void>(() => {});
+  const handleSyncRef = useRef<(isManual?: boolean, isStartupSync?: boolean) => void>(() => {});
   const clearCacheRef = useRef<() => void>(() => {});
   const forceReloadEditorRef = useRef<(date: string, content: string) => void>(() => {});
 
@@ -114,7 +114,7 @@ function App() {
     onSyncTrigger: () => {
       const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';
       if (autoSync) {
-        handleSyncRef.current();
+        handleSyncRef.current(false);
       }
     },
     syncProgressStatus: syncProgress.status,
@@ -177,7 +177,7 @@ function App() {
           switchMainView(activeMainView === 'scratchpad' ? 'journal' : 'scratchpad');
         }}
         isScratchpadActive={activeMainView === 'scratchpad'}
-        onSync={handleSync}
+        onSync={() => handleSync(true)}
         onThemeToggle={toggleTheme}
         theme={theme}
         syncProgress={syncProgress}
@@ -250,7 +250,7 @@ function App() {
               loadEntries();
               const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';
               if (autoSync && isLoggedIn) {
-                handleSync();
+                handleSync(false);
               }
             }
           }}
@@ -264,7 +264,7 @@ function App() {
                 loadEntries();
                 const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';
                 if (autoSync && isLoggedIn) {
-                  handleSync();
+                  handleSync(false);
                 }
               }
             } else {
@@ -280,7 +280,7 @@ function App() {
               await loadEntries();
               const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';
               if (autoSync && isLoggedIn) {
-                handleSync();
+                handleSync(false);
               }
             }
           }}
@@ -356,7 +356,7 @@ function App() {
             triggerSyncRefresh();
             const autoSync = localStorage.getItem('past_you_auto_sync') !== 'false';
             if (autoSync && isLoggedIn) {
-              handleSync();
+              handleSync(false);
             }
           }}
         />
