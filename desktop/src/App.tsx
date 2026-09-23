@@ -28,6 +28,7 @@ import { useBannerLogic } from "./hooks/useBannerLogic";
 import { useTextZoom } from "./hooks/useTextZoom";
 import { matchesShortcut } from "./components/heart/shortcut";
 import { ImportReportModal } from "./components/modals/data_management/ImportReportModal";
+import { preloadSfx } from "./services/audioService";
 
 function App() {
   const t = useTranslation().t;
@@ -80,6 +81,10 @@ function App() {
   } = useOllamaStore();
 
   useAmbientAudio();
+
+  useEffect(() => {
+    preloadSfx();
+  }, []);
 
   // Global heart shortcut. When the configured combo is pressed anywhere in
   // the app, fire the same action the floating heart's click would: open the

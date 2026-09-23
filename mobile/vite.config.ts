@@ -14,7 +14,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['favicon.ico', 'icon.png'],
+      includeAssets: ['favicon.ico', 'icon.png', 'sounds/*.mp3'],
       manifest: {
         name: 'Campfire Journal',
         short_name: 'Campfire',
@@ -33,6 +33,7 @@ export default defineConfig({
       },
       workbox: {
         navigateFallback: null,
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,mp3}'],
         runtimeCaching: [
           {
             urlPattern: ({ request }) => request.mode === 'navigate',

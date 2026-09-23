@@ -18,6 +18,7 @@ import { FallingHearts } from './components/heart';
 
 // Utils
 import { calculateStreak } from '@campfire/core';
+import { preloadSfx } from './services/audioService';
 
 function App() {
   const { t, i18n } = useTranslation();
@@ -51,6 +52,11 @@ function App() {
 
   // Initialize background ambiance audio
   useAmbientAudio();
+
+  // Preload sound effects for zero-latency instant playback
+  useEffect(() => {
+    preloadSfx();
+  }, []);
 
   // Ensure the persisted language is applied even if localStorage was read
   // before the i18n module initialized.
