@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
 import {
   Plus,
   Trash2,
@@ -59,7 +59,10 @@ export function ScratchpadItemRow({
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(item.text);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [hasOverflow, setHasOverflow] = useState(false);
 
+  const textRef = useRef<HTMLSpanElement>(null);
   const subtaskInputRef = useRef<HTMLInputElement>(null);
   const subtaskFormRef = useRef<HTMLFormElement>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
@@ -70,7 +73,24 @@ export function ScratchpadItemRow({
 
   useEffect(() => {
     setEditText(item.text);
+    setIsExpanded(false);
   }, [item.text]);
+
+  useLayoutEffect(() => {
+    const el = textRef.current;
+    if (!el) return;
+
+    const checkOverflow = () => {
+      if (!isExpanded) {
+        setHasOverflow(el.scrollHeight > el.clientHeight);
+      }
+    };
+
+    checkOverflow();
+    const ro = new ResizeObserver(checkOverflow);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [item.text, isExpanded]);
 
   useEffect(() => {
     if (!isAddingSubtask) return;
@@ -244,7 +264,7 @@ export function ScratchpadItemRow({
 
   // Shared completion badge
   const badge = hasChildren ? (
-    <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md bg-bg-app text-text-secondary border border-border-brand/40 select-none shrink-0">
+    <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md bg-bg-app text-text-secondary border border-border-brand/40 select-none shrink-0 mt-0.5">
       {completedChildCount}/{totalChildCount}
     </span>
   ) : null;
@@ -295,16 +315,16 @@ export function ScratchpadItemRow({
     return (
       <div className="space-y-1 my-2">
         <div
-          className="group flex items-center justify-between gap-2 p-2 rounded-xl bg-bg-surface/90 border border-border-brand/60 shadow-xs hover:border-accent-brand/40 transition-all cursor-pointer"
+          className="group flex items-start justify-between gap-2 p-2 rounded-xl bg-bg-surface/90 border border-border-brand/60 shadow-xs hover:border-accent-brand/40 transition-all cursor-pointer"
           onClick={() => {
             if (window.getSelection()?.toString()) return;
             if (!isEditing) onToggleCollapse(item.id);
           }}
         >
-          <div className="flex items-center gap-2 flex-1 min-w-0">
+          <div className="flex items-start gap-2 flex-1 min-w-0">
             <button
               onClick={(e) => { e.stopPropagation(); onToggleCollapse(item.id); }}
-              className="p-1 rounded-md text-text-secondary hover:text-text-primary hover:bg-bg-app transition-colors cursor-pointer shrink-0"
+              className="p-1 rounded-md text-text-secondary hover:text-text-primary hover:bg-bg-app transition-colors cursor-pointer shrink-0 mt-0.5"
               title={isCollapsed ? t("common.expand", "Expand") : t("common.collapse", "Collapse")}
             >
               {isCollapsed ? (
@@ -314,7 +334,7 @@ export function ScratchpadItemRow({
               )}
             </button>
 
-            <Folder className="h-4.5 w-4.5 text-accent-brand shrink-0" />
+            <Folder className="h-4.5 w-4.5 text-accent-brand shrink-0 mt-0.5" />
 
             {isEditing ? editForm : (
               <div className="flex items-center gap-1.5 flex-1 min-w-0">
@@ -328,7 +348,7 @@ export function ScratchpadItemRow({
           </div>
 
           {/* Hover-revealed action buttons */}
-          <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+          <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity mt-0.5">
             {/* Primary actions: Add, Delete, Move Up, Move Down */}
             <button
               type="button"
@@ -416,7 +436,7 @@ export function ScratchpadItemRow({
   return (
     <div className="space-y-1">
       <div
-        className="group flex items-center justify-between gap-2 p-2 rounded-xl hover:bg-bg-surface/70 transition-colors cursor-pointer"
+        className="group flex items-start justify-between gap-2 p-2 rounded-xl hover:bg-bg-surface/70 transition-colors cursor-pointer"
         onClick={() => {
           if (window.getSelection()?.toString()) return;
           if (!isEditing) {
@@ -425,12 +445,12 @@ export function ScratchpadItemRow({
           }
         }}
       >
-        <div className="flex items-center gap-2 flex-1 min-w-0">
+        <div className="flex items-start gap-2 flex-1 min-w-0">
           {/* Collapse/expand button for parent tasks with children */}
           {hasChildren ? (
             <button
               onClick={(e) => { e.stopPropagation(); onToggleCollapse(item.id); }}
-              className="p-1 rounded-md text-text-secondary hover:text-text-primary hover:bg-bg-app transition-colors cursor-pointer shrink-0"
+              className="p-1 rounded-md text-text-secondary hover:text-text-primary hover:bg-bg-app transition-colors cursor-pointer shrink-0 mt-0.5"
               title={isCollapsed ? t("common.expand", "Expand") : t("common.collapse", "Collapse")}
             >
               {isCollapsed ? (
@@ -451,7 +471,7 @@ export function ScratchpadItemRow({
               if (checkStatus !== 'checked') playSfx('pencil-tick');
               onToggleCheck(item.id, checkStatus !== 'checked');
             }}
-            className="text-accent-brand focus:outline-none cursor-pointer shrink-0"
+            className="text-accent-brand focus:outline-none cursor-pointer shrink-0 mt-0.5"
           >
             {checkStatus === 'checked' ? (
               <CheckSquare className="h-4.5 w-4.5 opacity-80" />
@@ -463,23 +483,39 @@ export function ScratchpadItemRow({
           </button>
 
           {isEditing ? editForm : (
-            <div className="flex items-center gap-1.5 flex-1 min-w-0">
-              <span
-                className={`text-sm break-words min-w-0 leading-relaxed ${
-                  checkStatus === 'checked' ? "line-through text-text-secondary/60" : "text-text-primary"
-                }`}
-              >
-                {item.text}
-              </span>
-              {/* Badge after the title text */}
-              {badge}
+            <div className="flex flex-col flex-1 min-w-0">
+              <div className="flex items-start gap-1.5 min-w-0">
+                <span
+                  ref={textRef}
+                  className={`text-sm break-words min-w-0 leading-relaxed ${
+                    !isExpanded ? "line-clamp-3" : ""
+                  } ${
+                    checkStatus === 'checked' ? "line-through text-text-secondary/60" : "text-text-primary"
+                  }`}
+                >
+                  {item.text}
+                </span>
+                {badge}
+              </div>
+              {hasOverflow && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsExpanded((v) => !v);
+                  }}
+                  className="self-start text-[11px] font-semibold text-accent-brand hover:underline mt-0.5 cursor-pointer select-none"
+                >
+                  {isExpanded ? t("scratchpad.showLess", "Show less") : t("scratchpad.showMore", "Show more")}
+                </button>
+              )}
             </div>
           )}
         </div>
 
         {/* Hover-revealed action buttons */}
         <div
-          className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity"
+          className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity mt-0.5"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Primary action slot: Add Subtask when unchecked, Delete when checked */}

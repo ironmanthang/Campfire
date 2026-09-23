@@ -1010,7 +1010,9 @@
     "deleteGroupConfirmMessage": "Are you sure you want to permanently delete the group \"{{name}}\" and all of its subtasks? This action is permanent and cannot be undone.",
     "clearCompletedConfirmTitle": "Clear Completed Tasks",
     "clearCompletedConfirmMessage": "Are you sure you want to permanently clear all completed tasks? This action is permanent and cannot be undone.",
-    "clearConfirmButton": "Clear Completed"
+    "clearConfirmButton": "Clear Completed",
+    "showMore": "Show more",
+    "showLess": "Show less"
   },
   "scratchpadConflict": {
     "title": "Scratchpad Sync Conflict",

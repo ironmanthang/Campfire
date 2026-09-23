@@ -1010,7 +1010,9 @@
     "deleteGroupConfirmMessage": "Bạn có chắc chắn muốn xóa vĩnh viễn nhóm \"{{name}}\" cùng toàn bộ nội dung bên trong? Hành động này không thể hoàn tác.",
     "clearCompletedConfirmTitle": "Xóa những mục đã hoàn thành",
     "clearCompletedConfirmMessage": "Bạn có chắc chắn muốn xóa vĩnh viễn toàn bộ các nội dung đã hoàn thành? Hành động này không thể hoàn tác.",
-    "clearConfirmButton": "Dọn dẹp"
+    "clearConfirmButton": "Dọn dẹp",
+    "showMore": "Xem thêm",
+    "showLess": "Thu gọn"
   },
   "scratchpadConflict": {
     "title": "Xung đột đồng bộ Scratchpad",

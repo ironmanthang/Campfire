@@ -215,7 +215,9 @@
     "deleteGroupConfirmTitle": "Delete Group",
     "deleteGroupConfirmMessage": "Are you sure you want to permanently delete the group \"{{name}}\" and all of its tasks? This action cannot be undone.",
     "deleteTaskConfirmTitle": "Delete Note",
-    "deleteTaskConfirmMessage": "Are you sure you want to permanently delete \"{{name}}\"? This action cannot be undone."
+    "deleteTaskConfirmMessage": "Are you sure you want to permanently delete \"{{name}}\"? This action cannot be undone.",
+    "showMore": "Show more",
+    "showLess": "Show less"
   },
   "scratchpadConflict": {
     "title": "Scratchpad Sync Conflict",

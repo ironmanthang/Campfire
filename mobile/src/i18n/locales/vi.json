@@ -215,7 +215,9 @@
     "deleteGroupConfirmTitle": "Xóa nhóm",
     "deleteGroupConfirmMessage": "Bạn có chắc muốn xóa vĩnh viễn nhóm \"{{name}}\" và toàn bộ việc trong đó? Hành động này không thể hoàn tác.",
     "deleteTaskConfirmTitle": "Xóa ghi chú",
-    "deleteTaskConfirmMessage": "Bạn có chắc muốn xóa vĩnh viễn \"{{name}}\"? Hành động này không thể hoàn tác."
+    "deleteTaskConfirmMessage": "Bạn có chắc muốn xóa vĩnh viễn \"{{name}}\"? Hành động này không thể hoàn tác.",
+    "showMore": "Xem thêm",
+    "showLess": "Thu gọn"
   },
   "scratchpadConflict": {
     "title": "Xung đột đồng bộ Scratchpad",
